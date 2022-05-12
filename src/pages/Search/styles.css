@@ -1,0 +1,129 @@
+/* button */
+
+.bookingStripe_search {
+    display: flex;
+    column-gap: 8px;
+    align-items: center;
+}
+.bookingStripe_search .booking_input{
+    height: auto;
+    padding: 3px 7px;
+    background-color: #121e40;
+    color: #fff;
+    border-color: transparent;
+}
+.bookingStripe_search .booking_input .inputTitle {
+    font-size: .8rem;
+    font-weight: 500;
+}
+.bookingStripe_search  .booking_input .label{
+    position: relative;
+    color: #fff;
+    background-color: transparent;
+    padding: 0;
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 400;
+    top: -5px;
+    left: 0;
+}
+.bookingStripe_search .shiftbtn{
+    transform: none;
+    width: 31px;
+    box-shadow: none;
+    background-color: transparent;
+}
+.contentWrapper {
+    padding: 50px 0;
+}
+
+.searchPage {
+    background: linear-gradient(to bottom, #2e3563 400px, transparent 20%);
+}
+.bookingStripe_search  .tripType{
+    max-width: 103px;
+}
+.bookingStripe_search .UpdateButtonGrp{
+    max-width: 180px;
+    width: 100%;
+}
+.bookingStripe_search .UpdateButtonGrp button{
+    height: 48px;
+    background-color: #f55a2a;
+    font-size: 16px;
+}
+.bookingStripe_search .UpdateButtonGrp button:hover{
+    background-color: #ff5e2c;
+}
+.bookingStripe_search .departure.booking_input, .bookingStripe_search .return.booking_input {
+    max-width: 92px;
+}
+
+
+/* fare type */
+.searchPage .fareType .MuiFormControlLabel-label{
+    font-size: 12px;
+    color: #fff;
+}
+
+
+/* booking Section */
+.contentWrapper  .booking_row  {
+    margin-top: 5px;
+}
+
+.booking_row .bookingCol_title {
+    font-size: 24px;
+    color: #fff;
+    letter-spacing: 1px;
+    margin: 10px 0;
+}
+.sidemenu {
+    background: #fff;
+    width: 100%;
+    height: 300px;
+    border-radius: 11px;
+    box-shadow: 0px 0px 10px -8px;
+}
+.mainBookingrow {
+    background-color: #fff;
+    border-radius: 8px;
+}
+.mainBookingrow .MuiGrid-item{
+    padding: 15px 20px;
+}
+.mainBookingrow .MuiGrid-item:not(:last-child){
+    border-right: 1px solid #ccc;
+}
+.mainBookingrow .MuiGrid-item:last-child{
+    flex-basis: 24%;
+    max-width: 24%;
+    text-align: center;
+}
+.mainBookingrow .depart_place {
+    margin-bottom: 5px;
+    font-size: 16px;
+    color: #000;
+}
+.mainBookingrow .details_text {
+    font-size: 11px;
+    opacity: .8;
+}
+.booking_row .timeText {
+    font-size: 23px;
+}
+.booking_row .time {
+    display: flex;
+    align-items: center;
+    column-gap: 7px;
+}
+.flight_timerow{
+    display: flex;
+    align-items: center;
+    column-gap: 7px;
+    justify-content: space-between;
+}
+.flight_timerow .price{
+    font-size: 23px;
+    text-align: right;
+}

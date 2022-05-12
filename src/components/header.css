@@ -1,0 +1,48 @@
+.headerLogo{
+    width: auto;
+    height: 60px;
+    margin-right: 30px;
+}
+.headermenu {
+    column-gap: 26px;
+}
+.headermenu .menuItem {
+    text-transform: capitalize;;
+    padding: 5px 20px;
+    border-radius: 100px;
+}
+
+.headermenu .menuItem.active{
+    background-color: #121e40
+}
+.headerRightMenu{
+    column-gap: 20px;
+}
+.tripmanagement p{
+    text-align: left;
+    font-size: 12px;
+    text-transform: capitalize;
+    line-height: 14px;
+}
+.headerRightMenu .loginButton{
+    background-color: #121e40;
+    color: #fff;
+    font-size: 13px;
+    padding: 1px 20px;
+    border-radius: 100px;
+    line-height: 16px;
+    height: 42px;
+    margin-top: 7px;
+}
+
+.bannerBg{
+    background-color: #21325d;
+}
+.bannerInner{
+    background-image: url(../assets/bannerbg.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-color: #21325da3;
+    background-blend-mode: overlay;
+}

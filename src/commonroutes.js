@@ -4,14 +4,16 @@ import {
     Routes,
     Route,
   } from "react-router-dom";
-  import App from './App';
+  import Home from './pages/Home/Home';
+  import Search from './pages/Search/Search';
 
 export default function Commonroutes() {
   return (
     <BrowserRouter>
-        <Routes>
-            <Route path="/" element={<App />} />
-        </Routes>
-    </BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
+      </Routes>
+    </BrowserRouter> 
   )
 }

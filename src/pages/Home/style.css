@@ -1,0 +1,304 @@
+.title{
+    font-size: 30px;
+}
+.bookingSlot {
+    background-color: #ffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0px 0px 12px -7px #343434;
+}
+.bannerrow{
+    position: relative;
+    top: 61px;
+}
+.tripselect_option {
+    column-gap: 13px;
+    margin-bottom: 25px;
+}
+.tripselect_option .MuiFormControlLabel-root{
+    background-color: #e5f6fd;
+    border-radius: 100px;
+    padding-right: 12px;
+}
+
+
+/*----- booking form --------*/
+.bookingStripe{
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    column-gap: 8px;
+}
+.booking_input{
+    border: 2px solid #c0c0c2;
+    border-radius: 8px;
+    height:47px;
+    background: rgb(255, 255, 255);
+    cursor: pointer;
+    position: relative;
+    padding: 16px 18px 15px;
+    width: 100%;
+}
+.booking_input:hover{
+    border-color: #929292;
+}
+
+.booking_input .label{
+    font-family: Quicksand, Avenir, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 14px;
+    display: inline-flex;
+    font-weight: 700;
+    color: rgb(119, 119, 119);
+    position: absolute;
+    padding: 0px 4px;
+    left: 14px;
+    top: -10px;
+    background-color: rgb(255, 255, 255);
+}
+.booking_input .inputTitle{
+    font-size: 1.1rem; 
+    font-weight: 700;
+}
+.booking_input .inputTagline{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 185px;
+    font-size: 12px;
+    opacity: .5;
+}
+.inputFrom.booking_input {
+    padding-left: 45px;
+}
+.departure.booking_input, .return.booking_input {
+    max-width: 110px;
+}
+.traveler.booking_input{
+    max-width: 155px;
+}
+.flight_icon{
+    width: 27px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) rotate(-44deg);
+    left: 7px;
+}
+.flight_icon.down{
+    transform: translateY(-50%) rotate(0deg);
+}
+.shiftbtn img {
+    width: 100%;
+}
+.shiftbtn {
+    z-index: 1;
+    width: 21px;
+    transform: scale(2.1);
+    box-shadow: 0px 0px 2px 0px #cfcfcf;
+    border-radius: 4px !IMPORTANT;
+    padding: 6px !important;
+    background-color: white !important;
+}
+.prefred_select .MuiInputBase-formControl:after , 
+.prefred_select .MuiInputBase-formControl:before{
+     border-color: white;
+}
+
+.preferedStripe{
+    display: flex;
+    align-items: center;
+}
+.preferedStripe .rightBox{
+    border-left: 1px solid gray;
+    padding-left: 20px;
+}
+.preferedStripe .rightBox .MuiFormControlLabel-label{
+    font-size: 12px;
+}
+.preferedStripe .prefred_select .MuiInputBase-formControl {
+    font-size: 12px;
+    opacity: .7;
+}
+
+
+/* recent search row */
+.recentSearchrow {
+    display: flex;
+    align-items: center;
+    column-gap: 17px;
+    margin-top: 20px;
+}
+.recentSearchrow .label {
+    font-size: 12px;
+    opacity: .6;
+    margin-right: 15px;
+}
+.recentSearchrow  .searchItem {
+    background-color: #f5f5f5;
+    padding: 8px 13px;
+    border-radius: 7px;
+    max-width: 206px;
+    text-align: center;
+}
+.recentSearchrow  .searchItem .textRow span{
+    font-size: 12px;
+    opacity: .9;
+}
+.recentSearchrow  .searchItem .date {
+    font-size: 10px;
+    opacity: .6;
+}
+.recentSearchrow  .searchItem .textRow {
+    display: flex;
+    align-items: center;
+    column-gap: 3px;
+}
+
+/* search button */
+.boxAction {
+    text-align: center;
+    /* margin-top: 10px; */
+    position: relative;
+    top: 48px;
+}
+ 
+.boxAction .searchButton:hover {
+    background: linear-gradient(to bottom right, #ff6333, #ed3800);
+}
+.boxAction .searchButton {
+    border-radius: 100px;
+    font-size: 21px;
+    max-width: 280px;
+    width: 100%;
+    background: linear-gradient(to bottom left, #ff6333, #ed3800);
+}
+.emptyBoxBanner{
+    background-color: #f9fbfa;
+    height: 140px;
+}
+
+
+
+/* discount section */
+.discountSection {
+    padding: 50px 0;
+    background-color: #f9fbfa;
+}
+.discount_title{
+    color : #2e3563
+}
+.discount_card{
+    width: 20%;
+}
+.discount_card .card_inner{
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 25px 20px;
+    box-shadow: 0px 0px 5px 0px #ccc;
+    background-color: #386cb5;
+    height: 210px;
+}
+.discount_card:nth-child(2) .card_inner{
+    background-color: #9e2627
+}
+.discount_card:nth-child(3) .card_inner{
+    background-color: #fff
+}
+.discount_card:nth-child(4) .card_inner{
+    background-color: #194b94
+}
+.discount_card:nth-child(3) .discount_cont {
+    color: #000;
+}
+.discountSection .discount_title {
+    color: #2e3563;
+    font-size: 23px ;
+    margin-bottom: 20px;
+    font-weight: 400;
+}
+.discount_card .discount_cont {
+    font-size: 25px;
+    text-transform: uppercase;
+    font-weight: 500;
+    line-height: 28px;
+    color: #fff;
+    margin-bottom: 7px;
+}
+.discount_card:nth-child(3) .subtitle {
+    color: #000;
+}
+.discount_card .subtitle {
+    font-size: 14px;
+    font-weight: 200;
+    color: #fff;
+    opacity: .9;
+}
+.discountSection .promoCodeBtn {
+    background: #fff;
+    margin-top: 13px;
+    width: 100%;border-radius: 7px;
+    padding: 8px;
+}
+
+.discountSection .discount_card:nth-child(1)  .promoCodeBtn {
+    background: #2e3563;
+    margin-top: 13px;
+    color: #fff;
+} 
+.discountSection .discount_card:nth-child(2)  .promoCodeBtn {
+    background: #fff;
+    margin-top: 13px;
+    color: #9e2627;
+} 
+.discountSection .discount_card:nth-child(3)  .promoCodeBtn {
+    background: #26b867;
+    margin-top: 13px;
+    color: #fff;
+} 
+.discountSection .discount_card:nth-child(4)  .promoCodeBtn {
+    background: #f02325;
+    color: #fff;
+} 
+.discountSection .promoCodeBtn,
+.discountSection .promoCode {
+    font-size: 12px;
+}
+
+.add_discount .card_inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #e5f6fd;
+    border: 1px solid #9ac9d7;
+}
+.add_discount  .offersCount{
+    font-size: 25px;
+    font-weight: 500;
+    color: #2e3563;
+}
+
+
+
+/* ----------conent Section ------------- */
+.contentSection {
+    padding: 50px 0 0;
+}
+
+
+.contentSection .title{
+    color: #000;
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: 400;
+}
+.contentSection p {
+    font-size: 13px;
+    margin-bottom: 15px;
+    color: #444;
+}
+.contentSection .subitle {
+    font-size: 13px;
+    margin-top: 2px;
+    font-weight: 400;
+    color: #232323;
+}
