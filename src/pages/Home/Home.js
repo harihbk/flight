@@ -1,15 +1,28 @@
 import React from 'react'
 import Header from '../../components/header';
+import { useNavigate  } from "react-router-dom";
 import { Container, Toolbar, IconButton, Box, Typography, AppBar, MenuItem, Menu, Button, Grid } from '@mui/material';
 import { FormControl, FormControlLabel, RadioGroup, Radio, FormLabel, TextField  } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import './style.css';  
 import Footer from '../../components/Footer/Footer';
- 
-export default function Home() {
+import Calendar from '../../components/BookingCalendar/Calendar';
+
+
+export default function Home(props) {
+  const navigate = useNavigate(); 
+
+
+
+  const coursesPage = () => {
+    navigate("/search")
+  }
+
+
   const [tripOpt, setTripOpt] = React.useState("oneway");
   const [preferedAirline, setPreferedAirline] = React.useState('none');
   const [fareType, setFareType] = React.useState('regular');
+  const [calendarOpen, setCalendarOpen] = React.useState(false);
 
   const colorsRadio = {
     color: "#99999a",
@@ -20,7 +33,6 @@ export default function Home() {
 
   const handleRadioChange = (event)=> {
     setTripOpt(event.target.value);
-    console.log(tripOpt);
   } 
 
   const handleChange = (event) => {
@@ -31,12 +43,16 @@ export default function Home() {
     setFareType(event.target.value);
   };
 
+  const changeCalendar = ()=>{
+    calendarOpen ? setCalendarOpen(false) : setCalendarOpen(true);
+  }
+
   return (
     <div>
       <Header  headerDark={true}  />
       <div className='bannerBg'  >
         <div className='bannerInner'>
-          <Container maxWidth="lg" className='bannerrow'> 
+          <Container maxWidth="lg" className='bannerrow' style={{maxWidth : 1300}}> 
             <Typography className='title' style={{ textAlign : 'center', color : '#fff', fontSize : 30, marginBottom: 20 }}>Best Deals for Flight Booking in mytrippe</Typography>
           
             <Box className='bookingSlot'>
@@ -46,17 +62,17 @@ export default function Home() {
                   name="row-radio-buttons-group"
                   value={tripOpt}
                   onChange={handleRadioChange} >
-                  <FormControlLabel value="oneway" control={<Radio sx={{ 
+                  <FormControlLabel className={tripOpt == 'oneway' ? 'active' : ""} value="oneway" control={<Radio sx={{ 
                     color: "#99999a",
                     '&.Mui-checked': {
                       color: "#f59625",
                     }, }}/>} label="One Way" />
-                  <FormControlLabel value="rondtrip" control={<Radio sx={{ 
+                  <FormControlLabel value="rondtrip" className={tripOpt == 'rondtrip' ? 'active' : ""}  control={<Radio sx={{ 
                     color: "#99999a",
                     '&.Mui-checked': {
                       color: "#f59625",
                     }, }}/>} label="Round Trip" />
-                  <FormControlLabel value="multicity" control={<Radio sx={{ 
+                  <FormControlLabel value="multicity" className={tripOpt == 'multicity' ? 'active' : ""}  control={<Radio sx={{ 
                     color: "#99999a",
                     '&.Mui-checked': {
                       color: "#f59625",
@@ -85,16 +101,22 @@ export default function Home() {
                         <Typography className='inputTagline'>BLR, Bangaluru International Airport</Typography>
                     </div>
 
-                    <div className='departure booking_input'>
-                        <Typography component="span" className='label'>Departure</Typography>
-                        <Typography className='placeto inputTitle'>6 May 22</Typography>
-                        <Typography className='inputTagline'>Friday</Typography>
+                    <div className='departure booking_input bookingCalendar_parent' onClick={changeCalendar}>
+                        <Box  >
+                          <Typography component="span" className='label'>Departure</Typography>
+                          <Typography className='placeto inputTitle'>6 May 22</Typography>
+                          <Typography className='inputTagline'>Friday</Typography>
+                        </Box>
+                        
+                        <Calendar calendarOpen = {calendarOpen} />
                     </div>
 
-                    <div className='return booking_input'>
-                        <Typography component="span" className='label'>Return</Typography>
-                        <Typography className='placeto inputTitle'>8 May 222</Typography>
-                        <Typography className='inputTagline'>Sunday</Typography>
+                    <div className='return booking_input' onClick={changeCalendar}>
+                        <Box  >
+                          <Typography component="span" className='label'>Return</Typography>
+                          <Typography className='placeto inputTitle'>8 May 222</Typography>
+                          <Typography className='inputTagline'>Sunday</Typography>
+                        </Box>
                     </div>
 
                     <div className='traverler booking_input'>
@@ -102,7 +124,7 @@ export default function Home() {
                         <Typography className='placeto inputTitle'>1 Adult</Typography>
                         <Typography className='inputTagline'>Economy</Typography>
                     </div>
-                  </div> 
+                  </div>
 
                   {/* fare type and prefered row */}
                   <Box className='preferedStripe'>
@@ -226,8 +248,8 @@ export default function Home() {
                   {/* END recent searches */}
                 </Box>
 
-                <Box className='boxAction'> 
-                  <Button className='searchButton' variant='contained'>Search Flights</Button>
+                <Box className='boxAction' > 
+                  <Button className='searchButton' variant='contained' onClick={() => coursesPage()}>Search Flights</Button>
                 </Box>
             </Box>
           </Container>

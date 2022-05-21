@@ -1,0 +1,40 @@
+
+.bookingCalendar_Cs{
+    position: absolute;
+    background: #fff;
+    padding: 30px 15px;
+    z-index: 1;
+    left: 0;
+    border-radius: 7px;
+    box-shadow: 0px 6px 10px 0px #00000017;
+}
+.bookingCalendar_parent{
+    position: relative
+}
+.bookingCalendar_Cs .rdp-day_selected:not([aria-disabled='true']):not(.rdp-day_range_middle){
+    background-color : #f55a2a;
+}
+.bookingCalendar_Cs .rdp-day_range_middle{
+    background-color: #ffe3da !important;
+    border-radius: 100%;
+    color: #000;    
+}
+.bookingCalendar_Cs .rdp-weeknumber, .bookingCalendar_Cs .rdp-day:focus{
+   border: 0;
+}
+.bookingCalendar_Cs .rdp-weeknumber, .bookingCalendar_Cs .rdp-day{
+    /* border-radius: 4px; */
+}
+.bookingCalendar_Cs .rdp-caption_label{
+    font-size: 118%;
+    font-weight: bold;
+    color: #21325d;
+}
+
+.bookingCalendar_Cs  .rdp-months .rdp-nav .rdp-nav_button:focus{
+    background-color: #bdbdbe;
+    color: #fff;
+    border-radius: 3px;
+    padding: 1px;
+    border: 0;
+} 
