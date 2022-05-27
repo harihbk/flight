@@ -61,3 +61,16 @@ body .color_primary:hover{
   background-color: #f55a2a;
   color: #fff;
 }
+
+body .color_secondary{
+  background-color: #131e40;
+  color: #fff;
+}
+body .color_secondary:hover{
+  background-color: #131e40;
+  color: #fff;
+}
+body .color_secondary.Mui-disabled{
+  opacity: .4;
+  color: #fff;
+}

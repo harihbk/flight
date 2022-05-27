@@ -447,31 +447,32 @@
     border-radius: 8px;
 }
 .flight_detail_bot .flightlist > div:first-child{
-    padding: 6px;
-    padding-right: 0;
+    padding-left: 6px;
 }
 .flight_detail_bot .flightlist > div:last-child{
-    padding: 6px;
-    padding-left: 0;
+    padding-right: 6px;
 }
 .flight_detail_bot .flightlist > div{
     width: 100%;
+}
+.flight_detail_bot .flightlist{
+    padding: 6px 0;
 }
 .flight_detail_bot .flightlist img {
     width: 25px;
     margin-bottom: 3px;
 } 
 .flight_detail_bot .flightlist .time_place p:not(:first-child){
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 300;
     line-height: 11px;
-    opacity: .8;
+    opacity: .6;
 }
 .flight_detail_bot  .brand {
     max-width: 12%;
 }
 .flight_detail_bot  .hours {
-    max-width: 18%;
+    max-width: 22%;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -481,7 +482,7 @@
 .flight_detail_bot  .hours::after{
     content: '';
     position: absolute;
-    top: 54%;
+    top: 52%;
     transform: translateY(-50%);
     right: -7px;
     background-image: url(../../assets/icons/flightsmall.svg);

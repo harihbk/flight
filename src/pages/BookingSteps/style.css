@@ -1,0 +1,180 @@
+body{
+    background-color: #ebecec;
+}
+.boxsection {
+    background-color: #fff;
+    border-radius: 8px;
+}
+.flightlist_item:not(:last-child) {
+    border-bottom: 1px solid #ccc;
+}
+.flightlist .fdetails_inner{
+    padding: 26px 28px;
+}
+.flightlist  .viewfare {
+    font-size: 12px;
+    text-transform: capitalize;
+    display: block;
+    margin-left: auto;
+    padding: 2px 10px;
+    color: #f00;
+}
+.flightlist  .cancelfee{
+    padding: 2px 10px;
+    font-size: 9px;
+    border: 1px solid;
+    color: #000000;
+    background: #c3e8f8;
+    border-color: #62a4d6;
+}
+.flightlist_item  .journeydetail .time_place{
+    max-width: 26%;
+    width: 100%;
+}
+.flightlist_item  .journeydetail .hours{
+    width: 31%;
+    text-align: center;
+    padding-top: 10px;
+    position: relative;
+}
+.flightlist_item  .journeydetail .jplace_text{
+    font-size: 10px;
+    line-height: 11px;
+    font-weight: 300;
+    padding-top: 3px;
+    opacity: .7;
+}
+.flightlist_item  .journeydetail .hours_border{
+    /* border-bottom: 1px dashed #f55a29; */
+    margin-bottom: 3px;
+}
+.flightlist_item .journeydetail .hours_border::before {
+    content: '';
+    width: 70%;
+    height: 1px;
+    border-bottom: 1px dashed #f00;
+    position: absolute;
+    top: calc(50% + 3px);
+    /* top: 23px; */
+    transform: translate(-50%, -50%);
+    left: 50%;
+}
+.flightlist_item  .journeydetail .hours_border::after{
+    content: '';
+    position: absolute;
+    top: calc(50% + 3px);
+    transform: translateY(-50%);
+    right: 10%;
+    background-image: url(../../assets/icons/flightsmall.svg);
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+
+
+/* stepper form */
+.journey_stepper .stepscount {
+    font-size: 9px;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    line-height: 7px;
+    opacity: .7;
+}
+.stepper_label .MuiStepLabel-label, .stepper_label  .MuiStepLabel-label.Mui-active{
+    font-size: 11px;
+    color: #fff !important;
+    font-weight: 600;
+}
+.stepper_label .MuiStepLabel-iconContainer .MuiSvgIcon-root{
+    font-size: 30px;
+}
+.stepper_label .MuiStepLabel-iconContainer .MuiSvgIcon-root:not(.Mui-active){
+    color: #7194c7;
+}
+.stepper_label .MuiStepLabel-iconContainer .MuiSvgIcon-root.Mui-active{
+    color: #f55a29;
+}
+.stepper_label .MuiStepLabel-iconContainer .MuiSvgIcon-root.Mui-completed{
+    color: #289841;
+    background: #fff;
+    border-radius: 100px;
+}
+
+.bookingStep .buttongroups{
+    margin-top: 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    display: flex;
+}
+
+.stepcontHeader{
+    padding: 13px 30px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+.stepcontHeader .stitle{
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.stepWrapper .boxcont {
+    padding: 16px 25px;
+}
+.stepWrapper .formtitle {
+    margin-bottom: 20px;
+}
+.stepWrapper .formtitle p {
+    font-size: 15px;
+    font-weight: 300;
+}
+.form_item .MuiFormControl-root:not(.width80){
+    width: 100%;
+}
+
+.addonTab_wrapper{
+    border-top: 5px solid #ebecec;
+}
+.flight_addon_tab .tablistnav {
+    padding: 10px;
+    border-bottom: 1px solid #ebecec;
+}
+.flight_addon_tab .tablistnav button{
+    border: 0;
+    padding: 10px 20px;
+    font-size: 17px;
+    font-weight: 500;
+    border-radius: 4px;
+    background-color: #fff;
+    border-right: 1px solid #fff;
+}
+.flight_addon_tab .tablistnav button.Mui-selected{
+    background-color: #c3e8f8;
+}
+
+.flight_addon_tab .tablistnav button:not(.Mui-selected):not(:last-child){
+    border-right: 1px solid #ccc;
+}
+.flight_addon_tab .TabPanelUnstyled-root{
+    padding: 30px 20px;
+}
+.flight_addon_tab .location_badge{    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: #e7e7e7;
+    padding: 3px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+.flight_addon_tab .location_badge p{
+    font-weight: 300;
+}
+.flight_addon_tab  .date{
+    font-size: 11px;
+    opacity: .7;
+}

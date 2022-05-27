@@ -1,0 +1,94 @@
+.sidemenu.booking{
+    padding: 13px 15px;
+}
+.faredetails .listitem {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px dashed #ccc;
+    padding: 9px 0px;
+}
+.faredetails .listitem .farelabel{
+    width: 79%;    
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+    font-size: 13px;
+    font-weight: 300;
+}
+.faredetails .listitem .fareprice{
+    width: 21%;
+    font-size: 13px;
+    font-weight: 300;
+}
+.sidemenu.booking .stitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.sidemenu.booking .stitle.ucase{
+    text-transform: uppercase;
+}
+.sidemenu.booking .iconplus {
+    width: 13px;
+    height: 13px;
+    background-color: #f55a29;
+    color: #fff;
+    border-radius: 100px;
+}
+.promo_cards{
+    margin-top: 20px;
+}
+.promo_cards .promo_item{
+    color: #fff;
+    padding: 26px 22px 21px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    position: relative;
+}
+.promo_cards .ptitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.promo_cards  .pdescp {
+    font-size: 12px;
+    max-width: 219px;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+.promo_cards  .terms {
+    font-size: 12px;
+    font-weight: 500;
+}
+.promo_cards  .promo_item:hover .actionButton{
+    transition: .4s;
+    opacity: 1;
+}
+.promo_cards  .actionButton {
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    opacity: 0;
+}
+.promo_cards  .actionButton button {
+    width: 20px;
+    padding: 3px;
+    height: 20px;
+    border-radius: 100px;
+    font-size: 8px;
+}
+.promo_cards .actionButton button.delete {
+    background-color: #fff;
+}
+.promo_cards .actionButton button.check {
+    background-color: #086d0a;
+    color: #fff;
+    margin-right: 5px;
+}
+.promo_cards  .actionButton button svg{
+    width: 16px;
+    height: 16px;
+}
+
+
