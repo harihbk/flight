@@ -137,7 +137,7 @@ body{
 .addonTab_wrapper{
     border-top: 5px solid #ebecec;
 }
-.flight_addon_tab .tablistnav {
+.flight_addon_tab .tablistnav:not(.noborder) {
     padding: 10px;
     border-bottom: 1px solid #ebecec;
 }
@@ -154,10 +154,10 @@ body{
     background-color: #c3e8f8;
 }
 
-.flight_addon_tab .tablistnav button:not(.Mui-selected):not(:last-child){
-    border-right: 1px solid #ccc;
+.flight_addon_tab .tablistnav:not(.noborder) button:not(.Mui-selected):not(:first-child){
+    border-left: 1px solid #ccc;
 }
-.flight_addon_tab .TabPanelUnstyled-root{
+.flight_addon_tab > .TabsUnstyled-root > .TabPanelUnstyled-root{
     padding: 30px 20px;
 }
 .flight_addon_tab .location_badge{    
@@ -177,4 +177,180 @@ body{
 .flight_addon_tab  .date{
     font-size: 11px;
     opacity: .7;
+}
+
+/* inner tab  */
+.flight_addon_tab .mealstab .tablistnav button{
+    width: 100%;
+    text-align: left;
+    padding: 6px 15px;
+    margin-bottom: 10px;
+}
+.flight_addon_tab .mealstab .tablistnav button:not(.Mui-selected){
+    background-color: #efefef;
+}
+
+.flight_addon_tab .foodlist .fooditem {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    /* width: 100%; */
+    padding: 5px;
+    border-radius: 5px;
+}
+.flight_addon_tab .foodlist .thumbnail {
+    width: 60px;
+    height: 65px;
+    background: #efefef;
+}
+.flight_addon_tab .foodlist .thumbnail img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.flight_addon_tab .foodlist .foofname {
+    width: 44%;
+    padding: 0 20px;
+    font-size: 13px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #dddcdc;
+}
+.flight_addon_tab .foodlist .fprice {
+    font-size: 18px;
+    font-weight: 500;
+    padding: 0 20px;
+    width: 54px;
+}
+.seats_wrapper .seats_row .MuiCheckbox-root{
+    padding:  4px;
+}
+.flight_addon_tab .seatsbox{
+    padding: 20px 30px;
+    padding-top: 8rem;
+    padding-bottom: 6rem;
+    background-image: url(../../assets/food/seatsbg.png);
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    min-height: 600px;
+    align-items: flex-start;
+}
+.flight_addon_tab .foodlist .fooditem .qtygroup .MuiButtonGroup-grouped{
+    min-width: 30px
+}
+.flight_addon_tab .foodlist .fooditem .qtygroup .MuiOutlinedInput-input{
+    padding: 4px;
+    font-weight: 500;
+    text-align: center;
+}
+.flight_addon_tab .foodlist .qtygroup .MuiFormControl-root {
+    border-radius: 0;
+    width: 35px;
+}
+.flight_addon_tab .foodlist .fooditem .MuiOutlinedInput-notchedOutline{
+    border-radius: 0;
+}
+.flight_addon_tab .foodlist .fooditem button:first-child{
+    border-right: 0;
+}
+.flight_addon_tab .foodlist .fooditem button:last-child{
+    border-left: 0;
+}
+.flight_addon_tab .foodlist .fooditem button{
+    border-color: #ccc !important;
+    color: #000;
+}
+.flight_addon_tab .foodlist .fooditem .qtygroup{
+    width: 95px;
+}
+
+
+/* seat selection */
+.seatsbox .seatno {
+    width: 28px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.seatsbox .empty {
+    width: 25px;
+}
+.seats_row .MuiCheckbox-root  .complete_icon{
+    background: #2f7c31;
+    fill: #fff;
+}
+.seats_row .MuiCheckbox-root svg{
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+}
+.seats_row .MuiCheckbox-root.Mui-disabled svg{
+    background: #000;
+    fill: #fff;
+}
+.seats_row .flight_seat_title {
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 23px;
+    text-transform: uppercase;
+    font-weight: 300;
+}
+.seats_wrapper .seatsinfo .hint .icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    background: #fff;
+    border : 1px solid;
+}
+.seats_wrapper .seatsinfo .hint svg {
+    width: 100%;
+    height: 100%;
+}
+.seats_wrapper  .seatsinfo .hint {
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
+    margin-bottom: 5px;
+}
+.seats_wrapper .seatsinfo .price_low  .icon{
+    border-color: rgb(0, 169, 37);
+}
+.seats_wrapper .seatsinfo .price_med  .icon{
+    border-color: rgb(255, 0, 0);
+}
+.seats_wrapper .seatsinfo .price_high .icon {
+    border-color: rgb(102, 0, 255);
+}
+.seats_wrapper .seatsinfo .booked .icon {
+    background: #000;
+    border-color: #000;
+    fill: #fff;
+}
+.seats_wrapper .seatsinfo {
+    margin-top: 20px;
+}
+.seats_wrapper .seatsinfo  .title{
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+
+
+/* step 3 review */
+.review_step .modal_wrapper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    max-width: 900px;
+    width: 100%;
+}
+.review_step button.Mui-selected{
+    background-color: #121e40 !important;
+    color: #fff;
 }

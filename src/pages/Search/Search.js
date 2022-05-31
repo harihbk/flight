@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../../components/header';
+import { useNavigate  } from "react-router-dom";
 import { Container,IconButton, Box, Typography,Button, Grid } from '@mui/material';
 import { FormControlLabel, RadioGroup, Radio, Tab, Tabs} from '@mui/material';
 import { TabPanelUnstyled,TabsUnstyled, TabUnstyled, TabsListUnstyled } from '@mui/base';
@@ -17,7 +18,14 @@ export default function Search({ isVisible }) {
     const [tripType, setTripType] = React.useState('roundtrip');
     const [flightGo, setFlightGo] = React.useState('flight_go1');
     const [flightReturn, setFlightReturn] = React.useState('flight_return1');
-    const [tabValue, setTabValue] = React.useState();
+    const [tabValue, setTabValue] = React.useState();  
+    const navigate = useNavigate(); 
+
+
+
+    const navigatePage = (name) => {
+      navigate(`/${name}`)
+    }
 
     const changeFareType = (event) => {
       setFareType(event.target.value);
@@ -205,7 +213,7 @@ export default function Search({ isVisible }) {
                                     <Grid item md={3} >
                                         <Typography className='total_price'>₹ 12,490</Typography>
                                         <Typography className='details_text'>Fare Details</Typography>
-                                        <Button variant='contained' className='color_primary booknow_btn'>Book Now</Button>
+                                        <Button variant='contained' className='color_primary booknow_btn' onClick={() => navigatePage('booking')}>Book Now</Button>
                                     </Grid>
                                 </Grid>
                             </Box>

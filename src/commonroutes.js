@@ -14,7 +14,7 @@ export default function Commonroutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/booking1" element={<Index />} />
+        <Route path="/booking" element={<Index />} />
       </Routes>
     </BrowserRouter> 
   )

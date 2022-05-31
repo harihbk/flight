@@ -107,7 +107,7 @@ export default function Index() {
         case 1:
           return <Step2 stepObj={steps[step]}/>;
         case 2:
-          return <Step3 />;
+          return <Step2 stepObj={steps[step]} activestatus={activeStep}/>;
         case 3:
           return <Step4 />;
         default:
