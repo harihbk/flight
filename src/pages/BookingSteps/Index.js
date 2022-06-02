@@ -3,7 +3,7 @@ import Header from '../../components/header';
 import { Container,Grid, Box, Typography, Button } from '@mui/material';
 import { Step,StepButton, Stepper, Paper,StepContent, StepLabel } from '@mui/material';
 import BookingSidemenu from '../../components/BookingSidemenu/BookingSidemenu';
-import Step1 from './Step1';
+import Step1 from './step1';
 import Step2 from './Step2';
 import Step3 from './Step3';
 import Step4 from './Step4';

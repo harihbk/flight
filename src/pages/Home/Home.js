@@ -1,4 +1,4 @@
-import React from 'react'
+import React , { useRef } from 'react'
 import Header from '../../components/header';
 import { useNavigate  } from "react-router-dom";
 import { Container, Toolbar, IconButton, Box, Typography, AppBar, MenuItem, Menu, Button, Grid } from '@mui/material';
@@ -8,8 +8,204 @@ import './style.css';
 import Footer from '../../components/Footer/Footer';
 import Calendar from '../../components/BookingCalendar/Calendar';
 
+import Model from "./Model"
+
+import Paper from '@mui/material/Paper';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import InputBase from '@mui/material/InputBase';
+import debouce from "lodash.debounce";
+
+import axios from 'axios';  
+
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+
+import CommentIcon from '@mui/icons-material/Comment';
+import { Divider } from '@material-ui/core';
+import { isEmpty } from 'lodash';
+
+function Froms({value}){
+  const { city , country } = value
+  return (
+    <div>{value.city},{value.country}</div>
+  );
+}
 
 export default function Home(props) {
+ // const Fromref = useRef();
+  const [open, setOpen] = React.useState(false);
+  const [toopen, setToopen] = React.useState(false);
+
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [ searchFrom , setSearchFrom ] = React.useState([]);
+  const [ searchTo , setSearchTo ] = React.useState([]);
+
+  const [ searchFromlocalstorage , setSearchFromlocalstorage ] = React.useState([]);
+  const [ searchTolocalstorage , setSearchTolocalstorage ] = React.useState([]);
+
+  const [ suggestionfrom , setSuggestionfrom ] = React.useState(false);
+  const [ suggestionto , setSuggestionto ] = React.useState(false);
+
+  const [ searchfromselected , setSearchfromselected ] = React.useState({});
+  const [ searchtoselected , setSearchtoselected ] = React.useState({});
+
+
+  React.useEffect(()=>{
+    const url = process.env.REACT_APP_FROM_SEARCH;
+    const getstorage = JSON.parse(localStorage.getItem(url));
+    setSearchFromlocalstorage(getstorage)
+    setSearchfromselected(getstorage[0] || {})
+  },[searchFrom])
+
+
+
+  React.useEffect(()=>{
+    const url = process.env.REACT_APP_TO_SEARCH;
+    const getstorage = JSON.parse(localStorage.getItem(url));
+    setSearchTolocalstorage(getstorage)
+    if(getstorage && getstorage[0]){
+    setSearchtoselected(getstorage[0] || {})
+    }
+  },[searchTo])
+
+  const handleChangeFrom = (e) => {
+
+    
+
+    setSearchTerm(e.target.value);
+    const Search = e.target.value;
+    if(isEmpty(Search)){
+      setSuggestionfrom(false) // show suggestion
+      return
+    }
+    axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=${Search}`).then(res=>{
+      setSearchFrom(res?.data)
+      setSuggestionfrom(true) // show suggestion
+    }).catch(err=>{
+      console.log(err);
+    })
+
+  };
+
+  const debouncedResults = React.useMemo(() => {
+    return debouce(handleChangeFrom, 300);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      debouncedResults.cancel();
+    };
+  });
+
+  const clickfrom = (e) => {
+    const url = process.env.REACT_APP_FROM_SEARCH;
+    const getstorage = JSON.parse(localStorage.getItem(url));
+    if (getstorage !=null && getstorage.length > 4 ){
+
+      var find =  getstorage.find(obj => obj._id == e._id)
+      if(find==undefined){
+          const swallowcopy = [e , ...getstorage ]
+          let gg= swallowcopy.slice(0,5)
+          localStorage.setItem(url , JSON.stringify(gg )) 
+      }
+
+    }  else {
+      if(getstorage ==null ) {
+        let arr = []
+        arr.push(e)
+        localStorage.setItem(url , JSON.stringify(arr) )
+      } else {
+       var find =  getstorage.find(obj => obj._id == e._id)
+        if(find==undefined){
+            getstorage.push(e)
+            localStorage.setItem(url , JSON.stringify(getstorage)) 
+        }
+      } 
+    }
+    setSearchfromselected(e)
+
+    setTimeout(()=>{
+      setOpen(false)
+    },
+    100)
+
+  }
+
+
+  const clickto = (e) => {
+
+
+    const url = process.env.REACT_APP_TO_SEARCH;
+    const getstorage = JSON.parse(localStorage.getItem(url));
+    if (getstorage !=null && getstorage.length > 4 ){
+
+      var find =  getstorage.find(obj => obj._id == e._id)
+      if(find==undefined){
+          const swallowcopy = [e , ...getstorage ]
+          let gg= swallowcopy.slice(0,5)
+          localStorage.setItem(url , JSON.stringify(gg )) 
+      }
+
+    }  else {
+      if(getstorage ==null ) {
+        let arr = []
+        arr.push(e)
+        localStorage.setItem(url , JSON.stringify(arr) )
+      } else {
+       var find =  getstorage.find(obj => obj._id == e._id)
+        if(find==undefined){
+            getstorage.push(e)
+            localStorage.setItem(url , JSON.stringify(getstorage)) 
+        }
+      } 
+    }
+    setSearchtoselected(e)
+
+    setTimeout(()=>{
+      setToopen(false)
+    },
+    100)
+
+  }
+  
+  
+  const handleChangeTo = (e) => {
+
+    setSearchTerm(e.target.value);
+    const Search = e.target.value;
+    if(isEmpty(Search)){
+      setSuggestionto(false) // show suggestion
+      return
+    }
+    axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=${Search}`).then(res=>{
+      setSearchTo(res?.data)
+      setSuggestionto(true) // show suggestion
+    }).catch(err=>{
+      console.log(err);
+    })
+
+  };
+
+  const debouncedResultsto = React.useMemo(() => {
+    return debouce(handleChangeTo, 300);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      debouncedResultsto.cancel();
+    };
+  });
+
+
+  // const [show, setShow] = React.useState(false);
+  // const container = React.useRef(null);
+
+
   const navigate = useNavigate(); 
 
 
@@ -47,6 +243,16 @@ export default function Home(props) {
     calendarOpen ? setCalendarOpen(false) : setCalendarOpen(true);
   }
 
+  const getfrom = () => {
+    setOpen(true);
+  }
+
+  const getto = () => {
+    setToopen(true);
+  }
+
+ 
+
   return (
     <div>
       <Header  headerDark={true}  />
@@ -81,12 +287,99 @@ export default function Home(props) {
 
                 <Box  component="form" className='inputWrapper'>
                   <div className='bookingStripe'>
-                    <div className='inputFrom booking_input'>
+                    
+                    <div className='inputFrom booking_input' onClick={ getfrom } style={{ position : 'relative'}}>
                         <img src={require('../../assets/icons/flight.png')} className='flight_icon' />
                         <Typography component="span" className='label'>From</Typography>
-                        <Typography className='placefrom inputTitle'>Coimbatore (CJB)</Typography>
-                        <Typography className='inputTagline'>CJB, Coimbatore Airport</Typography>
+                        <Typography className='placefrom inputTitle'>{searchfromselected.city} ({searchfromselected.iata})</Typography>
+                        <Typography className='inputTagline'>{searchfromselected.iata}, {searchfromselected.city} {searchfromselected.airport}</Typography>
+
+
+                    <Model open={ open } onClickOutside={() => {setOpen(false) ; setSuggestionfrom(false) }} >
+                    <Box
+                        sx={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          '& > :not(style)': {
+                            m: 0,
+                            width: '100%',
+                            height: 128,
+                            zIndex : 10,
+                            position  : 'absolute',
+                            left : 0,
+                            top : 47
+                          },
+                        }}
+                      >
+                        <Paper elevation={3} >
+                           <Paper component="form" sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 'auto' }}>
+                           <IconButton sx={{ p: '10px' }} aria-label="menu">
+                                <SearchIcon />
+                              </IconButton>
+                              <InputBase
+                                sx={{ ml: 1, flex: 1 }}
+                                placeholder="From"
+                                inputProps={{ 'aria-label': 'To' }}
+                                 onChange={debouncedResults}
+                              />
+                           </Paper>
+                           <Paper sx={{ height : 300 , overflowY:'auto'}}>
+                                 { suggestionfrom  ? 
+                                            <>
+                                           <Typography component="p" textAlign="center">Suggestion</Typography>
+                                              <Divider/>
+                                              <List>
+                                                { searchFrom && searchFrom.map((value , index)=>(
+                                                      <ListItem  key={value.iata}
+                                                      secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                                      onClick = { () => { clickfrom(value) }  }
+                                                      >
+                                                      <ListItemAvatar>
+                                                        <FlightTakeoffIcon />
+                                                      </ListItemAvatar>
+                                                      <ListItemText primary={<Froms value={value}/>} secondary={value.airport} />
+                                                    </ListItem>
+
+                                                ))}
+                                              </List>
+                                  </>
+                                   : 
+                                          <>
+                                           <Typography component="p" textAlign="center">Recent Search</Typography>
+                                  <Divider/>
+                                  <List>
+                                    { searchFromlocalstorage && searchFromlocalstorage.map((value , index)=>(
+                                          <ListItem  key={value.iata}
+                                          secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                          onClick = { () => { clickfrom(value) }  }
+                                          >
+                                          <ListItemAvatar>
+                                            <FlightTakeoffIcon />
+                                          </ListItemAvatar>
+                                          <ListItemText primary={<Froms value={value}/>} secondary={value.airport} />
+                                        </ListItem>
+
+                                    ))}
+                                  </List>
+                                          </>
+                                }
+                            </Paper>
+
+
+                        </Paper>
+                        
+                    </Box>
+                    </Model>
+
                     </div>
+
+
+
+
+
+                    
+                   
+
                     
                     <div className='shiftfld'>
                       <IconButton aria-label="fingerprint" className='shiftbtn' color="secondary">
@@ -94,11 +387,91 @@ export default function Home(props) {
                       </IconButton>
                     </div>
 
-                    <div className='inputFrom booking_input'>
+                    <div className='inputFrom booking_input' onClick={ getto } style={{ position : 'relative'}}>
                         <img src={require('../../assets/icons/flight.png')} className='flight_icon down' />
                         <Typography component="span" className='label'>To</Typography>
-                        <Typography className='placeto inputTitle'>Bengaluru (BLR)</Typography>
-                        <Typography className='inputTagline'>BLR, Bangaluru International Airport</Typography>
+                        <Typography className='placefrom inputTitle'>{searchtoselected.city} ({searchtoselected.iata})</Typography>
+                        <Typography className='inputTagline'>{searchtoselected.iata}, {searchtoselected.city} {searchtoselected.airport}</Typography>
+
+          {/* to */}
+                        <Model open={ toopen } onClickOutside={() => {setToopen(false) ; setSuggestionto(false) }} >
+                    <Box
+                        sx={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          '& > :not(style)': {
+                            m: 0,
+                            width: '100%',
+                            height: 128,
+                            zIndex : 10,
+                            position  : 'absolute',
+                            left : 0,
+                            top : 47
+                          },
+                        }}
+                      >
+                        <Paper elevation={3} >
+                           <Paper component="form" sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 'auto' }}>
+                           <IconButton sx={{ p: '10px' }} aria-label="menu">
+                                <SearchIcon />
+                              </IconButton>
+                              <InputBase
+                                sx={{ ml: 1, flex: 1 }}
+                                placeholder="From"
+                                inputProps={{ 'aria-label': 'From' }}
+                                 onChange={debouncedResultsto}
+                              />
+                           </Paper>
+                           <Paper sx={{ height : 300 , overflowY:'auto'}}>
+                                 { suggestionto  ? 
+                                            <>
+                                           <Typography component="p" textAlign="center">Suggestion</Typography>
+                                              <Divider/>
+                                              <List>
+                                                { searchTo && searchTo.map((value , index)=>(
+                                                      <ListItem  key={value.iata}
+                                                      secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                                      onClick = { () => { clickto(value)  }  }
+                                                      >
+                                                      <ListItemAvatar>
+                                                        <FlightTakeoffIcon />
+                                                      </ListItemAvatar>
+                                                      <ListItemText primary={<Froms value={value}/>} secondary={value.airport} />
+                                                    </ListItem>
+
+                                                ))}
+                                              </List>
+                                  </>
+                                   : 
+                                          <>
+                                           <Typography component="p" textAlign="center">Recent Search</Typography>
+                                  <Divider/>
+                                  <List>
+                                    { searchTolocalstorage && searchTolocalstorage.map((value , index)=>(
+                                          <ListItem  key={value.iata}
+                                          secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                          onClick = { () => { clickto(value) }  }
+                                          >
+                                          <ListItemAvatar>
+                                            <FlightTakeoffIcon />
+                                          </ListItemAvatar>
+                                          <ListItemText primary={<Froms value={value}/>} secondary={value.airport} />
+                                        </ListItem>
+
+                                    ))}
+                                  </List>
+                                          </>
+                                }
+                            </Paper>
+
+
+                        </Paper>
+                        
+                    </Box>
+                    </Model>
+
+
+
                     </div>
 
                     <div className='departure booking_input bookingCalendar_parent' onClick={changeCalendar}>
