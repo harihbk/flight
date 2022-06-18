@@ -1,18 +1,29 @@
-import React, {useEffect} from 'react'
+import React, { useEffect , useRef } from 'react'
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 import 'react-day-picker/dist/style.css';
 import './calendar.css';
 import { Typography } from '@mui/material';
 
-export default function Calendar(props) {
-    const [selected, setSelected] = React.useState();
+ const  Calendar = (props ) => {
+
+    var date = new Date();
+
+// add a day
+date.setDate(date.getDate() + 1);
+
+    const [selected, setSelected] = React.useState(new Date());
+    const [endselected, setEndselected] = React.useState(date);
+
     const [fromDate, setfromDate] = React.useState();
     const [toDate, settoDate] = React.useState();
     const [singleLabels, setSingleLabels] = React.useState([3200, 4000, 44, 565, 5656, 565 ,5656, 656]);
     const [singleInvalid, setSingleInvalid] = React.useState([]);
 
-    const { calendarOpen } = props;
+    const { calendarOpen , onClickOutside  , _parentcalendarfuction} = props;
+
+     const refd = React.createRef();
+     
 
     const onPageLoadingSingle = React.useCallback((event) => {
         getPrices(event.firstDay, (bookings) => {
@@ -21,6 +32,37 @@ export default function Calendar(props) {
                 
         });
     }, []);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            // console.log(event.target);
+          if (refd.current && !refd.current.contains(event.target)) {
+            onClickOutside && onClickOutside();
+          }
+        };
+        document.addEventListener('click', handleClickOutside, true);
+        return () => {
+          document.removeEventListener('click', handleClickOutside, true);
+        };
+      }, [ onClickOutside ]);
+
+
+      const cancel = () => {
+          alert('d')
+      }
+
+    //   React.useEffect(()=>{
+
+    //     console.log(date);
+    //     setSelected(date)
+    //   },[])
+
+      const handleDayChange = date => {
+           setSelected(date)
+        _parentcalendarfuction(date)
+
+      }
+
 
     const getPrices = (d, callback) => {
         const invalid = [];
@@ -59,19 +101,25 @@ export default function Calendar(props) {
   return (
     <div>
         { calendarOpen && (
-            <DayPicker className='bookingCalendar_Cs'
-                mode="range"
+            <div ref={refd}>
+            <DayPicker className='bookingCalendar_Cs' 
+                mode="single"
                 selected={selected}
                 onSelect={setSelected} 
                 numberOfMonths={2} 
                 labels={singleLabels}
-            invalid={singleInvalid}
-            onPageLoading={onPageLoadingSingle}
+             invalid={singleInvalid}
+             onPageLoading={onPageLoadingSingle}
+             onDayClick={handleDayChange}
+
+
             />
-            
+            </div>
         ) }
 
         {/* <Typography>{fromDate} {toDate}</Typography> */}
     </div>
   )
 }
+
+export default Calendar

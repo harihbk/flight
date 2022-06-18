@@ -28,6 +28,12 @@ import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import CommentIcon from '@mui/icons-material/Comment';
 import { Divider } from '@material-ui/core';
 import { isEmpty } from 'lodash';
+import Chip from '@mui/material/Chip';
+
+import moment from 'moment'
+import Checkbox from '@mui/material/Checkbox';
+
+
 
 function Froms({value}){
   const { city , country } = value
@@ -53,6 +59,43 @@ export default function Home(props) {
 
   const [ searchfromselected , setSearchfromselected ] = React.useState({});
   const [ searchtoselected , setSearchtoselected ] = React.useState({});
+
+
+  // Passangers 
+  const [ passangeropen , setPassangeropen ] = React.useState(false);
+
+  //Traveller class
+  const [ travellerclass , setTravellerclass ] = React.useState({
+    ADULT : 1,
+    CHILD : 0,
+    INFANT : 0
+  });
+
+  // Travel class
+  const [ travelclass , setTravelclass ] = React.useState("Economy");
+
+  //Calendar
+  var date = new Date();
+  var date1 = {...date}
+  date.setDate(date.getDate() + 1);
+
+  // add a day
+  const [ calendar , setCalendar ] = React.useState(date1) // from
+  const [ tocalendar , setTocalendar ] = React.useState(date) // from
+
+  
+  const [ calendartostatus , setCalendartostatus] = React.useState(true)
+
+
+  const calendarref = useRef();
+
+  const [stopchecked, setStopchecked] = React.useState(false);
+
+  const stophandleChange = (event) => {
+    setStopchecked(event.target.checked);
+  };
+
+ 
 
 
   React.useEffect(()=>{
@@ -105,6 +148,8 @@ export default function Home(props) {
   const clickfrom = (e) => {
     const url = process.env.REACT_APP_FROM_SEARCH;
     const getstorage = JSON.parse(localStorage.getItem(url));
+
+
     if (getstorage !=null && getstorage.length > 4 ){
 
       var find =  getstorage.find(obj => obj._id == e._id)
@@ -112,9 +157,17 @@ export default function Home(props) {
           const swallowcopy = [e , ...getstorage ]
           let gg= swallowcopy.slice(0,5)
           localStorage.setItem(url , JSON.stringify(gg )) 
+      } else {
+        console.log(find);
+        let _id = find._id
+        var gets = getstorage.filter(a => a._id != _id)
+        let hh = [find,...gets]
+        localStorage.setItem(url , JSON.stringify(hh )) 
+
       }
 
     }  else {
+
       if(getstorage ==null ) {
         let arr = []
         arr.push(e)
@@ -124,7 +177,7 @@ export default function Home(props) {
         if(find==undefined){
             getstorage.push(e)
             localStorage.setItem(url , JSON.stringify(getstorage)) 
-        }
+        } 
       } 
     }
     setSearchfromselected(e)
@@ -143,12 +196,18 @@ export default function Home(props) {
     const url = process.env.REACT_APP_TO_SEARCH;
     const getstorage = JSON.parse(localStorage.getItem(url));
     if (getstorage !=null && getstorage.length > 4 ){
-
       var find =  getstorage.find(obj => obj._id == e._id)
       if(find==undefined){
           const swallowcopy = [e , ...getstorage ]
           let gg= swallowcopy.slice(0,5)
-          localStorage.setItem(url , JSON.stringify(gg )) 
+          localStorage.setItem(url , JSON.stringify(gg)) 
+      } else {
+        console.log(find);
+        let _id = find._id
+        var gets = getstorage.filter(a => a._id != _id)
+        let hh = [find,...gets]
+        localStorage.setItem(url , JSON.stringify(hh )) 
+
       }
 
     }  else {
@@ -211,7 +270,38 @@ export default function Home(props) {
 
 
   const coursesPage = () => {
-    navigate("/search")
+
+   let obj = {
+     calendarfrom : calendar,
+     calendarto : tocalendar,
+     from     : searchfromselected,
+     to       :  searchtoselected,
+     trip     : tripOpt,
+     travellerclass : travellerclass,
+     travelclass : travelclass
+
+   }
+
+   console.log(obj);
+
+  // localStorage.setItem("mytripee_search",JSON.stringify(obj))
+   let queryparams
+  if(obj?.trip == "oneway"){
+     queryparams = `?itinerary=${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarfrom).format("YYYY/MM/DD") }&tripType=${obj?.trip}&paxType=A-${travellerclass.ADULT}_C-${travellerclass.CHILD}_I-${travellerclass.INFANT}&cabinClass=${obj.travelclass}&location=${obj?.from?.city}-${obj?.to?.city}`
+  } else {
+    queryparams = `?itinerary=${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarfrom).format("YYYY/MM/DD") }_${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarto).format("YYYY/MM/DD") }&tripType=${obj?.trip}&paxType=A-${travellerclass.ADULT}_C-${travellerclass.CHILD}_I-${travellerclass.INFANT}&cabinClass=${obj.travelclass}&location=${obj?.from?.city}-${obj?.to?.city}`
+  }
+
+  if(stopchecked){
+    const parm = stopchecked ? 0  : 1
+    queryparams = `${queryparams}&stops=${parm}`
+  }
+
+  queryparams = `${queryparams}&pft=${fareType}`
+  
+  navigate(`/search${queryparams}`)
+
+ 
   }
 
 
@@ -219,6 +309,8 @@ export default function Home(props) {
   const [preferedAirline, setPreferedAirline] = React.useState('none');
   const [fareType, setFareType] = React.useState('regular');
   const [calendarOpen, setCalendarOpen] = React.useState(false);
+  const [calendarOpento, setCalendarOpento] = React.useState(false);
+
 
   const colorsRadio = {
     color: "#99999a",
@@ -229,6 +321,8 @@ export default function Home(props) {
 
   const handleRadioChange = (event)=> {
     setTripOpt(event.target.value);
+    setCalendartostatus(true)
+
   } 
 
   const handleChange = (event) => {
@@ -243,6 +337,14 @@ export default function Home(props) {
     calendarOpen ? setCalendarOpen(false) : setCalendarOpen(true);
   }
 
+  const changeCalendarto = ()=>{
+    calendarOpento ? setCalendarOpento(false) : setCalendarOpento(true);
+    setTripOpt("rondtrip")
+
+
+
+  }
+
   const getfrom = () => {
     setOpen(true);
   }
@@ -250,6 +352,20 @@ export default function Home(props) {
   const getto = () => {
     setToopen(true);
   }
+
+ const parentcalendarfuction = (data) => {
+  setCalendar(data)
+
+ //  console.log(data);
+ }
+
+
+ const parenttocalendarfuction = (data) => {
+  setCalendartostatus(false)
+  setTocalendar(data)
+
+//  console.log(data);
+}
 
  
 
@@ -477,25 +593,123 @@ export default function Home(props) {
                     <div className='departure booking_input bookingCalendar_parent' onClick={changeCalendar}>
                         <Box  >
                           <Typography component="span" className='label'>Departure</Typography>
-                          <Typography className='placeto inputTitle'>6 May 22</Typography>
-                          <Typography className='inputTagline'>Friday</Typography>
+                          <Typography className='placeto inputTitle'>{ moment(calendar).format("DD MMM YY") }</Typography>
+                          <Typography className='inputTagline'>{ moment(calendar).format("dddd") }</Typography>
                         </Box>
                         
-                        <Calendar calendarOpen = {calendarOpen} />
+                        <Calendar calendarOpen = {calendarOpen}  onClickOutside={ ()=> setCalendarOpen(false)  } _parentcalendarfuction={parentcalendarfuction}/>
                     </div>
 
-                    <div className='return booking_input' onClick={changeCalendar}>
+
+                    <div className='return booking_input' onClick={changeCalendarto}>
+                      { calendartostatus  &&   
+                        <Box  >
+                          <Typography component="span" className='label'>Return </Typography>
+                          <Typography className='placeto inputTitle'>Tap to add a return</Typography>
+                          <Calendar calendarOpen = {calendarOpento}  onClickOutside={ ()=>  setCalendarOpento(false)   } _parentcalendarfuction={parenttocalendarfuction}/>
+
+                        </Box>
+                        }
+
+                        { !calendartostatus  &&   
                         <Box  >
                           <Typography component="span" className='label'>Return</Typography>
-                          <Typography className='placeto inputTitle'>8 May 222</Typography>
-                          <Typography className='inputTagline'>Sunday</Typography>
+                          <Typography className='placeto inputTitle'>{ moment(tocalendar).format("DD MMM YY") }</Typography>
+                          <Typography className='inputTagline'>{ moment(tocalendar).format("dddd") }</Typography>
+                          <Calendar calendarOpen = {calendarOpento}  onClickOutside={ ()=> setCalendarOpento(false)  } _parentcalendarfuction={parenttocalendarfuction}/>
+
                         </Box>
+                        }
+
+
                     </div>
 
-                    <div className='traverler booking_input'>
+                    <div className='traverler booking_input' style={{ position : 'relative'}} onClick={ ()=> setPassangeropen(true) }>
                         <Typography component="span" className='label'>Travellers & Class</Typography>
                         <Typography className='placeto inputTitle'>1 Adult</Typography>
                         <Typography className='inputTagline'>Economy</Typography>
+
+                        <Model open={passangeropen} onClickOutside={()=> setPassangeropen(false)}>
+                              <Box
+                              sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                '& > :not(style)': {
+                                  m: 0,
+                                  width: '35rem',
+                                  height: 250,
+                                  zIndex : 10,
+                                  position  : 'absolute',
+                                  left : -300 ,
+                                  top : 47
+                                },
+                              }}
+                              >
+                                <Paper elevation={2}>
+                                  <Grid container justifyContent="space-between" sx={{ paddingLeft : 2 , paddingRight : 2 , marginTop : 3 , marginBottom : 3}}>
+                                    <Grid Item sx={{ display:'flex' }} xs={4}>
+                                        <Typography component="h4" m={1}>
+                                          Adult
+                                        </Typography>
+                                        <Paper elevation={2} sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT + 1 }) ) }> + </Typography>
+                                            <Typography> {travellerclass.ADULT} </Typography>
+                                            <Typography variant="h5"  onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT > 1 ? state.ADULT - 1 : 1 }) )  } > - </Typography>
+
+                                        </Paper>
+
+                                    </Grid>
+                                    <Grid Item sx={{ display:'flex' }} xs={4}>
+                                    <Typography component="h4" m={1}>Child</Typography>
+                                    <Paper elevation={2} sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD + 1 }) ) }> + </Typography>
+                                            <Typography> {travellerclass.CHILD}  </Typography>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD > 0 ? state.CHILD - 1 : 0 }) )  }> - </Typography>
+
+                                    </Paper>
+                                    </Grid>
+                                    <Grid Item  sx={{ display:'flex' }} xs={4}>
+                                    <Typography component="h4" m={1}>Infant</Typography>
+                                    <Paper elevation={2} sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT + 1 }) ) }> + </Typography>
+                                            <Typography> {travellerclass.INFANT}  </Typography>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT > 0 ? state.INFANT - 1 : 0 }) )  }> - </Typography>
+                                    </Paper>
+                                    </Grid>
+
+                                  </Grid>
+
+
+                                  <Divider  />
+
+                                  <Typography variant="h5" mt={2} mb={2} textAlign="center">Travel Class</Typography>
+
+                                   <Grid container justifyContent="space-around" mb={2}>
+                                     <Grid Item><Button variant={ (travelclass == "Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Economy") } >Economy</Button></Grid>
+                                     <Grid Item><Button variant={ (travelclass == "Premium Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Premium Economy") }>Premium Economy</Button></Grid>
+                                     <Grid Item><Button variant={ (travelclass == "Business" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Business") }>Business</Button></Grid>
+                                     <Grid Item><Button variant={ (travelclass == "First Class" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("First Class") }>First Class</Button></Grid>
+
+                                   </Grid>
+
+
+                                   <Grid container justifyContent="space-around" >
+                                      <Grid Item xs={3}></Grid>
+                                     <Grid Item xs={3}></Grid>
+                                     <Grid Item><Button variant="outlined" color="error" onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Cancel</Button></Grid>
+                                     <Grid Item><Button variant="contained" color="success" onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Done</Button></Grid>
+
+                                   </Grid>
+
+
+
+                                </Paper>
+
+                                
+
+                              </Box>
+                      
+                        </Model>
                     </div>
                   </div>
 
@@ -515,7 +729,22 @@ export default function Home(props) {
                           <MenuItem value={"sleeper"}>Sleeper</MenuItem>
                         </Select>
                       </FormControl>
-                      <RadioGroup row value={"directflight"}>
+
+                        
+
+                    <FormControlLabel
+                              value="end"
+                              control={<Checkbox
+                                checked={stopchecked}
+                                onChange={stophandleChange}
+                                inputProps={{ 'aria-label': 'controlled' }}
+                              />}
+                              label="Direct Flight"
+                              labelPlacement="end"
+                            />
+
+
+                      {/* <RadioGroup row value={"directflight"}>
                         <FormControlLabel value="directflight" control={<Radio sx={{ 
                             '& .MuiSvgIcon-root': {
                               fontSize: 15,
@@ -524,7 +753,7 @@ export default function Home(props) {
                             '&.Mui-checked': {
                               color: "#f59625",
                             }, }}/>} label="Direct Flight" />
-                      </RadioGroup>
+                      </RadioGroup> */}
                     </div>  
 
                     <div className='rightBox'>
