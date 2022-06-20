@@ -102,7 +102,18 @@ export default function Home(props) {
     const url = process.env.REACT_APP_FROM_SEARCH;
     const getstorage = JSON.parse(localStorage.getItem(url));
     setSearchFromlocalstorage(getstorage)
-    setSearchfromselected(getstorage[0] || {})
+
+    if(getstorage && getstorage[0]){
+      setSearchfromselected(getstorage[0]  || {})
+    } else {
+
+      axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=Shirdi`).then(res=>{
+        let hyn = res?.data[0];
+        setSearchfromselected(hyn)
+ 
+       })
+
+    }
   },[searchFrom])
 
 
@@ -113,6 +124,17 @@ export default function Home(props) {
     setSearchTolocalstorage(getstorage)
     if(getstorage && getstorage[0]){
     setSearchtoselected(getstorage[0] || {})
+    } else {
+
+     // http://localhost:3030/flight?$search=Shirdi
+      axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=Chennai`).then(res=>{
+       let hyn = res?.data[0];
+       console.log(hyn);
+       setSearchtoselected(hyn)
+
+      })
+
+
     }
   },[searchTo])
 

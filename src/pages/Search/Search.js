@@ -247,6 +247,38 @@ export default function Search({ isVisible }) {
                 return Obj        
         }
 
+        const CreateObjectround = (data , key , top ) => {
+           
+            let split = data.split("-");
+            let Obj;
+            if( key == 0 ){
+                 Obj =  {	
+                    fromCityOrAirport: {
+                      code: split[0]
+                    },
+                    toCityOrAirport: {
+                      code: split[1]
+                    },
+                    travelDate: moment(split[2]).format("YYYY-MM-DD") 
+                        }
+            } else {
+                let prev = top[key-1].split("-");
+
+                Obj =  {	
+                    fromCityOrAirport: {
+                      code: prev[1]
+                    },
+                    toCityOrAirport: {
+                      code: split[0]
+                    },
+                    travelDate: moment(split[2]).format("YYYY-MM-DD") 
+                        }
+
+            }
+            
+                return Obj        
+        }
+
         /**
          * function to modify paxtype
          * **/
@@ -286,10 +318,17 @@ export default function Search({ isVisible }) {
             
 
 
-        if(tripType == "oneway" || tripType == "rondtrip") {
+        if(tripType == "oneway") {
             let top = itinerary.split("_");
             for (const key in top) {
                 CreatesearchObject.searchQuery.routeInfos.push(CreateObject(top[key]))
+            }
+        }
+
+        if(tripType == "rondtrip") {
+            let top = itinerary.split("_");
+            for (const key in top) {
+                CreatesearchObject.searchQuery.routeInfos.push(CreateObjectround(top[key] , key , top))
             }
         }
 
@@ -323,7 +362,6 @@ export default function Search({ isVisible }) {
 
 
                         var modifieddata = datadup.map((dd , i )=>{
-                           
                             let dept_obj = {
                                                 timing    : moment(dd?.sI[0]?.dt).format("HH:mm"),
                                                 timewords : moment(dd?.sI[0]?.dt).format("MMMM DD"),
@@ -404,7 +442,6 @@ export default function Search({ isVisible }) {
                         })
 
                      //   
-                    // modifieddata.sort((a, b) => (a.totalPriceList[0] < b.totalPriceList[0]) ? 1 : -1)
                     modifieddata.sort(function(a, b) {
                         var c = a.totalPriceList[0].totalamount;
                         var d = b.totalPriceList[0].totalamount;
