@@ -14,6 +14,57 @@ import { ReactComponent as ArrowIcon } from '../../assets/icons/arrowicon.svg';
 import moment from 'moment'
 import axios from 'axios';  
 import { useSearchParams } from 'react-router-dom';
+import { debounce } from "lodash"
+import Searchmenuskeleton from "./Searchmenuskeleton"
+
+
+function Flightdetails(rest){
+
+    return (
+         <>
+        { rest?._flightdetail?.map((flightdetail , flightdetailindex)=>(
+            <>
+            <Box className='flightlist flightfrom' key={flightdetailindex}>
+            <Box className='brand'>
+                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
+                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {flightdetail?.flightdetaildt?.name}</Typography>
+                <Typography style={{ fontSize : 10, fontWeight : '500' }}> { flightdetail?.flightcodefn}</Typography>
+            </Box>
+            <Box className='time_place first'>
+                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>{ flightdetail?.flightdetaildt?.dt }</Typography>
+                <Typography>{flightdetail?.flightdetaildt?.citycountry}</Typography>
+                <Typography>{flightdetail?.flightdetaildt?.name}</Typography>
+                <Typography>{flightdetail?.flightdetaildt?.terminal}</Typography>
+    
+    
+            </Box>
+            <Box className='hours'>
+                <Typography className='hrs' style={{fontSize : 12, fontWeight : '500'}}>{ flightdetail?.duration }</Typography>
+                <Typography style={{ fontSize : 10 }}>Duration</Typography>
+            </Box>
+            <Box className='time_place'>
+                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>{ flightdetail?.flightdetailat?.at }</Typography>
+                <Typography>{flightdetail?.flightdetailat?.citycountry}</Typography>
+                <Typography>{flightdetail?.flightdetailat?.name}</Typography>
+                <Typography>{flightdetail?.flightdetailat?.terminal}</Typography>
+            </Box>
+            </Box>
+                {
+                    flightdetail?.layoverduration != 'NaNh NaNm' &&
+                    <Box className='hrsnext_flight'> { flightdetail?.layoverduration  }  </Box>
+    
+                }
+            
+                </>
+        )) 
+        } 
+        </>
+       
+
+    );
+
+     
+}
 
 
 function Faredetails(...rest){
@@ -147,9 +198,13 @@ export default function Search({ isVisible }) {
     const [flightReturn, setFlightReturn] = React.useState('flight_return1');
     const [tabValue, setTabValue] = React.useState();  
     const [ listflight , setListflight ] = React.useState([]);
+    const [ listflightfilter , setListflightfilter ] = React.useState([]);
+
     const [ location , setLocation ] = React.useState([]);
     const [ paxtypeget , setPaxtypeget ] = React.useState([]);
     const [ cabinClassget , setCabinClassget ] = React.useState("");
+    const [ minmaxprice , setMinmaxprice ] = React.useState(0);
+    const [ airline , setAirline ] = React.useState([])
 
 
     //fare detail click by radio button
@@ -192,6 +247,38 @@ export default function Search({ isVisible }) {
                 return Obj        
         }
 
+        const CreateObjectround = (data , key , top ) => {
+           
+            let split = data.split("-");
+            let Obj;
+            if( key == 0 ){
+                 Obj =  {	
+                    fromCityOrAirport: {
+                      code: split[0]
+                    },
+                    toCityOrAirport: {
+                      code: split[1]
+                    },
+                    travelDate: moment(split[2]).format("YYYY-MM-DD") 
+                        }
+            } else {
+                let prev = top[key-1].split("-");
+
+                Obj =  {	
+                    fromCityOrAirport: {
+                      code: prev[1]
+                    },
+                    toCityOrAirport: {
+                      code: split[0]
+                    },
+                    travelDate: moment(split[2]).format("YYYY-MM-DD") 
+                        }
+
+            }
+            
+                return Obj        
+        }
+
         /**
          * function to modify paxtype
          * **/
@@ -228,13 +315,20 @@ export default function Search({ isVisible }) {
             setPaxtypeget(CreatesearchObject.searchQuery.paxInfo) // store paxtype to get outside of use effect
             setCabinClassget(cabinClass)
             CreatesearchObject.searchQuery.searchModifiers = {}
+            
 
 
-
-        if(tripType == "oneway" || tripType == "rondtrip") {
+        if(tripType == "oneway") {
             let top = itinerary.split("_");
             for (const key in top) {
                 CreatesearchObject.searchQuery.routeInfos.push(CreateObject(top[key]))
+            }
+        }
+
+        if(tripType == "rondtrip") {
+            let top = itinerary.split("_");
+            for (const key in top) {
+                CreatesearchObject.searchQuery.routeInfos.push(CreateObjectround(top[key] , key , top))
             }
         }
 
@@ -264,21 +358,117 @@ export default function Search({ isVisible }) {
                     axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/air-search-all`,CreatesearchObject , { headers : headers}  ).then(res=>{
                         console.log(res);
                         let data = res?.data?.searchResult?.tripInfos?.ONWARD
+                        let datadup = res?.data?.searchResult?.tripInfos?.ONWARD
+                        let dataround = res?.data?.searchResult?.tripInfos?.COMBO
 
-                        data.map((d,i)=>{
-                            if(d.totalPriceList.length == 1 ){
-                               return d.totalPriceList[0].checked = true
-                            } else if(d.totalPriceList.length > 1){
-                                 d.totalPriceList[0].checked = true
-                                 for(var ii = 1; ii < d?.totalPriceList?.length ; ii++ ){
-                                    d.totalPriceList[ii].checked = false
-                                 }
-                                  return d
+                if (datadup) {
+                        var modifieddata = datadup.map((dd , i )=>{
+                            let dept_obj = {
+                                                timing    : moment(dd?.sI[0]?.dt).format("HH:mm"),
+                                                timewords : moment(dd?.sI[0]?.dt).format("MMMM DD"),
+                                                city      : dd?.sI[0]?.da?.city,
+                                                name : dd?.sI[0]?.fD?.aI?.name
+                                            }
+
+                            let arrival_obj = {
+                                                timing    : moment(dd?.sI[dd?.sI.length - 1]?.at).format("HH:mm"),
+                                                timewords : moment(dd?.sI[dd?.sI.length - 1]?.at).format("MMMM DD") ,
+                                                city      : dd?.sI[dd?.sI.length - 1]?.aa?.city,
+                                                name : ''
+                                            }
+
+                                            let paxt = paxTypefn(paxType)
+
+                            if(dd.totalPriceList.length == 1 ){
+                                 dd.totalPriceList[0].checked = true
+                                 dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
+                            } else if(dd.totalPriceList.length > 1){
+                                dd.totalPriceList[0].checked = true
+                                dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
+                                for(var ii = 1; ii < dd?.totalPriceList?.length ; ii++ ){
+                                    dd.totalPriceList[ii].checked = false
+                                    dd.totalPriceList[ii].totalamount = calculatetotalamount1(dd.totalPriceList[ii] , paxt)
+                                }
+                            }
+
+                           let swallowcopy = {...dd}
+                            //  console.log(swallowcopy);
+
+                            let flightdetails =swallowcopy?.sI.map((flightdetail , flightdetailindex)=>{
+                                return {
+                                    flightname : flightdetail?.oB?.name,
+                                    flightcodefn :  `${flightdetail?.fD?.aI?.code}-${flightdetail?.fD?.fN}`,
+                                    flightdetaildt : {
+                                        dt : moment(flightdetail?.dt).format('MMM DD,ddd, HH:mm'),
+                                        citycountry : `${flightdetail?.da?.city},${flightdetail?.da?.country}`,
+                                        name : flightdetail?.da?.name,
+                                        termianl : flightdetail?.da?.terminal
+
+                                    },
+                                    duration : twodatetimediff(flightdetail?.dt,flightdetail?.at),
+                                    flightdetailat : {
+                                        at : moment(flightdetail?.at).format('MMM DD,ddd, HH:mm'),
+                                        citycountry : `${flightdetail?.aa?.city}-${flightdetail?.aa?.country}`,
+                                        name : flightdetail?.aa?.name,
+                                        termianl : flightdetail?.aa?.terminal
+                                    },
+                                    layoverduration : twodatetimediff(flightdetail?.at , dd?.sI[flightdetailindex+1]?.dt )
+                                   
+                                }
+                            })
+                   
+                            return {
+                                unique : i ,
+                                dept_obj : dept_obj,
+                                flight_code :  dd?.sI.map((indata,ind) => (
+                                    `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ dd?.sI?.length -1 == ind ? '' : ',' }`
+                                    )),
+                                duration : calculateTime(dd?.sI),
+                                stopwords : dd?.sI?.length == 1 ? 'Non Stop' : `${dd?.sI?.length - 1 } Stop(s)` ,
+                                stopinnumber : dd?.sI?.length == 1 ? 0 : dd?.sI?.length - 1 ,
+                                arrival_obj  : arrival_obj,
+                                totalPriceList : dd.totalPriceList,
+                                flightdetails : flightdetails,
+                                dt_date : swallowcopy?.sI[0]?.dt,
+                                at_date : swallowcopy?.sI[swallowcopy?.sI?.length-1]?.at,
+                                minduration : calculateTimemiutes(dd?.sI)
+
                             }
                         })
+                     //   
+                    modifieddata.sort(function(a, b) {
+                        var c = a.totalPriceList[0].totalamount;
+                        var d = b.totalPriceList[0].totalamount;
+                        return  c-d 
+                    });
+                    let swaldeep = [...modifieddata]
+                    const unique = [...new Set(swaldeep.map(item => item.dept_obj.name))]
+                                    .map(i=>  swaldeep.filter(tt => tt.dept_obj.name == i) )
+                                    .map(ii => ii.reduce((prev,curr)=> prev.totalPriceList[0].totalamount < curr.totalPriceList[0].totalamount ? prev : curr) 
+                                    ).map(iii => ( {...iii , cnt :   swaldeep.filter(iif => iif.dept_obj.name == iii.dept_obj.name).length     } ) )
+                    setAirline(unique)
+                    setListflight(modifieddata)
+                    setListflightfilter(modifieddata)
+                    setMinmaxprice(Math.round(swaldeep[swaldeep.length - 1].totalPriceList[0].totalamount)) //  pass min max price to popular search
 
-                        
-                        setListflight(data)
+
+            } 
+
+            // round trip
+
+            if( dataround ) {
+
+                
+            }
+
+
+
+
+
+
+
+
+
                     }).catch(err=>{
                         console.log(err);
                     })
@@ -331,7 +521,9 @@ export default function Search({ isVisible }) {
         unmutate[parentindex]['totalPriceList'].map(idd => idd.checked = false )
         let plindex = unmutate[parentindex]['totalPriceList'].findIndex( x => x.id == target_id)
         unmutate[parentindex]['totalPriceList'][plindex].checked = true
-        setListflight(unmutate)
+      //  setListflight(unmutate)
+        setListflightfilter(unmutate)
+
 
     }
 
@@ -355,14 +547,32 @@ export default function Search({ isVisible }) {
             var duration = moment.duration(endTime.diff(startTime));
             hours += parseInt(duration.asHours()) ;
             minutes += parseInt(duration.asMinutes()) % 60;
-
         }
-
         var tot =  minduration+hours * 60 + minutes; 
         return `${Math.floor(tot / 60)}h ${tot % 60}m`
-
-
     }
+
+    const calculateTimemiutes = ( data ) => {
+        const minduration = data?.reduce((acc,curr)=> acc+curr.duration ,0 )
+        var hours = 0;
+        var minutes = 0;
+
+        for (let index = 0; index < data?.length - 1; index++) {
+            let at = data[index]?.at  
+            let dt = data[index+1]?.dt
+            var startTime=moment(at , "YYYY-MM-DD hh:mm");
+            var endTime=moment(dt, "YYYY-MM-DD hh:mm");
+
+            var duration = moment.duration(endTime.diff(startTime));
+            hours += parseInt(duration.asHours()) ;
+            minutes += parseInt(duration.asMinutes()) % 60;
+        }
+        var tot =  minduration+hours * 60 + minutes; 
+        return ( Math.floor(tot / 60) * 60 ) + (tot % 60) 
+    }
+
+
+
 
     const twodatetimediff = (start,end) => {
         var startTime=moment(start , "YYYY-MM-DD hh:mm");
@@ -376,19 +586,238 @@ export default function Search({ isVisible }) {
     }
 
     const calculatetotalamount = (data,index)=>{
+
         let tot = 0;
         if(data?.fd?.ADULT){
-            tot += data?.fd?.ADULT?.fC?.TF * paxtypeget.ADULT
+            tot += data?.fd?.ADULT?.fC?.TF * paxtypeget?.ADULT 
         }
         if(data?.fd?.CHILD){
-            tot += data?.fd?.CHILD?.fC?.TF * paxtypeget.CHILD
+            tot += data?.fd?.CHILD?.fC?.TF * paxtypeget?.CHILD
         }
         if(data?.fd?.INFANT){
-            tot += data?.fd?.INFANT?.fC?.TF * paxtypeget.INFANT
+            tot += data?.fd?.INFANT?.fC?.TF * paxtypeget?.INFANT
         }
+
         return tot.toLocaleString(undefined,{minimumFractionDigits: 2})
     }
+
+    const calculatetotalamount1 = (data,_paxtypeget)=>{
+        let tot = 0;
+        if(data?.fd?.ADULT){
+            tot += data?.fd?.ADULT?.fC?.TF * _paxtypeget.ADULT
+        }
+        if(data?.fd?.CHILD){
+            tot += data?.fd?.CHILD?.fC?.TF * _paxtypeget.CHILD
+        }
+        if(data?.fd?.INFANT){
+            tot += data?.fd?.INFANT?.fC?.TF * _paxtypeget.INFANT
+        }
+        return tot
+    }
+
     
+
+    const [ sortingstatus , setSortingstatus ] = React.useState(false);
+
+    const sorting = type => {
+
+        var unmutatee = [...listflightfilter]
+
+        switch (type) {
+            case "depature":
+                unmutatee.sort(function(a, b) {
+                    var c = new Date(a.dt_date);
+                    var d = new Date(b.dt_date);
+                    return sortingstatus == 0 ? c-d : d-c
+                });
+            break;
+
+            case "duration" :
+                unmutatee.sort(function(a, b) {
+                    var c = a.minduration;
+                    var d = b.minduration;
+                    return sortingstatus == 0 ? c-d : d-c
+                });
+            break;
+
+            case "arrival" :
+                unmutatee.sort(function(a, b) {
+                    var c = new Date(a.at_date);
+                    var d = new Date(b.at_date);
+                    return sortingstatus == 0 ? c-d : d-c
+                });
+            break;
+
+            case "price" :
+
+                unmutatee.sort(function(a, b) {
+                    var c = a.totalPriceList[0].totalamount;
+                    var d = b.totalPriceList[0].totalamount;
+                    return sortingstatus == 0 ? c-d : d-c
+                });
+
+            break;
+
+        }
+        setSortingstatus(sortingstatus => !sortingstatus)
+      //  setListflight(unmutatee)
+        setListflightfilter(unmutatee)
+
+    }
+
+
+    /**
+     * Popular Search
+     * **/
+
+
+    const filter = (imm , ranger , depature , arrival) => {
+
+        const unmutatee = [...listflight]
+        var filterrecord;
+
+        if(imm.length > 0 ) {
+            var sorted = imm.sort((a,b)=>a-b)
+            let arrOfNum = sorted.map(str => {
+                return Number(str);
+              });
+            var len =  arrOfNum.length; 
+            if(len > 2){
+                 arrOfNum.slice(-1)
+            }
+                
+            filterrecord =  unmutatee.filter(function(t){
+                if(arrOfNum.includes(t.stopinnumber)){
+                    return true
+                }
+                if(len > 2){
+                    return t.stopinnumber >=2
+                }
+                return false;
+            });
+        } else {
+            filterrecord = unmutatee
+        }
+
+
+        if( ranger[1].label) {
+            let pr = ranger[1].label;          
+            let ft = pr.replace(/\,/g,'')
+            filterrecord = filterrecord.filter(t=>  t.totalPriceList[0].totalamount <= ft);
+        } else {
+            filterrecord = unmutatee
+        }
+
+
+        if(depature.length > 0){
+
+            var format = 'HH:mm';
+
+            // var time = moment() gives you current time. no format required.
+           
+
+            filterrecord =  filterrecord.filter(function(t){
+                
+                if(depature.includes(1)){
+                    let time = moment(t?.dept_obj?.timing,format),
+                    beforeTime = moment('00:59', format),
+                    afterTime = moment('00:06', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(depature.includes(2)){
+                    let time = moment(t?.dept_obj?.timing,format),
+                    beforeTime = moment('06:00', format),
+                    afterTime = moment('12:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(depature.includes(3)){
+                    let time = moment(t?.dept_obj?.timing,format),
+                    beforeTime = moment('12:00', format),
+                    afterTime = moment('18:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(depature.includes(4)){
+                    let time = moment(t?.dept_obj?.timing,format),
+                    beforeTime = moment('18:00', format),
+                    afterTime = moment('00:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+
+            })
+
+
+        }
+
+
+
+
+        if(arrival.length > 0){
+
+            var format = 'HH:mm';
+
+            // var time = moment() gives you current time. no format required.
+           
+
+            filterrecord =  filterrecord.filter(function(t){
+                
+                if(arrival.includes(1)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('00:59', format),
+                    afterTime = moment('00:06', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(arrival.includes(2)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('06:00', format),
+                    afterTime = moment('12:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(arrival.includes(3)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('12:00', format),
+                    afterTime = moment('18:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(arrival.includes(4)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('18:00', format),
+                    afterTime = moment('00:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+
+            })
+
+
+        }
+
+       setListflightfilter(filterrecord)
+
+
+    }
 
 
  
@@ -508,7 +937,16 @@ export default function Search({ isVisible }) {
 
                     <Grid container className='booking_row' spacing={3}> 
                         <Grid item md={3} className="filter_col"> 
-                            <Sidemenu />
+
+                        
+                            {/* <Sidemenu _minmaxprice={minmaxprice}  _sliderfun={sliderfun} _stopfilterpn={stopfilterpn}/> */}
+                           { 
+                            listflight.length > 0 ?  <Sidemenu _minmaxprice={minmaxprice} _filter={filter} _airline={airline}/> : <Searchmenuskeleton />
+                           }
+                           
+
+
+
                         </Grid>
                         <Grid item  md={9} className="booking_col">
                             <Typography className='bookingCol_title'>
@@ -869,50 +1307,45 @@ export default function Search({ isVisible }) {
                                                         {'Chennai '} {'Wed, 15 Jun'}
                                                     </Typography>
                                                     <Box component={'div'} className='tablehead'>
-                                                        <Typography>Departure</Typography>
-                                                        <Typography>Duration</Typography>
-                                                        <Typography>Arrival</Typography>
-                                                        <Typography>Price</Typography>
+                                                        <Typography onClick={ () => sorting("depature")}>Departure</Typography>
+                                                        <Typography onClick={ () => sorting("duration")}>Duration</Typography>
+                                                        <Typography onClick={ () => sorting("arrival")}>Arrival</Typography>
+                                                        <Typography onClick={ () => sorting("price")}>Price</Typography>
                                                         <Typography className='check'></Typography>
                                                     </Box>
                                                 </Box>
 
                                                 {/* flights  one way  */}
-                                                {listflight && listflight.map((data, i) => (
+                                                {listflightfilter && listflightfilter.map((data, i) => (
                                                     <Box className='flightitem'>
                                                         <RadioGroup className="faretype_radio" 
                                                             value={flightGo}
                                                             onChange={changeFGo} >
                                                             <Box className='flight_brand'>
-                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> { data?.sI[0]?.fD?.aI?.name ?? '-' }
+                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> { data?.dept_obj?.name ?? '-' }
                                                             </Box>
 
                                                             <span style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}} >
-                                                                { 
-                                                                 data?.sI.map((indata,ind) => (
-                                                                    `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ data?.sI?.length -1 == ind ? '' : ',' }`
-                                                                    ))
-                                                                    }
-                                                                
+                                                               { data?.flight_code}
                                                             </span>
 
 
                                                             <Box className='timeandDetails'>
                                                                 <Box className='from'>
-                                                                    <Typography className='timeText'>  { moment(data?.sI[0]?.dt).format("HH:mm")   } </Typography>
-                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { moment(data?.sI[0]?.dt).format("MMMM DD")   } </Typography>
+                                                                    <Typography className='timeText'>  { data?.dept_obj?.timing   } </Typography>
+                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.dept_obj?.timewords   } </Typography>
 
-                                                                    <Typography className='place'> { data?.sI[0]?.da?.city } </Typography>
+                                                                    <Typography className='place'> { data?.dept_obj?.city   } </Typography>
                                                                 </Box>
                                                                 <Box className='hours'>
-                                                                    <Typography className='hourstext'>  {calculateTime(data?.sI) } </Typography>
-                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> { (data?.sI?.length == 1 ? 'Non Stop' : `${data?.sI?.length - 1 } Stop(s)` ) } </Typography>
+                                                                    <Typography className='hourstext'>  { data?.duration } </Typography>
+                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.stopwords } </Typography>
                                                                 </Box>
                                                                 <Box className='to'>
-                                                                    <Typography className='timeText'>  { moment(data?.sI[data?.sI.length - 1]?.at).format("HH:mm")   } </Typography>
-                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { moment(data?.sI[data?.sI.length - 1]?.at).format("MMMM DD")   } </Typography>
+                                                                    <Typography className='timeText'>  {data?.arrival_obj?.timing   } </Typography>
+                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.arrival_obj?.timewords   } </Typography>
 
-                                                                    <Typography className='place'> { data?.sI[data?.sI.length - 1]?.aa?.city } </Typography>
+                                                                    <Typography className='place'> { data?.arrival_obj?.city } </Typography>
                                                                 </Box>
                                                                 
                                                                 <span>
@@ -970,49 +1403,14 @@ export default function Search({ isVisible }) {
                                                                     </TabsListUnstyled>
                                                                     <TabPanelUnstyled value={0}>
 
+                                                                        <Flightdetails _flightdetail={data?.flightdetails}/>
 
-
-                                                                    { data?.sI.map((flightdetail , flightdetailindex)=>(
-                                                                        <>
-                                                                        <Box className='flightlist flightfrom'>
-                                                                        <Box className='brand'>
-                                                                            <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                            <Typography style={{ fontSize : 10, fontWeight : '500' }}> {flightdetail?.oB?.name}</Typography>
-                                                                            <Typography style={{ fontSize : 10, fontWeight : '500' }}> { flightdetail?.fD?.aI?.code}-{flightdetail?.fD?.fN}</Typography>
-                                                                        </Box>
-                                                                        <Box className='time_place first'>
-                                                                            <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>{ moment(flightdetail?.dt).format('MMM DD,ddd, HH:mm')}</Typography>
-                                                                            <Typography>{flightdetail?.da?.city},{flightdetail?.da?.country}</Typography>
-                                                                            <Typography>{flightdetail?.da?.name}</Typography>
-                                                                            <Typography>{flightdetail?.da?.terminal}</Typography>
-
-
-                                                                        </Box>
-                                                                        <Box className='hours'>
-                                                                            <Typography className='hrs' style={{fontSize : 12, fontWeight : '500'}}>{ twodatetimediff(flightdetail?.dt,flightdetail?.at) }</Typography>
-                                                                            <Typography style={{ fontSize : 10 }}>Duration</Typography>
-                                                                        </Box>
-                                                                        <Box className='time_place'>
-                                                                            <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>{ moment(flightdetail?.at).format('MMM DD,ddd, HH:mm')}</Typography>
-                                                                            <Typography>{flightdetail?.aa?.city},{flightdetail?.aa?.country}</Typography>
-                                                                            <Typography>{flightdetail?.aa?.name}</Typography>
-                                                                            <Typography>{flightdetail?.aa?.terminal}</Typography>
-                                                                        </Box>
-                                                                        </Box>
-                                                                            {
-                                                                                flightdetailindex != data?.sI?.length - 1 &&
-                                                                                <Box className='hrsnext_flight'> { twodatetimediff(flightdetail?.at , data?.sI[flightdetailindex+1]?.dt )   }  </Box>
-
-                                                                            }
-                                                                        
-                                                                            </>
-                                                                    )) 
-                                                                    }
-                                                                       
                                                                     </TabPanelUnstyled>
                                                                     <TabPanelUnstyled value={1}>
 
                                                                     <Faredetails value={data?.totalPriceList} _paxtypeget={paxtypeget}/>
+
+
 
 
                                                                     </TabPanelUnstyled>

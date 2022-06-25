@@ -197,6 +197,8 @@ export default function Search({ isVisible }) {
     const [flightGo, setFlightGo] = React.useState('flight_go1');
     const [flightReturn, setFlightReturn] = React.useState('flight_return1');
     const [tabValue, setTabValue] = React.useState();  
+    const [tabValuereturn, setTabValuereturn] = React.useState();  
+
     const [ listflight , setListflight ] = React.useState([]);
     const [ listflightfilter , setListflightfilter ] = React.useState([]);
 
@@ -206,6 +208,22 @@ export default function Search({ isVisible }) {
     const [ minmaxprice , setMinmaxprice ] = React.useState(0);
     const [ airline , setAirline ] = React.useState([])
 
+    //rounded
+   const [ listflightround , setListflightround ] = React.useState([])
+   const [ listflightroundfilter , setListflightroundfilter ] = React.useState([])
+
+
+   // Return 
+
+   const [ airlinereturn , setAirlinereturn ] = React.useState([])
+   const [ listflightreturn , setListflightreturn ] = React.useState([])
+   const [ listflightfilterreturn , setListflightfilterreturn ] = React.useState([])
+   const [ minmaxpricereturn , setMinmaxpricereturn ] = React.useState([])
+
+   const [ splitType , setSplitType ] = React.useState(false)
+   const [ displaystatus , setDisplaystatus] = React.useState("");
+
+   
 
     //fare detail click by radio button
 
@@ -247,37 +265,7 @@ export default function Search({ isVisible }) {
                 return Obj        
         }
 
-        const CreateObjectround = (data , key , top ) => {
-           
-            let split = data.split("-");
-            let Obj;
-            if( key == 0 ){
-                 Obj =  {	
-                    fromCityOrAirport: {
-                      code: split[0]
-                    },
-                    toCityOrAirport: {
-                      code: split[1]
-                    },
-                    travelDate: moment(split[2]).format("YYYY-MM-DD") 
-                        }
-            } else {
-                let prev = top[key-1].split("-");
-
-                Obj =  {	
-                    fromCityOrAirport: {
-                      code: prev[1]
-                    },
-                    toCityOrAirport: {
-                      code: split[0]
-                    },
-                    travelDate: moment(split[2]).format("YYYY-MM-DD") 
-                        }
-
-            }
-            
-                return Obj        
-        }
+      
 
         /**
          * function to modify paxtype
@@ -318,19 +306,14 @@ export default function Search({ isVisible }) {
             
 
 
-        if(tripType == "oneway") {
+        if(tripType == "oneway" || tripType == "rondtrip") {
             let top = itinerary.split("_");
             for (const key in top) {
                 CreatesearchObject.searchQuery.routeInfos.push(CreateObject(top[key]))
             }
         }
 
-        if(tripType == "rondtrip") {
-            let top = itinerary.split("_");
-            for (const key in top) {
-                CreatesearchObject.searchQuery.routeInfos.push(CreateObjectround(top[key] , key , top))
-            }
-        }
+      
 
         if(stops == 0){
             CreatesearchObject.searchQuery.searchModifiers.isDirectFlight = true;
@@ -340,7 +323,7 @@ export default function Search({ isVisible }) {
           //  CreatesearchObject.searchQuery.searchModifiers.isConnectingFlight = true;
         }
 
-
+       
          /**
          * Arrange Object to get list of flights
          * **/
@@ -358,8 +341,29 @@ export default function Search({ isVisible }) {
                     axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/air-search-all`,CreatesearchObject , { headers : headers}  ).then(res=>{
                         console.log(res);
                         let data = res?.data?.searchResult?.tripInfos?.ONWARD
-                        let datadup = res?.data?.searchResult?.tripInfos?.ONWARD
+                       
+                       
+                           let datadup = res?.data?.searchResult?.tripInfos?.ONWARD
+                           let _return = res?.data?.searchResult?.tripInfos?.RETURN
 
+                           if(datadup && _return){
+                            setTripType('roundtrip')
+                            setDisplaystatus("oneway")
+                            setSplitType(true)
+                           }
+
+                           if(datadup && _return == undefined){
+                            setTripType('oneway')
+                            setDisplaystatus("oneway")
+                            setSplitType(false)
+                           }
+
+                           
+
+                        
+                            let dataround = res?.data?.searchResult?.tripInfos?.COMBO
+
+                if(datadup){
 
                         var modifieddata = datadup.map((dd , i )=>{
                             let dept_obj = {
@@ -376,7 +380,9 @@ export default function Search({ isVisible }) {
                                                 name : ''
                                             }
 
-                                            let paxt = paxTypefn(paxType)
+
+
+                            let paxt = paxTypefn(paxType)
 
                             if(dd.totalPriceList.length == 1 ){
                                  dd.totalPriceList[0].checked = true
@@ -415,9 +421,7 @@ export default function Search({ isVisible }) {
                                    
                                 }
                             })
-
-                            
-                                               
+                   
                             return {
                                 unique : i ,
                                 dept_obj : dept_obj,
@@ -435,42 +439,241 @@ export default function Search({ isVisible }) {
                                 minduration : calculateTimemiutes(dd?.sI)
 
                             }
-
-
-
-
                         })
-
                      //   
                     modifieddata.sort(function(a, b) {
                         var c = a.totalPriceList[0].totalamount;
                         var d = b.totalPriceList[0].totalamount;
                         return  c-d 
                     });
-
                     let swaldeep = [...modifieddata]
-
-
-
-                    console.log(swaldeep);
-
-                  
-
                     const unique = [...new Set(swaldeep.map(item => item.dept_obj.name))]
                                     .map(i=>  swaldeep.filter(tt => tt.dept_obj.name == i) )
                                     .map(ii => ii.reduce((prev,curr)=> prev.totalPriceList[0].totalamount < curr.totalPriceList[0].totalamount ? prev : curr) 
                                     ).map(iii => ( {...iii , cnt :   swaldeep.filter(iif => iif.dept_obj.name == iii.dept_obj.name).length     } ) )
+                   
+                   
+                                    console.log(unique);
 
-
-                                             
-                                
-
-
-
-                    setAirline(unique)
+                                    
+                                    setAirline(unique)
                     setListflight(modifieddata)
                     setListflightfilter(modifieddata)
                     setMinmaxprice(Math.round(swaldeep[swaldeep.length - 1].totalPriceList[0].totalamount)) //  pass min max price to popular search
+
+
+
+                }
+
+
+
+                     // return
+
+                if (_return) {
+
+                    var modifieddata = _return.map((dd , i )=>{
+
+                        let dept_obj = {
+                                            timing    : moment(dd?.sI[0]?.dt).format("HH:mm"),
+                                            timewords : moment(dd?.sI[0]?.dt).format("MMMM DD"),
+                                            city      : dd?.sI[0]?.da?.city,
+                                            name : dd?.sI[0]?.fD?.aI?.name
+                                        }
+
+                        let arrival_obj = {
+                                            timing    : moment(dd?.sI[dd?.sI.length - 1]?.at).format("HH:mm"),
+                                            timewords : moment(dd?.sI[dd?.sI.length - 1]?.at).format("MMMM DD") ,
+                                            city      : dd?.sI[dd?.sI.length - 1]?.aa?.city,
+                                            name : ''
+                                        }
+
+
+
+                        let paxt = paxTypefn(paxType)
+
+                        if(dd.totalPriceList.length == 1 ){
+                             dd.totalPriceList[0].checked = true
+                             dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
+                        } else if(dd.totalPriceList.length > 1){
+                            dd.totalPriceList[0].checked = true
+                            dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
+                            for(var ii = 1; ii < dd?.totalPriceList?.length ; ii++ ){
+                                dd.totalPriceList[ii].checked = false
+                                dd.totalPriceList[ii].totalamount = calculatetotalamount1(dd.totalPriceList[ii] , paxt)
+                            }
+                        }
+
+                       let swallowcopy = {...dd}
+                        //  console.log(swallowcopy);
+
+                        let flightdetails =swallowcopy?.sI.map((flightdetail , flightdetailindex)=>{
+                            return {
+                                flightname : flightdetail?.oB?.name,
+                                flightcodefn :  `${flightdetail?.fD?.aI?.code}-${flightdetail?.fD?.fN}`,
+                                flightdetaildt : {
+                                    dt : moment(flightdetail?.dt).format('MMM DD,ddd, HH:mm'),
+                                    citycountry : `${flightdetail?.da?.city},${flightdetail?.da?.country}`,
+                                    name : flightdetail?.da?.name,
+                                    termianl : flightdetail?.da?.terminal
+
+                                },
+                                duration : twodatetimediff(flightdetail?.dt,flightdetail?.at),
+                                flightdetailat : {
+                                    at : moment(flightdetail?.at).format('MMM DD,ddd, HH:mm'),
+                                    citycountry : `${flightdetail?.aa?.city}-${flightdetail?.aa?.country}`,
+                                    name : flightdetail?.aa?.name,
+                                    termianl : flightdetail?.aa?.terminal
+                                },
+                                layoverduration : twodatetimediff(flightdetail?.at , dd?.sI[flightdetailindex+1]?.dt )
+                               
+                            }
+                        })
+               
+                        return {
+                            unique : i ,
+                            dept_obj : dept_obj,
+                            flight_code :  dd?.sI.map((indata,ind) => (
+                                `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ dd?.sI?.length -1 == ind ? '' : ',' }`
+                                )),
+                            duration : calculateTime(dd?.sI),
+                            stopwords : dd?.sI?.length == 1 ? 'Non Stop' : `${dd?.sI?.length - 1 } Stop(s)` ,
+                            stopinnumber : dd?.sI?.length == 1 ? 0 : dd?.sI?.length - 1 ,
+                            arrival_obj  : arrival_obj,
+                            totalPriceList : dd.totalPriceList,
+                            flightdetails : flightdetails,
+                            dt_date : swallowcopy?.sI[0]?.dt,
+                            at_date : swallowcopy?.sI[swallowcopy?.sI?.length-1]?.at,
+                            minduration : calculateTimemiutes(dd?.sI)
+
+                        }
+                    })
+                 //   
+                modifieddata.sort(function(a, b) {
+                    var c = a.totalPriceList[0].totalamount;
+                    var d = b.totalPriceList[0].totalamount;
+                    return  c-d 
+                });
+                let swaldeep = [...modifieddata]
+                const unique = [...new Set(swaldeep.map(item => item.dept_obj.name))]
+                                .map(i=>  swaldeep.filter(tt => tt.dept_obj.name == i) )
+                                .map(ii => ii.reduce((prev,curr)=> prev.totalPriceList[0].totalamount < curr.totalPriceList[0].totalamount ? prev : curr) 
+                                ).map(iii => ( {...iii , cnt :   swaldeep.filter(iif => iif.dept_obj.name == iii.dept_obj.name).length     } ) )
+               
+               
+                                setAirlinereturn(unique)
+                                setListflightreturn(modifieddata)
+                                setListflightfilterreturn(modifieddata)
+                                setMinmaxpricereturn(Math.round(swaldeep[swaldeep.length - 1].totalPriceList[0].totalamount)) //  pass min max price to popular search
+            
+
+                }
+
+     // return
+
+
+
+
+             
+
+         //   round trip
+
+            if( dataround ) {
+
+                setTripType('roundtrip')
+
+                let arr = []
+
+             let resdata =   dataround.map((dd,index)=>{
+
+                    let mid = CreatesearchObject.searchQuery.routeInfos[0].toCityOrAirport.code;
+                    let ind = dd.sI.findIndex(elem =>  elem.aa.code == mid)
+                    let going = dd.sI.splice(0,ind+1)
+                    let onwards = dd.sI.splice(ind-1)
+                    let spred = [ [...going],[...onwards] ]
+                    let roundobj = []
+
+
+                    let paxt = paxTypefn(paxType)
+
+                    if(dd.totalPriceList.length == 1 ){
+                         dd.totalPriceList[0].checked = true
+                         dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
+                    } else if(dd.totalPriceList.length > 1){
+                        dd.totalPriceList[0].checked = true
+                        dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
+                        for(var ii = 1; ii < dd?.totalPriceList?.length ; ii++ ){
+                            dd.totalPriceList[ii].checked = false
+                            dd.totalPriceList[ii].totalamount = calculatetotalamount1(dd.totalPriceList[ii] , paxt)
+                        }
+                    }
+
+                    spred.map(speddata =>{
+                        let dept_obj = {
+                            timing    : moment(speddata[0]?.dt).format("HH:mm"),
+                            timewords : moment(speddata[0]?.dt).format("MMMM DD"),
+                            city      : speddata[0]?.da?.city,
+                            name : speddata[0]?.fD?.aI?.name
+                        }
+
+                        let arrival_obj = {
+                            timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
+                            timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
+                            city      : speddata[speddata.length - 1]?.aa?.city,
+                            name : ''
+                        } 
+
+                        
+
+                        let oobj = {
+                            dept_obj,
+                            arrival_obj,
+                            stopwords : speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` ,
+                            stopinnumber : speddata?.length == 1 ? 0 : speddata?.length - 1 ,
+                            duration : calculateTime(speddata),
+                            flight_code :  speddata.map((indata,ind) => (
+                                `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
+                                )),
+                            
+                            
+                        }
+                        roundobj.push(oobj)
+                    })
+
+                    let outerobj = {
+                        obj : roundobj,
+                        totalPriceList : dd.totalPriceList
+
+                    }
+
+                    return outerobj
+
+
+                })
+
+                resdata.sort(function(a, b) {
+                    var c = a.totalPriceList[0].totalamount;
+                    var d = b.totalPriceList[0].totalamount;
+                    return  c-d 
+                });
+
+
+              //  resdata.sort((a, b) => a?.totalPriceList.totalamount - b?.totalPriceList.totalamount );
+                //let swaldeep = [...resdata]
+                console.log(resdata);
+
+                setListflightround(resdata);
+                setListflightroundfilter(resdata);
+               
+
+            }
+
+
+
+
+
+
+
+
 
                     }).catch(err=>{
                         console.log(err);
@@ -510,6 +713,11 @@ export default function Search({ isVisible }) {
         console.log(newValue)
     };
 
+    const TabChangereturn = (newValue) => {
+        setTabValuereturn(newValue);
+    };
+    
+
 
     /**
      * radio button change event
@@ -520,12 +728,28 @@ export default function Search({ isVisible }) {
 
 
         let target_id = e.target.value
+        
         let unmutate = [...listflight]
         unmutate[parentindex]['totalPriceList'].map(idd => idd.checked = false )
         let plindex = unmutate[parentindex]['totalPriceList'].findIndex( x => x.id == target_id)
         unmutate[parentindex]['totalPriceList'][plindex].checked = true
       //  setListflight(unmutate)
         setListflightfilter(unmutate)
+
+
+    }
+
+    const radiochangeeventreturn = (parentindex ,data , e) => {
+
+
+        let target_id = e.target.value
+        
+        let unmutate = [...listflightreturn]
+        unmutate[parentindex]['totalPriceList'].map(idd => idd.checked = false )
+        let plindex = unmutate[parentindex]['totalPriceList'].findIndex( x => x.id == target_id)
+        unmutate[parentindex]['totalPriceList'][plindex].checked = true
+      //  setListflight(unmutate)
+        setListflightfilterreturn(unmutate)
 
 
     }
@@ -851,6 +1075,7 @@ export default function Search({ isVisible }) {
                                 '&.Mui-checked': {
                                 color: "#f59625",
                                 }, }}/>} label="Round-Trip" />
+
                         </RadioGroup>
                         <div className='bookingStripe_search'>
                             <div className='tripType booking_input'>
@@ -1002,8 +1227,13 @@ export default function Search({ isVisible }) {
                                 </Grid>
                             </Box>
 
+
                             {/* choose flight */}
+
+
+{/* 
                             { tripType == 'roundtrip' && (
+                            // Rounded trip close
                                 <Box className='chooseFlightSect' >
                                     <Grid container spacing={2}>
                                         <Grid item md={6}>
@@ -1023,34 +1253,64 @@ export default function Search({ isVisible }) {
                                                     </Box>
                                                 </Box>
 
-                                                {/* flights */}
 
 
 
-                                                {testArray && testArray.map((data, i) => (
+                                                { listflightroundfilter && listflightroundfilter.map((data, i) => (
                                                     <Box className='flightitem'>
                                                         <RadioGroup className="faretype_radio" 
                                                             value={flightGo}
                                                             onChange={changeFGo} >
                                                             <Box className='flight_brand'>
-                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {'Indigo'}
+                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {  data?.obj[0]?.dept_obj?.name }
                                                             </Box>
 
                                                             <Box className='timeandDetails'>
                                                                 <Box className='from'>
-                                                                    <Typography className='timeText'>  {'07:10'} </Typography>
-                                                                    <Typography className='place'> {'Chandigarh'} </Typography>
+                                                                    <Typography className='timeText'>  { data?.obj[0]?.dept_obj?.timing } </Typography>
+                                                                    <Typography className='place'> { data?.obj[0]?.dept_obj?.city } </Typography>
+                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.obj[0]?.dept_obj?.timewords   } </Typography>
+
                                                                 </Box>
                                                                 <Box className='hours'>
-                                                                    <Typography className='hourstext'>  {'3 h 20 m'} </Typography>
-                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> {'Non Stop'} </Typography>
+                                                                    <Typography className='hourstext'>  { data?.obj[0]?.duration } </Typography>
+                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.obj[0]?.stopwords } </Typography>
                                                                 </Box>
                                                                 <Box className='to'>
-                                                                    <Typography className='timeText'>  {'07:10'} </Typography>
-                                                                    <Typography className='place'> {'Chennai'} </Typography>
+                                                                    <Typography className='timeText'>  { data?.obj[0]?.arrival_obj?.timing } </Typography>
+                                                                    <Typography className='place'> { data?.obj[0]?.arrival_obj?.city } </Typography>
+                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.obj[0]?.arrival_obj?.timewords   } </Typography>
+
                                                                 </Box>
                                                                 <Box className='price'>
-                                                                    <Typography className='priceText'>  {'₹ 5,552'} </Typography>
+
+                                                                    <span>
+                                                                { data?.totalPriceList.map((totaldata, totindex)=>(
+                                                                    <Box className='price' >
+                                                                    <Typography className='priceText'> 
+                                                                       
+                                                                       <div>
+                                                                           <span>
+                                                                           <Radio
+                                                                                checked={totaldata?.checked}
+                                                                                id= {totaldata?.id}
+                                                                                value={totaldata?.id}
+                                                                                onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
+                                                                                name={ "flights-" + totaldata?.id  }
+                                                                                inputProps={{ 'aria-label': 'A' }}
+                                                                            />
+                                                                           </span>
+                                                                        <span>₹</span>
+                                                                       {calculatetotalamount(totaldata)} 
+                                                                       </div>
+                                                                        </Typography>
+                                                                        <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ cabinClassget }</Typography>
+                                                                </Box>
+                                                                    )) }
+                                                                     </span>
+
+
+
                                                                     <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
                                                                 </Box>
                                                                 <Box className='check'>
@@ -1124,21 +1384,6 @@ export default function Search({ isVisible }) {
 
 
                                                                     <TabPanelUnstyled value={1}>
-                                                                       
-                                                                        {/* <table className='fareTable' border="1">
-                                                                            <tr>
-                                                                                <td>Base Fare (1 Adult)	</td>
-                                                                                <td>₹7,250</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>Taxes and Fees (1 Adult)</td>
-                                                                                <td>₹1,462</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>Total Fare (1 Adult)	</td>
-                                                                                <td>₹8,712</td>
-                                                                            </tr>
-                                                                        </table> */}
                                                                     </TabPanelUnstyled>
                                                                     <TabPanelUnstyled value={2}>
                                                                         Cancellation
@@ -1176,8 +1421,7 @@ export default function Search({ isVisible }) {
                                                     </Box>
                                                 </Box>
 
-                                                {/* flights */}
-                                                {testArray && testArray.map((data, i) => (
+                                                {listflightroundfilter && listflightroundfilter.map((data, i) => (
                                                     <Box className='flightitem'>
                                                         <RadioGroup  className="faretype_radio" 
                                                             value={flightReturn}
@@ -1188,120 +1432,45 @@ export default function Search({ isVisible }) {
 
                                                             <Box className='timeandDetails'>
                                                                 <Box className='from'>
-                                                                    <Typography className='timeText'>  {'07:10'} </Typography>
-                                                                    <Typography className='place'> {'Chandigarh'} </Typography>
+                                                                    <Typography className='timeText'>  { data?.obj[1]?.dept_obj?.timing  } </Typography>
+                                                                    <Typography className='place'> { data?.obj[1]?.dept_obj?.city  } </Typography>
                                                                 </Box>
                                                                 <Box className='hours'>
-                                                                    <Typography className='hourstext'>  {'3 h 20 m'} </Typography>
+                                                                    <Typography className='hourstext'>  { data?.obj[1]?.duration  } </Typography>
                                                                     <Typography className='placeType' style={{ textAlign : 'center' }}> {'Non Stop'} </Typography>
                                                                 </Box>
                                                                 <Box className='to'>
-                                                                    <Typography className='timeText'>  {'07:10'} </Typography>
-                                                                    <Typography className='place'> {'Chennai'} </Typography>
+                                                                    <Typography className='timeText'>  { data?.obj[1]?.dept_obj?.timing  } </Typography>
+                                                                    <Typography className='place'> { data?.obj[1]?.dept_obj?.timing  } </Typography>
                                                                 </Box>
                                                                 <Box className='price'>
                                                                     <Typography className='priceText'>  {'₹ 5,552'} </Typography>
-                                                                    <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i+10)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
                                                                 </Box>
-                                                                <Box className='check'>
-                                                                    <FormControlLabel value={'flight_return' + (i + 1)} control={<Radio sx={{ 
-                                                                        '& .MuiSvgIcon-root': {
-                                                                        fontSize: 20,
-                                                                        },
-                                                                        color: "#99999a",
-                                                                        '&.Mui-checked': {
-                                                                        color: "#f59625",
-                                                                        }, }}/>}  />
-                                                                </Box>
+                                                                
                                                             </Box>  
                                                             
                                                         </RadioGroup>
 
-                                                        { tabValue == i+10 && (
-                                                            <Box className='flight_detail_bot tab'>
-                                                                <TabsUnstyled defaultValue={0}>
-                                                                    <TabsListUnstyled className='tablistnav'>
-                                                                        <TabUnstyled>Flight Details</TabUnstyled>
-                                                                        <TabUnstyled>Fare</TabUnstyled>
-                                                                        <TabUnstyled>Cancellation</TabUnstyled>
-                                                                        <TabUnstyled>Rules</TabUnstyled>
-                                                                    </TabsListUnstyled>
-                                                                    <TabPanelUnstyled value={0}>
-                                                                        <Box className='flightlist flightfrom'>
-                                                                            <Box className='brand'>
-                                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'Indigo'}</Typography>
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'IN-334'}</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place first'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                            <Box className='hours'>
-                                                                                <Typography className='hrs' style={{fontSize : 12, fontWeight : '500'}}>4h 40m</Typography>
-                                                                                <Typography style={{ fontSize : 10 }}>Duration</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                        </Box>
-                                                                        <Box className='hrsnext_flight'> 2h 35m Layover </Box>
-                                                                        <Box className='flightlist flightfrom'>
-                                                                            <Box className='brand'>
-                                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'Indigo'}</Typography>
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'IN-334'}</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place first'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                            <Box className='hours'>
-                                                                                <Typography className='hrs' style={{fontSize : 12, fontWeight : '500'}}>4h 40m</Typography>
-                                                                                <Typography style={{ fontSize : 10 }}>Duration</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                        </Box>
-                                                                    </TabPanelUnstyled>
-                                                                    <TabPanelUnstyled value={1}>
-                                                                        <table className='fareTable' border="1">
-                                                                            <tr>
-                                                                                <td>Base Fare (1 Adult)	</td>
-                                                                                <td>₹7,250</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>Taxes and Fees (1 Adult)</td>
-                                                                                <td>₹1,462</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>Total Fare (1 Adult)	</td>
-                                                                                <td>₹8,712</td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </TabPanelUnstyled>
-                                                                    <TabPanelUnstyled value={2}>
-                                                                        Cancellation
-                                                                    </TabPanelUnstyled>
-                                                                    <TabPanelUnstyled value={3}>
-                                                                        Rules
-                                                                    </TabPanelUnstyled>
-                                                                </TabsUnstyled>
-                                                            </Box>
-                                                        )}
                                                     </Box>
                                                 ))}
                                             </Box>
                                         </Grid>
                                     </Grid>
                                 </Box>
-                            ) || (
+
+  // Rounded trip close
+
+                            )} 
+
+                             */}
+
+                 { displaystatus == 'oneway' && (
                                 <Box className='chooseFlightSect' >
+                                    
                                     <Grid container spacing={2}>
-                                        <Grid item md={12}>
+
+
+                                        <Grid item md={ splitType ? 6 : 12 }>
                                             <Box className='cardBox'>
                                                 <Box style={{ padding : 10, borderBottomWidth : 1, borderColor : '#ccc', borderBottomStyle : 'solid' }}>
                                                     <Typography className='journerydate journey_start'  component={'div'}>
@@ -1321,9 +1490,9 @@ export default function Search({ isVisible }) {
                                                 {/* flights  one way  */}
                                                 {listflightfilter && listflightfilter.map((data, i) => (
                                                     <Box className='flightitem'>
-                                                        <RadioGroup className="faretype_radio" 
+                                                        {/* <RadioGroup className="faretype_radio" 
                                                             value={flightGo}
-                                                            onChange={changeFGo} >
+                                                            onChange={changeFGo} > */}
                                                             <Box className='flight_brand'>
                                                                 <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> { data?.dept_obj?.name ?? '-' }
                                                             </Box>
@@ -1382,7 +1551,7 @@ export default function Search({ isVisible }) {
                                                                 </span>
 
                                                                   
-                                                                <Box className='check'>
+                                                                {/* <Box className='check'>
                                                                     <FormControlLabel value={'flight_go' + (i + 1)} control={<Radio sx={{ 
                                                                         '& .MuiSvgIcon-root': {
                                                                         fontSize: 20,
@@ -1391,9 +1560,9 @@ export default function Search({ isVisible }) {
                                                                         '&.Mui-checked': {
                                                                         color: "#f59625",
                                                                         }, }}/>}  />
-                                                                </Box>
+                                                                </Box> */}
                                                             </Box>  
-                                                        </RadioGroup>
+                                                        {/* </RadioGroup> */}
 
                                                         { tabValue == i && (
                                                             <Box className='flight_detail_bot tab'>
@@ -1430,9 +1599,153 @@ export default function Search({ isVisible }) {
                                                 ))}
                                             </Box>
                                         </Grid> 
+
+
+                            { splitType && 
+                            
+                            <Grid item md={6}>
+                            <Box className='cardBox'>
+                                <Box style={{ padding : 10, borderBottomWidth : 1, borderColor : '#ccc', borderBottomStyle : 'solid' }}>
+                                    <Typography className='journerydate journey_start'  component={'div'}>
+                                        {'Chandigarh'} 
+                                        <ArrowRightAlt className='miniArrow dark'/>
+                                        {'Chennai '} {'Wed, 15 Jun'}
+                                    </Typography>
+                                    <Box component={'div'} className='tablehead'>
+                                        <Typography onClick={ () => sorting("depature")}>Departure</Typography>
+                                        <Typography onClick={ () => sorting("duration")}>Duration</Typography>
+                                        <Typography onClick={ () => sorting("arrival")}>Arrival</Typography>
+                                        <Typography onClick={ () => sorting("price")}>Price</Typography>
+                                        <Typography className='check'></Typography>
+                                    </Box>
+                                </Box>
+
+                                {/* flights  one way  */}
+                                {listflightfilterreturn && listflightfilterreturn.map((data, i) => (
+                                    <Box className='flightitem'>
+                                        {/* <RadioGroup className="faretype_radio" 
+                                            value={flightGo}
+                                            onChange={changeFGo} > */}
+                                            <Box className='flight_brand'>
+                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> { data?.dept_obj?.name ?? '-' }
+                                            </Box>
+
+                                            <span style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}} >
+                                               { data?.flight_code}
+                                            </span>
+
+
+                                            <Box className='timeandDetails'>
+                                                <Box className='from'>
+                                                    <Typography className='timeText'>  { data?.dept_obj?.timing   } </Typography>
+                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.dept_obj?.timewords   } </Typography>
+
+                                                    <Typography className='place'> { data?.dept_obj?.city   } </Typography>
+                                                </Box>
+                                                <Box className='hours'>
+                                                    <Typography className='hourstext'>  { data?.duration } </Typography>
+                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.stopwords } </Typography>
+                                                </Box>
+                                                <Box className='to'>
+                                                    <Typography className='timeText'>  {data?.arrival_obj?.timing   } </Typography>
+                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.arrival_obj?.timewords   } </Typography>
+
+                                                    <Typography className='place'> { data?.arrival_obj?.city } </Typography>
+                                                </Box>
+                                                
+                                                <span>
+                                                { data?.totalPriceList.map((totaldata, totindex)=>(
+                                                    <Box className='price' >
+                                                    <Typography className='priceText'> 
+                                                       
+                                                       <div>
+                                                           <span>
+                                                           <Radio
+                                                                checked={totaldata?.checked}
+                                                                id= {totaldata?.id}
+                                                                value={totaldata?.id}
+                                                                onChange = { (e)=> radiochangeeventreturn(i,data?.totalPriceList , e) }
+                                                                name={ "flights-" + totaldata?.id  }
+                                                                inputProps={{ 'aria-label': 'A' }}
+                                                            />
+                                                           </span>
+                                                        <span>₹</span>
+                                                       {calculatetotalamount(totaldata)} 
+                                                       </div>
+                                                        </Typography>
+                                                        <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ cabinClassget }</Typography>
+                                                </Box>
+                                                    )) }
+                                                     </span>
+
+                                                <span>
+                                                <Typography className={`fdetails ${tabValuereturn }`} onClick={() => tabValuereturn == i ? TabChangereturn('-1') : TabChangereturn(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
+                                                <Typography sx={{ fontSize:11,color:'#213bd4'}}>seats left {data?.totalPriceList[0]?.fd?.ADULT?.sR}</Typography>
+                                                </span>
+
+                                                  
+                                                {/* <Box className='check'>
+                                                    <FormControlLabel value={'flight_go' + (i + 1)} control={<Radio sx={{ 
+                                                        '& .MuiSvgIcon-root': {
+                                                        fontSize: 20,
+                                                        },
+                                                        color: "#99999a",
+                                                        '&.Mui-checked': {
+                                                        color: "#f59625",
+                                                        }, }}/>}  />
+                                                </Box> */}
+                                            </Box>  
+                                        {/* </RadioGroup> */}
+
+                                        { tabValuereturn == i && (
+                                            <Box className='flight_detail_bot tab'>
+                                                <TabsUnstyled defaultValue={0}>
+                                                    <TabsListUnstyled className='tablistnav'>
+                                                        <TabUnstyled>Flight Details</TabUnstyled>
+                                                        <TabUnstyled>Fare</TabUnstyled>
+                                                        <TabUnstyled>Cancellation</TabUnstyled>
+                                                        <TabUnstyled>Rules</TabUnstyled>
+                                                    </TabsListUnstyled>
+                                                    <TabPanelUnstyled value={0}>
+
+                                                        <Flightdetails _flightdetail={data?.flightdetails}/>
+
+                                                    </TabPanelUnstyled>
+                                                    <TabPanelUnstyled value={1}>
+
+                                                    <Faredetails value={data?.totalPriceList} _paxtypeget={paxtypeget}/>
+
+
+
+
+                                                    </TabPanelUnstyled>
+                                                    <TabPanelUnstyled value={2}>
+                                                        Cancellation
+                                                    </TabPanelUnstyled>
+                                                    <TabPanelUnstyled value={3}>
+                                                        Rules
+                                                    </TabPanelUnstyled>
+                                                </TabsUnstyled>
+                                            </Box>
+                                        )}
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Grid> 
+                            
+                            
+                            
+                            }
+
+
+
                                     </Grid>
                                 </Box>
                             )}
+
+
+
+
                         </Grid>
                     </Grid>
                 </Box>

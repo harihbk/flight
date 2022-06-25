@@ -311,7 +311,7 @@ export default function Home(props) {
   if(obj?.trip == "oneway"){
      queryparams = `?itinerary=${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarfrom).format("YYYY/MM/DD") }&tripType=${obj?.trip}&paxType=A-${travellerclass.ADULT}_C-${travellerclass.CHILD}_I-${travellerclass.INFANT}&cabinClass=${obj.travelclass}&location=${obj?.from?.city}-${obj?.to?.city}`
   } else {
-    queryparams = `?itinerary=${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarfrom).format("YYYY/MM/DD") }_${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarto).format("YYYY/MM/DD") }&tripType=${obj?.trip}&paxType=A-${travellerclass.ADULT}_C-${travellerclass.CHILD}_I-${travellerclass.INFANT}&cabinClass=${obj.travelclass}&location=${obj?.from?.city}-${obj?.to?.city}`
+    queryparams = `?itinerary=${obj?.from?.iata}-${obj?.to?.iata}-${ moment(obj.calendarfrom).format("YYYY/MM/DD") }_${obj?.to?.iata}-${obj?.from?.iata}-${ moment(obj.calendarto).format("YYYY/MM/DD") }&tripType=${obj?.trip}&paxType=A-${travellerclass.ADULT}_C-${travellerclass.CHILD}_I-${travellerclass.INFANT}&cabinClass=${obj.travelclass}&location=${obj?.from?.city}-${obj?.to?.city}`
   }
 
   if(stopchecked){
