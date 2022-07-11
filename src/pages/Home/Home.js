@@ -171,6 +171,8 @@ export default function Home(props) {
     const url = process.env.REACT_APP_FROM_SEARCH;
     const getstorage = JSON.parse(localStorage.getItem(url));
 
+    setToopen(true)
+
 
     if (getstorage !=null && getstorage.length > 4 ){
 
@@ -215,6 +217,9 @@ export default function Home(props) {
   const clickto = (e) => {
 
 
+    setCalendarOpen(true) // this will open calendar
+
+
     const url = process.env.REACT_APP_TO_SEARCH;
     const getstorage = JSON.parse(localStorage.getItem(url));
     if (getstorage !=null && getstorage.length > 4 ){
@@ -257,7 +262,11 @@ export default function Home(props) {
   
   const handleChangeTo = (e) => {
 
+    
+
     setSearchTerm(e.target.value);
+
+
     const Search = e.target.value;
     if(isEmpty(Search)){
       setSuggestionto(false) // show suggestion
@@ -555,7 +564,7 @@ export default function Home(props) {
                               </IconButton>
                               <InputBase
                                 sx={{ ml: 1, flex: 1 }}
-                                placeholder="From"
+                                placeholder="To"
                                 inputProps={{ 'aria-label': 'From' }}
                                  onChange={debouncedResultsto}
                               />
