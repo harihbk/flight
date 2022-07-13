@@ -361,8 +361,9 @@
     max-width: 75px;
 }
 .flightitem .timeandDetails .hours {
-    max-width: 65px;
+    max-width: 100px;
     text-align: center;
+    width: 100%;
 }
 .flightitem .timeandDetails .to {
     max-width: 75px;

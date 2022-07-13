@@ -586,132 +586,61 @@ export default function Search({ isVisible }) {
                 let gg = [...dataround];
                // console.log(gg);
 
-                    function arrayEquals(a, b) {
-                    return Array.isArray(a) &&
-                        Array.isArray(b) &&
-                        a.length === b.length &&
-                        a.every((val, index) => val === b[index]);
-                }
-
+                   
 
             let paxt = paxTypefn(paxType)
             let amtstring = [];
             let ddarray = [];
              let hh =   gg.map(dd => {
 
-                    let mid = CreatesearchObject.searchQuery.routeInfos[0].toCityOrAirport.code;
-                    let ind = dd.sI.findIndex(elem =>  elem.aa.code == mid)
-                  // console.log(dd.sI.slice(0,ind+1))
-
-
-
-                    // let going = dd.sI.slice(0,ind+1)
-                    // let onwards = dd.sI.slice(ind+1)
+                   
                     let going = dd.sI.filter(d => d.isRs == false)
-                    let onwards = dd.sI.filter(d => d.isRs == true)
-                    let spred = [ [...going],[...onwards] ]
+                    let _return = dd.sI.filter(d => d.isRs == true)
+                    let spred = [ [...going],[..._return] ]
 
 
                 let drv ;
                 let flightdetails = []
-                 //   if(ind !="-1"){
-
-
                     // flightdetails
                         let gd =  helpers.comboflightsdetail(going)
                         flightdetails.push(gd)
-                        let ad =  helpers.comboflightsdetail(onwards)
+                        let ad =  helpers.comboflightsdetail(_return)
                         flightdetails.push(ad)
                     // flightdetails
+                    let parentgoing = helpers.combofrmt(going , true)
+                    let parentreturn = helpers.combofrmt(_return , true)
 
 
+                    drv = [parentgoing , parentreturn]
 
+                        //  drv =  spred.map(speddata =>{
+                        //     let dept_obj = {
+                        //         timing    : moment(speddata[0]?.dt).format("HH:mm"),
+                        //         timewords : moment(speddata[0]?.dt).format("MMMM DD"),
+                        //         city      : speddata[0]?.da?.city,
+                        //         name : speddata[0]?.fD?.aI?.name,
+                        //         datetime : moment(speddata[0]?.dt).format("MM-DD-YYYY HH:mm")
 
-                         drv =  spred.map(speddata =>{
-                            let dept_obj = {
-                                timing    : moment(speddata[0]?.dt).format("HH:mm"),
-                                timewords : moment(speddata[0]?.dt).format("MMMM DD"),
-                                city      : speddata[0]?.da?.city,
-                                name : speddata[0]?.fD?.aI?.name,
-                                datetime : moment(speddata[0]?.dt).format("MM-DD-YYYY HH:mm")
-
-                            }
+                        //     }
     
     
-                            let arrival_obj = {
-                                timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
-                                timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
-                                city      : speddata[speddata.length - 1]?.aa?.city,
-                                name : '',
-                                datetime : moment(speddata[speddata.length - 1]?.at).format("MM-DD-YYYY HH:mm"),
+                        //     let arrival_obj = {
+                        //         timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
+                        //         timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
+                        //         city      : speddata[speddata.length - 1]?.aa?.city,
+                        //         name : '',
+                        //         datetime : moment(speddata[speddata.length - 1]?.at).format("MM-DD-YYYY HH:mm"),
+                        //     }
 
-                            }
-
-                            let stopwords = speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` 
-                            let stopinnumber = speddata?.length == 1 ? 0 : speddata?.length - 1 
-                            let duration = calculateTime(speddata)
-                            let flight_code =  speddata.map((indata,ind) => (
-                                `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
-                                ))
-
-                            return { dept_obj , arrival_obj , stopwords ,stopinnumber , duration , flight_code}
-
-                        }); 
-                    // }else {
-
-                    //     let minn = dd.sI[0]?.aa?.code;
-                    //     let indd = dd.sI.findIndex(elem =>  elem.da.code == minn)
-
-                    //     let goingg = dd.sI.slice(0,indd+1)
-                    //     let onwardss = dd.sI.slice(indd+1)
-                    //     let spredd = [ [...goingg],[...onwardss] ]
-
-
-                    //     // flight details
-                    //         let gd =  helpers.comboflightsdetail(goingg)
-                    //         flightdetails.push(gd)
-                    //         let ad =  helpers.comboflightsdetail(onwardss)
-                    //         flightdetails.push(ad)
-                    //     // flight details
-
-
-
-
-                    //     drv =  spredd.map(speddata =>{
-                    //         let dept_obj = {
-                    //             timing    : moment(speddata[0]?.dt).format("HH:mm"),
-                    //             timewords : moment(speddata[0]?.dt).format("MMMM DD"),
-                    //             city      : speddata[0]?.da?.city,
-                    //             name : speddata[0]?.fD?.aI?.name,
-                    //             datetime : moment(speddata[0]?.dt).format("MM-DD-YYYY HH:mm")
-                    //         }
-    
-    
-                    //         let arrival_obj = {
-                    //             timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
-                    //             timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
-                    //             city      : speddata[speddata.length - 1]?.aa?.city,
-                    //             datetime : moment(speddata[speddata.length - 1]?.at).format("MM-DD-YYYY HH:mm"),
-
-                    //             name : ''
-                    //         }
-
-
-                    //         let stopwords = speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` 
-                    //         let stopinnumber = speddata?.length == 1 ? 0 : speddata?.length - 1 
-                    //         let duration = calculateTime(speddata)
-                    //         let flight_code =  speddata.map((indata,ind) => (
-                    //             `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
-                    //             ))
-
-
-                    //         return { dept_obj , arrival_obj , stopwords ,stopinnumber , duration , flight_code}
-
-
-                    //         }); 
-                    // }
-                      
-
+                        //     let stopwords = speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` 
+                        //     let stopinnumber = speddata?.length == 1 ? 0 : speddata?.length - 1 
+                        //     let duration = calculateTime(speddata)
+                        //     let flight_code =  speddata.map((indata,ind) => (
+                        //         `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
+                        //         ))
+                        //     return { dept_obj , arrival_obj , stopwords ,stopinnumber , duration , flight_code}
+                        // }); 
+                   
 
                 let amt = [];
                 if(dd.totalPriceList.length == 1 ){
@@ -730,25 +659,56 @@ export default function Search({ isVisible }) {
                     }
                     dd.amt = amt
                     dd.child = []
-                    dd.child.push(dd)
-                   dd.frmt = drv;
+                   
 
-         
+                   // dd.child.push(dd)
+                    dd.frmt = drv;
+
+                    let obj = [];
+
 
                   
-                             dd.flightdetails = flightdetails;
+                    dd.flightdetails = flightdetails;
 
                     
 
                    if(!amtstring.includes(amt.toString())){
                         amtstring.push(amt.toString())
-                      
+
+                        dd.going = {}
+                        dd.returns = {}
+
+                        let _going = {};
+                        let gg = helpers.combofrmt(going , true)
+                        _going[gg?.grouptime] = gg
+                        dd.going = _going
+
+
+                        let _returnss = {};
+                        let rr = helpers.combofrmt(_return , true)
+                        _returnss[rr?.grouptime] = rr
+                        dd.returns = _returnss
+
                         ddarray.push(dd)   
                    } else {
                     let index = ddarray.findIndex(x => x.amt.toString() == amt.toString());
                     if(index){
-                        delete dd.child
-                        ddarray[index].child.push(dd)
+                       // delete dd.child
+                        let _going = {};
+                        let ggs = helpers.combofrmt(going , false)
+                        _going[ggs?.grouptime] = ggs
+                        _going = {...ddarray[index].going , ..._going}
+                        ddarray[index].going = _going
+              
+
+
+                   // return grouping
+                    let _retu = {};
+                    let rrs = helpers.combofrmt(_return , false)
+                    _retu[rrs?.grouptime] = rrs
+                    _retu = {...ddarray[index].returns , ..._retu}
+                    ddarray[index].returns = _retu
+
                     }
 
                    }

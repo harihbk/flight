@@ -35,7 +35,6 @@ import moment from 'moment'
 
 
         comboflightsdetail: function(param1){
-            console.log(param1);
             let flightdetails =param1.map((flightdetail , flightdetailindex)=>{
                 return {
                     flightname : flightdetail?.oB?.name,
@@ -61,7 +60,58 @@ import moment from 'moment'
             return flightdetails
     
         },
-        helper3: function(param1, param2){
+         calculateTime : function( data ) {
+            const minduration = data?.reduce((acc,curr)=> acc+curr.duration ,0 )
+            var hours = 0;
+            var minutes = 0;
+    
+            for (let index = 0; index < data?.length - 1; index++) {
+                let at = data[index]?.at  
+                let dt = data[index+1]?.dt
+                var startTime=moment(at , "YYYY-MM-DD hh:mm");
+                var endTime=moment(dt, "YYYY-MM-DD hh:mm");
+    
+                var duration = moment.duration(endTime.diff(startTime));
+                hours += parseInt(duration.asHours()) ;
+                minutes += parseInt(duration.asMinutes()) % 60;
+            }
+            var tot =  minduration+hours * 60 + minutes; 
+            return `${Math.floor(tot / 60)}h ${tot % 60}m`
+        },
+        combofrmt: function(speddata , bool){
+
+                let dept_obj = {
+                    timing    : moment(speddata[0]?.dt).format("HH:mm"),
+                    timewords : moment(speddata[0]?.dt).format("MMMM DD"),
+                    city      : speddata[0]?.da?.city,
+                    name : speddata[0]?.fD?.aI?.name,
+                    datetime : moment(speddata[0]?.dt).format("MM-DD-YYYY HH:mm"),
+                    dateString : moment(speddata[0]?.dt).unix()
+                }
+
+
+                let arrival_obj = {
+                    timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
+                    timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
+                    city      : speddata[speddata.length - 1]?.aa?.city,
+                    name : '',
+                    datetime : moment(speddata[speddata.length - 1]?.at).format("MM-DD-YYYY HH:mm"),
+                    dateString : moment(speddata[speddata.length - 1]?.at).unix()
+
+                }
+
+                let grouptime = `${moment(speddata[0]?.dt).unix()}${moment(speddata[speddata.length - 1]?.at).unix()}`
+                let checked = bool
+                let stopwords = speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` 
+                let stopinnumber = speddata?.length == 1 ? 0 : speddata?.length - 1 
+               // let duration = this.twodatetimediff(speddata[0].dt , speddata[speddata.length - 1]?.at )
+                let duration = this.calculateTime( speddata )
+
+                let flight_code =  speddata.map((indata,ind) => (
+                    `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
+                    ))
+                return { dept_obj , arrival_obj , stopwords ,stopinnumber  , flight_code , grouptime , duration , checked}
+
     
         }
     }
