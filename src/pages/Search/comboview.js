@@ -63,37 +63,185 @@ function Flightdetails(rest){
      
 }
 
-function Flightoptions({_data}){
-    console.log(_data);
+function Faredetails(...rest){
+    let { value , _paxtypeget } = rest[0] || ''
+    let data = value.filter( x => x.checked == true )[0]
+    
+
+    const calculatetotalamount = (data,index)=>{    
+        let tot = 0;
+        if(data?.fd?.ADULT){
+            tot += data?.fd?.ADULT?.fC?.TF * _paxtypeget.ADULT
+        }
+        if(data?.fd?.CHILD){
+            tot += data?.fd?.CHILD?.fC?.TF * _paxtypeget.CHILD
+        }
+        if(data?.fd?.INFANT){
+            tot += data?.fd?.INFANT?.fC?.TF * _paxtypeget.INFANT
+        }
+        return tot.toLocaleString(undefined,{minimumFractionDigits: 2})
+    }
+
 
     return (
         <>
-     { _data && Object.keys(_data)?.map((key ,index) => (
+         <Grid container direction="row" justifyContent="space-between">
+             <Grid item> 
+             <Typography variant="h6">TYPE</Typography>
+             </Grid>
+             <Grid item> 
+             <Typography variant="h6">Fare</Typography>
+             </Grid>
+             <Grid item> 
+             <Typography variant="h6">Total</Typography>
+             </Grid>
+         </Grid>
+
+
+        { data?.fd?.ADULT && 
+            <>
+                <Grid container direction="row" justifyContent="space-between" >
+                    <Typography >Fare Details for Adult (CB: L)</Typography>
+                    </Grid>
+                    <Grid container direction="row" justifyContent="space-between" mb={2}>
+                        <Grid item> 
+                        <Typography>Base Price</Typography>
+                        <Typography> Taxes and fees</Typography>
+                        </Grid>
+
+                        <Grid item> 
+                        <Typography >₹ {data?.fd?.ADULT?.fC?.BF} x {_paxtypeget.ADULT}</Typography>
+                        <Typography >₹ {data?.fd?.ADULT?.fC?.TAF} x {_paxtypeget.ADULT}</Typography>
+                        </Grid>
+
+                        <Grid item> 
+                        <Typography >₹{data?.fd?.ADULT?.fC?.BF * _paxtypeget.ADULT}</Typography>
+                        <Typography >₹{data?.fd?.ADULT?.fC?.TAF * _paxtypeget.ADULT}</Typography>
+                        </Grid>
+                </Grid>
+            </>
+        }
+
+
+        { data?.fd?.CHILD && 
+                    <>
+                        <Grid container direction="row" justifyContent="space-between" >
+                            <Typography >Fare Details for Child (CB: L)</Typography>
+                            </Grid>
+                            <Grid container direction="row" justifyContent="space-between" mb={2}>
+                                <Grid item> 
+                                <Typography>Base Price</Typography>
+                                <Typography> Taxes and fees</Typography>
+                                </Grid>
+
+                                <Grid item> 
+                                <Typography >₹ {data?.fd?.CHILD?.fC?.BF} x {_paxtypeget.CHILD}</Typography>
+                                <Typography >₹ {data?.fd?.CHILD?.fC?.TAF} x {_paxtypeget.CHILD}</Typography>
+                                </Grid>
+
+                                <Grid item> 
+                                <Typography >₹{data?.fd?.CHILD?.fC?.BF * _paxtypeget.CHILD}</Typography>
+                                <Typography >₹{data?.fd?.CHILD?.fC?.TAF * _paxtypeget.CHILD}</Typography>
+                                </Grid>
+                        </Grid>
+                    </>
+                }
+        
+
+        { data?.fd?.INFANT && 
+                    <>
+                        <Grid container direction="row" justifyContent="space-between" >
+                            <Typography >Fare Details for Infant (CB: L)</Typography>
+                            </Grid>
+                            <Grid container direction="row" justifyContent="space-between" mb={2}>
+                                <Grid item> 
+                                <Typography>Base Price</Typography>
+                                <Typography> Taxes and fees</Typography>
+                                </Grid>
+
+                                <Grid item> 
+                                <Typography >₹ {data?.fd?.INFANT?.fC?.BF} x {_paxtypeget.INFANT}</Typography>
+                                <Typography >₹ {data?.fd?.INFANT?.fC?.TAF} x {_paxtypeget.INFANT}</Typography>
+                                </Grid>
+
+                                <Grid item> 
+                                <Typography >₹{data?.fd?.INFANT?.fC?.BF * _paxtypeget.INFANT}</Typography>
+                                <Typography >₹{data?.fd?.INFANT?.fC?.TAF * _paxtypeget.INFANT}</Typography>
+                                </Grid>
+                        </Grid>
+                    </>
+                }
+
+
+         <Divider/>
+         <Grid container direction="row" justifyContent="space-between">
+             <Grid item>Total</Grid>
+             <Grid item>₹{calculatetotalamount(data)} </Grid>
+         </Grid>
+
+
+
+        </>
+    )
+
+}
+
+function Flightoptions({_data , _fromparent , _type}){
+
+
+
+    const [ datas , setDatas ] = React.useState(_data)
+
+    const updatechecked = (e,key) => {
+         Object.keys(datas).map(data => datas[data].checked = false)
+         let obj = {}
+         obj[key] = { ...datas[key] ,  ...{checked : true} };
+         setDatas(prevstate => ({
+             ...prevstate,
+             ...obj 
+         }) )
+
+         setTimeout(()=>{
+            _fromparent(key , _type)
+         },100)
+
+        // datas[key].checked = true
+    }
+
+    return (
+        <>
+     { datas && Object.keys(datas)?.map((key ,index) => (
                 <>
                   
                 <Box className='timeandDetails' sx={{ display :'flex' , width:'100%'}}>
 
                         <Box className="firstdiv" sx={{ width:'80%'}}>
                             <Box sx={{ display : 'flex' , justifyContent : 'space-between'}}>
+                                    <Box > 
+                                      <Typography>  {  datas[key]?.dept_obj?.name } </Typography>
+                                      <Typography style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}}>  {  datas[key]?.flight_code } </Typography>
+
+                                    </Box>
                                     <Box className='from'>
                                     <input
                                     type="radio"
-                                    name = {`${index}${_data[key]?.dept_obj?.city}`}
-                                    checked={_data[key]?.checked}  
+                                    name = {`${index}${datas[key]?.dept_obj?.city}`}
+                                    checked={datas[key]?.checked}  
+                                    onChange = { (e) => updatechecked(e,key) }
                                   />
-                                        <Typography className='timeText'>  { _data[key]?.dept_obj?.timing } </Typography> 
-                                         <Typography className='place'> {  _data[key]?.dept_obj?.city } </Typography>
-                                        <Typography variant="h6" sx={{ fontSize : 11}}>  {  _data[key].dept_obj?.timewords   } </Typography>
+                                        <Typography className='timeText'>  { datas[key]?.dept_obj?.timing } </Typography> 
+                                         <Typography className='place'> {  datas[key]?.dept_obj?.city } </Typography>
+                                        <Typography variant="h6" sx={{ fontSize : 11}}>  {  datas[key].dept_obj?.timewords   } </Typography>
 
                                     </Box>
                                     <Box className='hours'>
-                                        <Typography className="hourstext"> { _data[key].duration }</Typography>
-                                        <Typography className='placeType' style={{ textAlign : 'center' }}> {  _data[key]?.stopwords } </Typography>
+                                        <Typography className="hourstext"> { datas[key].duration }</Typography>
+                                        <Typography className='placeType' style={{ textAlign : 'center' }}> {  datas[key]?.stopwords } </Typography>
                                     </Box>
                                     <Box className='to'>
-                                        <Typography className='timeText'>  {  _data[key]?.arrival_obj?.timing } </Typography>
-                                        <Typography className='place'> {  _data[key]?.arrival_obj?.city } </Typography>
-                                        <Typography variant="h6" sx={{ fontSize : 11}}>  {  _data[key]?.arrival_obj?.timewords   } </Typography>
+                                        <Typography className='timeText'>  {  datas[key]?.arrival_obj?.timing } </Typography>
+                                        <Typography className='place'> {  datas[key]?.arrival_obj?.city } </Typography>
+                                        <Typography variant="h6" sx={{ fontSize : 11}}>  {  datas[key]?.arrival_obj?.timewords   } </Typography>
                                     </Box>
                             </Box>
 
@@ -116,12 +264,12 @@ function Flightoptions({_data}){
 export default function Comboview(props) {
     const { _listflightroundfilter , _cabinClassget  , _paxtypeget} = props
 
-    console.log(_listflightroundfilter);
 
-   // console.log(_listflightroundfilter);
     const [tabValue, setTabValue] = React.useState();  
+    const [tabValueoption, setTabValueoption] = React.useState(); 
+    const [ listflightroundfilter , setListflightroundfilter]  = React.useState(_listflightroundfilter)
+    const [ storeindex , setStoreindex ] = React.useState(false);
 
-    const [tabValueoption, setTabValueoption] = React.useState();  
 
 
 
@@ -134,6 +282,52 @@ export default function Comboview(props) {
         setTabValueoption(newValue);
         setTabValue(-1)
     };
+
+    React.useEffect(()=>{
+        setListflightroundfilter(listflightroundfilter)
+    },[storeindex])
+
+
+    function fromparent(key,type){
+
+       let currentobj =  listflightroundfilter
+
+       // on change radio button for more option
+       let innerobj = currentobj[tabValueoption][type]
+       Object.keys(innerobj).map(r=>innerobj[r].checked = false )
+
+       currentobj[tabValueoption][type][key].checked = true
+
+      
+
+      let index = (type == "going") ? 0 : 1
+      currentobj[tabValueoption].frmt[index] = innerobj[key]
+       
+      let fd =  currentobj[tabValueoption][type][key].flightdetail
+      currentobj[tabValueoption]['flightdetails'][index] = fd
+
+        setStoreindex(!storeindex)
+        setListflightroundfilter(currentobj)
+
+      
+        // on change radio button for more option
+    }
+
+    const radiochangeevent = (i,totalPriceList , e) => {
+
+        console.log(i);
+        console.log(totalPriceList);
+        let id = e.target.value;
+
+        let currentobj =  listflightroundfilter
+        currentobj[i].totalPriceList.map(d=>d.checked=false)
+        currentobj[i].totalPriceList.filter(e=>e.id == id)[0].checked= true
+        console.log(currentobj[i].totalPriceList);
+        setListflightroundfilter(currentobj)
+        setStoreindex(!storeindex)
+
+
+    }
 
 
   return (
@@ -159,7 +353,7 @@ export default function Comboview(props) {
                                                 </Box>
 
      
-                                         { _listflightroundfilter && _listflightroundfilter.map((data, i) => (
+                                         { listflightroundfilter && listflightroundfilter.map((data, i) => (
                                                     <Box className='flightitem'>
                                                         {/* <RadioGroup className="faretype_radio" 
                                                              > */}
@@ -241,7 +435,7 @@ export default function Comboview(props) {
                                                                                         checked={totaldata?.checked}
                                                                                         id= {totaldata?.id}
                                                                                         value={totaldata?.id}
-                                                                                    // onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
+                                                                                        onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
                                                                                         name={ "flights-" + totaldata?.id  }
                                                                                         inputProps={{ 'aria-label': 'A' }}
                                                                                     />
@@ -258,9 +452,8 @@ export default function Comboview(props) {
 
 
                                                                             <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
-                                                                     
                                                                         {
-                                                                           Object.keys(data?.going).length > 1 ||  Object.keys(data?.returns).length > 1 &&
+                                                                           (Object.keys(data?.going).length > 1 ||  Object.keys(data?.returns).length > 1) &&
                                                                            <Typography className={`fdetails ${tabValueoption }`} onClick={() => tabValueoption == i ? TabChangeoption('-1') : TabChangeoption(i)}> {'More Option'} <KeyboardArrowDown className='down' /></Typography>
                                                                         }
 
@@ -276,11 +469,10 @@ export default function Comboview(props) {
                                                         {  tabValueoption == i && (
                                                             <Box className='flight_detail_bot tab'>
                                                                 <Grid container>
-                                                                    <Grid md={6} item > <Flightoptions _data = { data?.going }/> </Grid>
-                                                                    <Grid item  md={6}> <Flightoptions _data = { data?.returns }/> </Grid>
+                                                                    <Grid item md={6}> <Flightoptions _data = { data?.going }  _fromparent={fromparent} _type="going"/> </Grid>
+                                                                    <Grid item md={6}> <Flightoptions _data = { data?.returns } _fromparent={fromparent} _type="returns"/> </Grid>
                                                                 </Grid>
                                                             </Box>
-
                                                         )}
 
 
@@ -310,6 +502,7 @@ export default function Comboview(props) {
 
 
                                                                     <TabPanelUnstyled value={1}>
+                                                                        <Faredetails value={data?.totalPriceList} _paxtypeget={_paxtypeget}/>
                                                                     </TabPanelUnstyled>
                                                                     <TabPanelUnstyled value={2}>
                                                                         Cancellation

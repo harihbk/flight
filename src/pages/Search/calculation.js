@@ -78,7 +78,7 @@ import moment from 'moment'
             var tot =  minduration+hours * 60 + minutes; 
             return `${Math.floor(tot / 60)}h ${tot % 60}m`
         },
-        combofrmt: function(speddata , bool){
+        combofrmt: function(speddata ){
 
                 let dept_obj = {
                     timing    : moment(speddata[0]?.dt).format("HH:mm"),
@@ -99,18 +99,17 @@ import moment from 'moment'
                     dateString : moment(speddata[speddata.length - 1]?.at).unix()
 
                 }
-
+                let checked = false
                 let grouptime = `${moment(speddata[0]?.dt).unix()}${moment(speddata[speddata.length - 1]?.at).unix()}`
-                let checked = bool
                 let stopwords = speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` 
                 let stopinnumber = speddata?.length == 1 ? 0 : speddata?.length - 1 
                // let duration = this.twodatetimediff(speddata[0].dt , speddata[speddata.length - 1]?.at )
                 let duration = this.calculateTime( speddata )
-
+                let flightdetail = []
                 let flight_code =  speddata.map((indata,ind) => (
-                    `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
+                    `${indata?.fD?.aI?.code}-${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
                     ))
-                return { dept_obj , arrival_obj , stopwords ,stopinnumber  , flight_code , grouptime , duration , checked}
+                return { dept_obj , arrival_obj , stopwords ,stopinnumber  , flight_code , grouptime , duration ,flightdetail,checked }
 
     
         }

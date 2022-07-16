@@ -74,7 +74,7 @@ function Faredetails(...rest){
     let data = value.filter( x => x.checked == true )[0]
     
 
-    const calculatetotalamount = (data,index)=>{
+    const calculatetotalamount = (data,index)=>{    
         let tot = 0;
         if(data?.fd?.ADULT){
             tot += data?.fd?.ADULT?.fC?.TF * _paxtypeget.ADULT
@@ -364,7 +364,6 @@ export default function Search({ isVisible }) {
 
                         
                             let dataround = res?.data?.searchResult?.tripInfos?.COMBO
-                            let ggt = [...dataround];
 
                 if(datadup){
 
@@ -607,40 +606,11 @@ export default function Search({ isVisible }) {
                         let ad =  helpers.comboflightsdetail(_return)
                         flightdetails.push(ad)
                     // flightdetails
-                    let parentgoing = helpers.combofrmt(going , true)
-                    let parentreturn = helpers.combofrmt(_return , true)
+                    let parentgoing = helpers.combofrmt(going )
+                    let parentreturn = helpers.combofrmt(_return )
 
 
-                    drv = [parentgoing , parentreturn]
-
-                        //  drv =  spred.map(speddata =>{
-                        //     let dept_obj = {
-                        //         timing    : moment(speddata[0]?.dt).format("HH:mm"),
-                        //         timewords : moment(speddata[0]?.dt).format("MMMM DD"),
-                        //         city      : speddata[0]?.da?.city,
-                        //         name : speddata[0]?.fD?.aI?.name,
-                        //         datetime : moment(speddata[0]?.dt).format("MM-DD-YYYY HH:mm")
-
-                        //     }
-    
-    
-                        //     let arrival_obj = {
-                        //         timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
-                        //         timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
-                        //         city      : speddata[speddata.length - 1]?.aa?.city,
-                        //         name : '',
-                        //         datetime : moment(speddata[speddata.length - 1]?.at).format("MM-DD-YYYY HH:mm"),
-                        //     }
-
-                        //     let stopwords = speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` 
-                        //     let stopinnumber = speddata?.length == 1 ? 0 : speddata?.length - 1 
-                        //     let duration = calculateTime(speddata)
-                        //     let flight_code =  speddata.map((indata,ind) => (
-                        //         `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
-                        //         ))
-                        //     return { dept_obj , arrival_obj , stopwords ,stopinnumber , duration , flight_code}
-                        // }); 
-                   
+                    drv = [parentgoing , parentreturn] // parent going return
 
                 let amt = [];
                 if(dd.totalPriceList.length == 1 ){
@@ -663,10 +633,6 @@ export default function Search({ isVisible }) {
 
                    // dd.child.push(dd)
                     dd.frmt = drv;
-
-                    let obj = [];
-
-
                   
                     dd.flightdetails = flightdetails;
 
@@ -677,37 +643,63 @@ export default function Search({ isVisible }) {
 
                         dd.going = {}
                         dd.returns = {}
+                        dd.childd = []
 
                         let _going = {};
-                        let gg = helpers.combofrmt(going , true)
+                        let gg = helpers.combofrmt(going)
                         _going[gg?.grouptime] = gg
+                        _going[gg?.grouptime].flightdetail = helpers.comboflightsdetail(going)
+
                         dd.going = _going
 
 
                         let _returnss = {};
-                        let rr = helpers.combofrmt(_return , true)
+                        let rr = helpers.combofrmt(_return)
+
                         _returnss[rr?.grouptime] = rr
+                        _returnss[rr?.grouptime].flightdetail = helpers.comboflightsdetail(_return)
+
                         dd.returns = _returnss
 
                         ddarray.push(dd)   
                    } else {
                     let index = ddarray.findIndex(x => x.amt.toString() == amt.toString());
+
+
                     if(index){
+
+                      let childfd = []
                        // delete dd.child
                         let _going = {};
-                        let ggs = helpers.combofrmt(going , false)
+                        let ggs = helpers.combofrmt(going )
                         _going[ggs?.grouptime] = ggs
                         _going = {...ddarray[index].going , ..._going}
+            
+                        let parentfrmt = ddarray[index].frmt[0].grouptime
+                        _going[parentfrmt].checked = true
+            
+                    
+                       _going[ggs?.grouptime].flightdetail = helpers.comboflightsdetail(going)
                         ddarray[index].going = _going
-              
 
 
-                   // return grouping
-                    let _retu = {};
-                    let rrs = helpers.combofrmt(_return , false)
-                    _retu[rrs?.grouptime] = rrs
-                    _retu = {...ddarray[index].returns , ..._retu}
+
+                    // return grouping
+                        let _retu = {};
+                        let rrs = helpers.combofrmt(_return)
+                        _retu[rrs?.grouptime] = rrs
+                        _retu = {...ddarray[index].returns , ..._retu}
+
+                        let parentfrmt2 = ddarray[index].frmt[1].grouptime
+                        _retu[parentfrmt2].checked = true
+                       //console.log(dd.frmt[1]);
+                    
+                        
+                    _retu[rrs?.grouptime].flightdetail = helpers.comboflightsdetail(_return)
                     ddarray[index].returns = _retu
+
+                           
+
 
                     }
 
@@ -716,6 +708,7 @@ export default function Search({ isVisible }) {
 
                     return dd
                })
+
 
 
                console.log(ddarray);
@@ -728,127 +721,6 @@ export default function Search({ isVisible }) {
 
 
 
-
-
-
-
-
-            //     setTripType('roundtrip')
-
-            //     let arr = []
-
-
-            // let resdata =   gg.map((dd,index)=>{
-
-            //         let mid = CreatesearchObject.searchQuery.routeInfos[0].toCityOrAirport.code;
-            //         let ind = dd.sI.findIndex(elem =>  elem.aa.code == mid)
-            //         let going = dd.sI.splice(0,ind+1)
-            //         let onwards = dd.sI.splice(ind)
-            //         let spred = [ [...going],[...onwards] ]
-            //         let roundobj = []
-
-
-            //         let paxt = paxTypefn(paxType)
-
-            //         if(dd.totalPriceList.length == 1 ){
-            //              dd.totalPriceList[0].checked = true
-            //              dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
-            //         } else if(dd.totalPriceList.length > 1){
-            //             dd.totalPriceList[0].checked = true
-            //             dd.totalPriceList[0].totalamount = calculatetotalamount1(dd.totalPriceList[0] , paxt)
-            //             for(var ii = 1; ii < dd?.totalPriceList?.length ; ii++ ){
-            //                 dd.totalPriceList[ii].checked = false
-            //                 dd.totalPriceList[ii].totalamount = calculatetotalamount1(dd.totalPriceList[ii] , paxt)
-            //             }
-            //         }
-
-
-
-            //         spred.map(speddata =>{
-            //             let dept_obj = {
-            //                 timing    : moment(speddata[0]?.dt).format("HH:mm"),
-            //                 timewords : moment(speddata[0]?.dt).format("MMMM DD"),
-            //                 city      : speddata[0]?.da?.city,
-            //                 name : speddata[0]?.fD?.aI?.name
-            //             }
-
-
-            //             let arrival_obj = {
-            //                 timing    : moment(speddata[speddata.length - 1]?.at).format("HH:mm"),
-            //                 timewords : moment(speddata[speddata.length - 1]?.at).format("MMMM DD") ,
-            //                 city      : speddata[speddata.length - 1]?.aa?.city,
-            //                 name : ''
-            //             } 
-
-                      
-
-                    
-                        
-            //             let oobj = {
-            //                 dept_obj,
-            //                 arrival_obj,
-            //                 stopwords : speddata?.length == 1 ? 'Non Stop' : `${speddata?.length - 1 } Stop(s)` ,
-            //                 stopinnumber : speddata?.length == 1 ? 0 : speddata?.length - 1 ,
-            //                 duration : calculateTime(speddata),
-            //                 flight_code :  speddata.map((indata,ind) => (
-            //                     `${indata?.fD?.aI?.code} ${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
-            //                     )),     
-            //             }
-            //             roundobj.push(oobj)
-            //         })
-
-
-
-
-            //         let outerobj = {
-            //             obj : roundobj,
-            //             prices : dd.totalPriceList.map(r=>r.totalamount),
-            //             totalPriceList : dd.totalPriceList
-            //         }
-            //         return outerobj
-            //     })
-
-
-            //     function arrayEquals(a, b) {
-            //         return Array.isArray(a) &&
-            //             Array.isArray(b) &&
-            //             a.length === b.length &&
-            //             a.every((val, index) => val === b[index]);
-            //     }
-
-            //     let ghh = [...resdata]
-
-            //     var ggg= []
-            //     var obj1 = []
-            //     for ( var i = 0 ; i<ghh.length ; i++){
-            //         if(!(ggg.toString()).includes((ghh[i].prices.toString()))){
-            //             ggg.push(ghh[i].prices)
-            //             obj1.push(ghh[i])
-            //         } 
-            //     }
-
-
-                
-            //    obj1.map((d,i) => {
-            //     d.child = ghh.filter((a,b) => a.prices.toString() === d.prices.toString() )
-            //     })
-
-               
-               
-
-               
-
-            //     resdata.sort(function(a, b) {
-            //         var c = a.totalPriceList[0].totalamount;
-            //         var d = b.totalPriceList[0].totalamount;
-            //         return  c-d 
-            //     });
-
-            
-
-
-            //     setListflightround(resdata);
-            //     setListflightroundfilter(resdata);
                
 
             }
