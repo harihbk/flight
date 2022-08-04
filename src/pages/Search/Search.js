@@ -18,6 +18,9 @@ import { debounce } from "lodash"
 import Searchmenuskeleton from "./Searchmenuskeleton"
 import Comboview from './comboview';
 import helpers from "./calculation" 
+import { comboService } from "./store/comborxjs"
+import { ComboStopService , CombodeparturearrivalService } from "./store/comborxjs"
+import * as _ from 'lodash';
 
 
 function Flightdetails(rest){
@@ -225,6 +228,9 @@ export default function Search({ isVisible }) {
    const [ splitType , setSplitType ] = React.useState(false)
    const [ displaystatus , setDisplaystatus] = React.useState("");
 
+
+   // flight response status
+   const [flightstatus , setFlightstatus] = React.useState("")
    
 
     //fare detail click by radio button
@@ -349,15 +355,19 @@ export default function Search({ isVisible }) {
                            let _return = res?.data?.searchResult?.tripInfos?.RETURN
 
                            if(datadup && _return){
+
                             setTripType('roundtrip')
                             setDisplaystatus("oneway")
                             setSplitType(true)
+                            setFlightstatus('onwardreturn') // status flight api response
                            }
 
                            if(datadup && _return == undefined){
                             setTripType('oneway')
                             setDisplaystatus("oneway")
                             setSplitType(false)
+                            setFlightstatus('onward') // status flight api response
+
                            }
 
                            
@@ -366,6 +376,7 @@ export default function Search({ isVisible }) {
                             let dataround = res?.data?.searchResult?.tripInfos?.COMBO
 
                 if(datadup){
+
 
                         var modifieddata = datadup.map((dd , i )=>{
                             let dept_obj = {
@@ -580,6 +591,7 @@ export default function Search({ isVisible }) {
          //   round trip
 
             if( dataround ) {
+                setFlightstatus('combo') // status flight api response
 
 
                 let gg = [...dataround];
@@ -593,6 +605,7 @@ export default function Search({ isVisible }) {
              let hh =   gg.map(dd => {
 
                    
+
                     let going = dd.sI.filter(d => d.isRs == false)
                     let _return = dd.sI.filter(d => d.isRs == true)
                     let spred = [ [...going],[..._return] ]
@@ -629,41 +642,54 @@ export default function Search({ isVisible }) {
                     }
                     dd.amt = amt
                     dd.child = []
-                   
+                    
+                    var ddepcloen = _.cloneDeep(dd)
+
 
                    // dd.child.push(dd)
                     dd.frmt = drv;
                   
                     dd.flightdetails = flightdetails;
 
-                    
 
                    if(!amtstring.includes(amt.toString())){
                         amtstring.push(amt.toString())
 
+                        dd.allfare = []
+                        dd.allfare.push(ddepcloen)
+
                         dd.going = {}
                         dd.returns = {}
-                        dd.childd = []
+                       
 
                         let _going = {};
                         let gg = helpers.combofrmt(going)
+
+                        
                         _going[gg?.grouptime] = gg
                         _going[gg?.grouptime].flightdetail = helpers.comboflightsdetail(going)
+                      //  _going[gg?.grouptime].pricelist = dd.totalPriceList
 
                         dd.going = _going
 
 
                         let _returnss = {};
                         let rr = helpers.combofrmt(_return)
-
                         _returnss[rr?.grouptime] = rr
                         _returnss[rr?.grouptime].flightdetail = helpers.comboflightsdetail(_return)
+                      //  _returnss[rr?.grouptime].pricelist = dd.totalPriceList
 
                         dd.returns = _returnss
 
                         ddarray.push(dd)   
                    } else {
                     let index = ddarray.findIndex(x => x.amt.toString() == amt.toString());
+
+
+                    ddarray[index].allfare.push(ddepcloen)
+                   // console.log();
+                   // dd[0]
+                    //dd[index].allfare.push(dd)
 
 
                     if(index){
@@ -676,9 +702,9 @@ export default function Search({ isVisible }) {
                         _going = {...ddarray[index].going , ..._going}
             
                         let parentfrmt = ddarray[index].frmt[0].grouptime
+
                         _going[parentfrmt].checked = true
-            
-                    
+                        _going[ggs?.grouptime].pricelist = dd.totalPriceList
                        _going[ggs?.grouptime].flightdetail = helpers.comboflightsdetail(going)
                         ddarray[index].going = _going
 
@@ -694,13 +720,9 @@ export default function Search({ isVisible }) {
                         _retu[parentfrmt2].checked = true
                        //console.log(dd.frmt[1]);
                     
-                        
+                    _retu[rrs?.grouptime].pricelist = dd.totalPriceList
                     _retu[rrs?.grouptime].flightdetail = helpers.comboflightsdetail(_return)
                     ddarray[index].returns = _retu
-
-                           
-
-
                     }
 
                    }
@@ -709,11 +731,19 @@ export default function Search({ isVisible }) {
                     return dd
                })
 
-
+               ddarray.sort(function(a, b) {
+                var c = a.totalPriceList[0].totalamount;
+                var d = b.totalPriceList[0].totalamount;
+                return  c-d 
+            });
 
                console.log(ddarray);
                console.log(amtstring)
-               
+
+               let swaldeep = [...ddarray]
+
+               setMinmaxprice(Math.ceil(swaldeep[swaldeep.length - 1].totalPriceList[0].totalamount)) //  pass min max price to popular search
+
 
                 setListflightround(ddarray);
                 setListflightroundfilter(ddarray);
@@ -730,11 +760,10 @@ export default function Search({ isVisible }) {
                     }).catch(err=>{
                         console.log(err);
                     })
-                
-        
-
-
     },[])
+
+
+    
 
 
     const navigatePage = (name) => {
@@ -948,153 +977,132 @@ export default function Search({ isVisible }) {
      * **/
 
 
-    const filter = (imm , ranger , depature , arrival) => {
+    const filter = (imm , ranger , depature , arrival , _flightstatus , stopmulticity , departurearrival ) => {
 
-        const unmutatee = [...listflight]
+        var unmutatee;
         var filterrecord;
 
-        if(imm.length > 0 ) {
-            var sorted = imm.sort((a,b)=>a-b)
-            let arrOfNum = sorted.map(str => {
-                return Number(str);
-              });
-            var len =  arrOfNum.length; 
-            if(len > 2){
-                 arrOfNum.slice(-1)
+        if(_flightstatus != 'combo'){
+            unmutatee = [...listflight]
+            // imm -- onward journey
+    
+            // no of stops
+            filterrecord = helpers.noofstop_filter(imm,unmutatee)
+            // ranger
+            if( ranger[1].label) {
+            filterrecord = helpers.ranger(ranger,filterrecord)
             }
-                
-            filterrecord =  unmutatee.filter(function(t){
-                if(arrOfNum.includes(t.stopinnumber)){
-                    return true
-                }
-                if(len > 2){
-                    return t.stopinnumber >=2
-                }
-                return false;
-            });
+    
+            if(depature.length > 0){
+                //depature
+                filterrecord = helpers.depaturefilter(depature,filterrecord)
+            }
+    
+            if(arrival.length > 0){
+                filterrecord = helpers.arrivalfilter(arrival,filterrecord)           
+            }
+
+            setListflightfilter(filterrecord)
+
+
         } else {
-            filterrecord = unmutatee
-        }
+
+       //   var  _filterrecord = [...listflightround]
+         // var _filterrecord = JSON.parse(JSON.stringify(listflightround))
+        var  _filterrecord = _.cloneDeep(listflightround);
 
 
-        if( ranger[1].label) {
-            let pr = ranger[1].label;          
-            let ft = pr.replace(/\,/g,'')
-            filterrecord = filterrecord.filter(t=>  t.totalPriceList[0].totalamount <= ft);
-        } else {
-            filterrecord = unmutatee
-        }
+
+            if( ranger[1]?.label) {
+                _filterrecord =  helpers.ranger(ranger , _filterrecord)
+            }
+
+            
+                let indx = stopmulticity.status ? 0 : 1
+                let getstops = stopmulticity.status ? stopmulticity.stops_onwards : stopmulticity.stops_return
+                getstops = getstops.map(Number);
+                if(getstops.length > 0 ){
+                    _filterrecord = helpers.combofilter(indx,getstops , _filterrecord)
+                }
 
 
-        if(depature.length > 0){
 
-            var format = 'HH:mm';
+                if(departurearrival){
 
-            // var time = moment() gives you current time. no format required.
-           
+                    if(departurearrival.depaturefrom.length > 0){
+                        _filterrecord = helpers.combodepaturefrom(departurearrival.depaturefrom, _filterrecord)
+                    }
+                    console.log(departurearrival);
 
-            filterrecord =  filterrecord.filter(function(t){
+                    if(departurearrival.arrivalfrom.length > 0){
+                        _filterrecord = helpers.comboarrivalfrom(departurearrival.arrivalfrom, _filterrecord)                        
+                    }
+                    if(departurearrival.departureto.length > 0){
+                        _filterrecord = helpers.combodepatureto(departurearrival.departureto, _filterrecord)  
+                    }
+
+                    if(departurearrival.arrivalto.length > 0){
+                        console.log(departurearrival.arrivalto);
+                        _filterrecord = [...helpers.comboarrivalto(departurearrival.arrivalto, _filterrecord)  ]
+                    }
+                }
                 
-                if(depature.includes(1)){
-                    let time = moment(t?.dept_obj?.timing,format),
-                    beforeTime = moment('00:59', format),
-                    afterTime = moment('00:06', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
+                console.log(_filterrecord);
 
-                if(depature.includes(2)){
-                    let time = moment(t?.dept_obj?.timing,format),
-                    beforeTime = moment('06:00', format),
-                    afterTime = moment('12:59', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
+            
+               
+         
 
-                if(depature.includes(3)){
-                    let time = moment(t?.dept_obj?.timing,format),
-                    beforeTime = moment('12:00', format),
-                    afterTime = moment('18:59', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
+            if(_filterrecord.length > 0){
+              //  setListflightroundfilter(filterrecord)
+                comboService.comborevent(_filterrecord)
 
-                if(depature.includes(4)){
-                    let time = moment(t?.dept_obj?.timing,format),
-                    beforeTime = moment('18:00', format),
-                    afterTime = moment('00:59', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
+            }
 
 
-            })
 
 
+            
         }
-
-
-
-
-        if(arrival.length > 0){
-
-            var format = 'HH:mm';
-
-            // var time = moment() gives you current time. no format required.
-           
-
-            filterrecord =  filterrecord.filter(function(t){
-                
-                if(arrival.includes(1)){
-                    let time = moment(t?.arrival_obj?.timing,format),
-                    beforeTime = moment('00:59', format),
-                    afterTime = moment('00:06', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
-
-                if(arrival.includes(2)){
-                    let time = moment(t?.arrival_obj?.timing,format),
-                    beforeTime = moment('06:00', format),
-                    afterTime = moment('12:59', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
-
-                if(arrival.includes(3)){
-                    let time = moment(t?.arrival_obj?.timing,format),
-                    beforeTime = moment('12:00', format),
-                    afterTime = moment('18:59', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
-
-                if(arrival.includes(4)){
-                    let time = moment(t?.arrival_obj?.timing,format),
-                    beforeTime = moment('18:00', format),
-                    afterTime = moment('00:59', format);
-                    if (time.isBetween(beforeTime, afterTime)) {
-                        return true
-                      }
-                }
-
-
-            })
-
-
-        }
-
-       setListflightfilter(filterrecord)
-
-
     }
+
+
+
+
+    
+    // Observable from sidemenu comborxjs
+//    React.useEffect(()=>{ 
+//     const unsubscribe = ComboStopService.combostopObservable().subscribe(res=>{
+//        let roundfilter = [...listflightround] 
+//        console.log(res);
+//        console.log(roundfilter);
+//        let indx = res.status ? 0 : 1
+//        let getstops = res.status ? res.stops_onwards : res.stops_return
+//        getstops = getstops.map(Number);
+//        if(getstops.length>0){
+//         // let filterrec = roundfilter.filter(a => getstops.includes(a.frmt[indx].stopinnumber))
+//         // console.log(filterrec);
+//         // setListflightroundfilter(filterrec)
+//         // comboService.comborevent(filterrec) // trigger combo view
+//        }
+        
+
+//     })
+//     return ()=>unsubscribe.unsubscribe();
+//    },[]) 
+
+//    React.useEffect(()=>{ 
+//     const unsubscribe = CombodeparturearrivalService.combostopObservable().subscribe(res=>{
+//         console.log(res);
+//     })
+//     return ()=>unsubscribe.unsubscribe();
+//    },[]) 
+
+       // Observable from sidemenu comborxjs
+
+    
+
+
 
 
  
@@ -1216,10 +1224,9 @@ export default function Search({ isVisible }) {
                     <Grid container className='booking_row' spacing={3}> 
                         <Grid item md={3} className="filter_col"> 
 
-                        
                             {/* <Sidemenu _minmaxprice={minmaxprice}  _sliderfun={sliderfun} _stopfilterpn={stopfilterpn}/> */}
                            { 
-                            listflight.length > 0 ?  <Sidemenu _minmaxprice={minmaxprice} _filter={filter} _airline={airline}/> : <Searchmenuskeleton />
+                            (flightstatus == 'onward' || flightstatus=='onwardreturn' || flightstatus == 'combo') ?  <Sidemenu _minmaxprice={minmaxprice} _filter={filter} _airline={airline} _flightstatus={flightstatus}/> : <Searchmenuskeleton />
                            }
                            
 
@@ -1281,238 +1288,7 @@ export default function Search({ isVisible }) {
                             {/* choose flight */}
 
 
-{/* 
-                            { tripType == 'roundtrip' && (
-                            // Rounded trip close
-                                <Box className='chooseFlightSect' >
-                                    <Grid container spacing={2}>
-                                        <Grid item md={6}>
-                                            <Box className='cardBox'>
-                                                <Box style={{ padding : 10, borderBottomWidth : 1, borderColor : '#ccc', borderBottomStyle : 'solid' }}>
-                                                    <Typography className='journerydate journey_start'  component={'div'}>
-                                                        {'Chandigarh'} 
-                                                        <ArrowRightAlt className='miniArrow dark'/>
-                                                        {'Chennai '} {'Wed, 15 Jun'}
-                                                    </Typography>
-                                                    <Box component={'div'} className='tablehead'>
-                                                        <Typography>Departure</Typography>
-                                                        <Typography>Duration</Typography>
-                                                        <Typography>Arrival</Typography>
-                                                        <Typography>Price</Typography>
-                                                        <Typography className='check'></Typography>
-                                                    </Box>
-                                                </Box>
 
-
-
-
-                                                { listflightroundfilter && listflightroundfilter.map((data, i) => (
-                                                    <Box className='flightitem'>
-                                                        <RadioGroup className="faretype_radio" 
-                                                            value={flightGo}
-                                                            onChange={changeFGo} >
-                                                            <Box className='flight_brand'>
-                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {  data?.obj[0]?.dept_obj?.name }
-                                                            </Box>
-
-                                                            <Box className='timeandDetails'>
-                                                                <Box className='from'>
-                                                                    <Typography className='timeText'>  { data?.obj[0]?.dept_obj?.timing } </Typography>
-                                                                    <Typography className='place'> { data?.obj[0]?.dept_obj?.city } </Typography>
-                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.obj[0]?.dept_obj?.timewords   } </Typography>
-
-                                                                </Box>
-                                                                <Box className='hours'>
-                                                                    <Typography className='hourstext'>  { data?.obj[0]?.duration } </Typography>
-                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.obj[0]?.stopwords } </Typography>
-                                                                </Box>
-                                                                <Box className='to'>
-                                                                    <Typography className='timeText'>  { data?.obj[0]?.arrival_obj?.timing } </Typography>
-                                                                    <Typography className='place'> { data?.obj[0]?.arrival_obj?.city } </Typography>
-                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.obj[0]?.arrival_obj?.timewords   } </Typography>
-
-                                                                </Box>
-                                                                <Box className='price'>
-
-                                                                    <span>
-                                                                { data?.totalPriceList.map((totaldata, totindex)=>(
-                                                                    <Box className='price' >
-                                                                    <Typography className='priceText'> 
-                                                                       
-                                                                       <div>
-                                                                           <span>
-                                                                           <Radio
-                                                                                checked={totaldata?.checked}
-                                                                                id= {totaldata?.id}
-                                                                                value={totaldata?.id}
-                                                                                onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
-                                                                                name={ "flights-" + totaldata?.id  }
-                                                                                inputProps={{ 'aria-label': 'A' }}
-                                                                            />
-                                                                           </span>
-                                                                        <span>₹</span>
-                                                                       {calculatetotalamount(totaldata)} 
-                                                                       </div>
-                                                                        </Typography>
-                                                                        <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ cabinClassget }</Typography>
-                                                                </Box>
-                                                                    )) }
-                                                                     </span>
-
-
-
-                                                                    <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
-                                                                </Box>
-                                                                <Box className='check'>
-                                                                    <FormControlLabel value={'flight_go' + (i + 1)} control={<Radio sx={{ 
-                                                                        '& .MuiSvgIcon-root': {
-                                                                        fontSize: 20,
-                                                                        },
-                                                                        color: "#99999a",
-                                                                        '&.Mui-checked': {
-                                                                        color: "#f59625",
-                                                                        }, }}/>}  />
-                                                                </Box>
-                                                            </Box>  
-                                                        </RadioGroup>
-
-                                                        { tabValue == i && (
-                                                            <Box className='flight_detail_bot tab'>
-                                                                <TabsUnstyled defaultValue={0}>
-                                                                    <TabsListUnstyled className='tablistnav'>
-                                                                        <TabUnstyled>Flight Details</TabUnstyled>
-                                                                        <TabUnstyled>Fare</TabUnstyled>
-                                                                        <TabUnstyled>Cancellation</TabUnstyled>
-                                                                        <TabUnstyled>Rules</TabUnstyled>
-                                                                    </TabsListUnstyled>
-
-
-                                                                    <TabPanelUnstyled value={0}>
-                                                                        <Box className='flightlist flightfrom'>
-                                                                            <Box className='brand'>
-                                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'Indigo'}</Typography>
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'IN-334'}</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place first'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                            <Box className='hours'>
-                                                                                <Typography className='hrs' style={{fontSize : 12, fontWeight : '500'}}>4h 40m</Typography>
-                                                                                <Typography style={{ fontSize : 10 }}>Duration</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                        </Box>
-                                                                        <Box className='hrsnext_flight'> 2h 35m Layover </Box>
-                                                                        <Box className='flightlist flightfrom'>
-                                                                            <Box className='brand'>
-                                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'Indigo'}</Typography>
-                                                                                <Typography style={{ fontSize : 10, fontWeight : '500' }}> {'IN-334'}</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place first'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                            <Box className='hours'>
-                                                                                <Typography className='hrs' style={{fontSize : 12, fontWeight : '500'}}>4h 40m</Typography>
-                                                                                <Typography style={{ fontSize : 10 }}>Duration</Typography>
-                                                                            </Box>
-                                                                            <Box className='time_place'>
-                                                                                <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>4:00</Typography>
-                                                                                <Typography>Netaji Subhash Chandra Bose International Airport</Typography>
-                                                                            </Box>
-                                                                        </Box>
-                                                                    </TabPanelUnstyled>
-
-
-
-
-
-                                                                    <TabPanelUnstyled value={1}>
-                                                                    </TabPanelUnstyled>
-                                                                    <TabPanelUnstyled value={2}>
-                                                                        Cancellation
-                                                                    </TabPanelUnstyled>
-                                                                    <TabPanelUnstyled value={3}>
-                                                                        Rules
-                                                                    </TabPanelUnstyled>
-                                                                </TabsUnstyled>
-                                                            </Box>
-                                                        )}
-                                                    </Box>
-                                                ))}
-
-
-
-
-
-                                            </Box>
-                                        </Grid>
-                                        <Grid item md={6}>
-                                            <Box className='cardBox'>
-                                                <Box style={{ padding : 10, borderBottomWidth : 1, borderColor : '#ccc', borderBottomStyle : 'solid' }}>
-                                                    <Typography className='journerydate journey_start' component={'div'}>
-                                                        {'Chennai '}
-                                                        <ArrowRightAlt className='miniArrow dark'/>
-                                                        {'Chandigarh'} 
-                                                        {'Wed, 15 Jun'}
-                                                    </Typography>
-                                                    <Box component={'div'} className='tablehead'>
-                                                        <Typography>Departure</Typography>
-                                                        <Typography>Duration</Typography>
-                                                        <Typography>Arrival</Typography>
-                                                        <Typography>Price</Typography>
-                                                        <Typography className='check'></Typography>
-                                                    </Box>
-                                                </Box>
-
-                                                {listflightroundfilter && listflightroundfilter.map((data, i) => (
-                                                    <Box className='flightitem'>
-                                                        <RadioGroup  className="faretype_radio" 
-                                                            value={flightReturn}
-                                                            onChange={changeFReturn} >
-                                                            <Box className='flight_brand'>
-                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {'Indigo'}
-                                                            </Box>
-
-                                                            <Box className='timeandDetails'>
-                                                                <Box className='from'>
-                                                                    <Typography className='timeText'>  { data?.obj[1]?.dept_obj?.timing  } </Typography>
-                                                                    <Typography className='place'> { data?.obj[1]?.dept_obj?.city  } </Typography>
-                                                                </Box>
-                                                                <Box className='hours'>
-                                                                    <Typography className='hourstext'>  { data?.obj[1]?.duration  } </Typography>
-                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> {'Non Stop'} </Typography>
-                                                                </Box>
-                                                                <Box className='to'>
-                                                                    <Typography className='timeText'>  { data?.obj[1]?.dept_obj?.timing  } </Typography>
-                                                                    <Typography className='place'> { data?.obj[1]?.dept_obj?.timing  } </Typography>
-                                                                </Box>
-                                                                <Box className='price'>
-                                                                    <Typography className='priceText'>  {'₹ 5,552'} </Typography>
-                                                                </Box>
-                                                                
-                                                            </Box>  
-                                                            
-                                                        </RadioGroup>
-
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-
-  // Rounded trip close
-
-                            )} 
-
-                             */}
 
                 {/* combo view */}
 
@@ -1521,6 +1297,9 @@ export default function Search({ isVisible }) {
                    }
 
                 {/* combo view */}
+
+
+
 
                  { displaystatus == 'oneway' && (
                                 <Box className='chooseFlightSect' >

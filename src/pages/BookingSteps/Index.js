@@ -8,7 +8,12 @@ import Step2 from './Step2';
 import Step3 from './Step3';
 import Step4 from './Step4';
 import { styled } from '@mui/material/styles';
-
+import { useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom'
+import axios from 'axios';  
+import { useNavigate } from 'react-router-dom';
+import { TripinfoProvider } from "./context"
+import { Outlet } from 'react-router-dom';
 import './style.css';
 
 const steps = [
@@ -32,6 +37,46 @@ const steps = [
 export default function Index() { 
     const [activeStep, setActiveStep] = React.useState(0);
     const [completed, setCompleted] = React.useState({});
+    const [ tripInfos , setTripInfos ] = React.useState([])
+    const [ totalPriceInfo , setTotalPriceInfo ] = React.useState({})
+
+    const navigate = useNavigate();
+
+    const { id }  = useParams();
+    var value
+
+    // React.useEffect(()=>{
+
+    //   const headers = {
+    //     'Content-Type': 'application/json',
+    //     'apikey': process.env.REACT_APP_FLIGHT_API_KEY
+    //     }
+
+    //   let pricd = {
+    //       priceIds : [id]
+    //   }
+       
+    //   axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/review`,pricd , { headers : headers}  ).then(res=>{
+    //     console.log(res?.data);
+    //     if(res?.data?.status?.httpStatus == 200) {
+    //       let info = res?.data
+    //        value = info;
+    //       setTripInfos(info)
+    //      // setTotalPriceInfo(res?.data?.totalPriceInfo)
+    //     }
+        
+    //   }).catch(e=>{
+
+    //     console.log(e?.response?.data?.status?.success);
+    //     if(e?.response?.data?.status?.success == false){
+         
+    //         alert(e?.response?.data?.errors[0]?.message)
+    //       //  navigate(-1)
+         
+    //     }
+    //   })
+
+    // },[id])
   
     const totalSteps = () => {
         return steps.length;
@@ -57,6 +102,14 @@ export default function Index() {
               steps.findIndex((step, i) => !(i in completed))
             : activeStep + 1;
         setActiveStep(newActiveStep);
+
+
+      // if(newActiveStep == 1){
+      //   navigate("/booking/passangers");
+
+      // }
+
+
       };
     
       const handleBack = () => {
@@ -100,10 +153,25 @@ export default function Index() {
         }),
     }));
 
+    // const getStep = (step) => {
+    //   switch (step) {
+    //     case 0:
+    //       return <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Step1 /> </TripinfoProvider> }</>;
+    //     case 1:
+    //       return <Step2 stepObj={steps[step]}/>;
+    //     case 2:
+    //       return <Step2 stepObj={steps[step]} activestatus={activeStep}/>;
+    //     case 3:
+    //       return <Step4 />;
+    //     default:
+    //       return "Completed";
+    //   }
+    // }
+
     const getStep = (step) => {
       switch (step) {
         case 0:
-          return <Step1 />;
+          // return <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Step1/> </TripinfoProvider> }</>;
         case 1:
           return <Step2 stepObj={steps[step]}/>;
         case 2:
@@ -193,9 +261,9 @@ export default function Index() {
                             </Box>
                         </Box>
                     </Grid>
-                    <Grid item md={3}>
-                        <BookingSidemenu />
-                    </Grid>
+                    {/* <Grid item md={3}>
+                    <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <BookingSidemenu /> </TripinfoProvider> }</>
+                    </Grid> */}
                 </Grid>
             </Container>
         </Box>

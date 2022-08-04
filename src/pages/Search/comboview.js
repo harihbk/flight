@@ -6,9 +6,12 @@ import { TabPanelUnstyled,TabsUnstyled, TabUnstyled, TabsListUnstyled } from '@m
 import { KeyboardArrowDown } from '@mui/icons-material';
 import { ArrowRightAlt } from '@mui/icons-material';
 import  helpers  from "./calculation"
-
+import { comboService } from "./store/comborxjs"
+import moment from 'moment'
+import axios from 'axios';  
 
 function Flightdetails(rest){
+
 
     return (
          <>
@@ -208,10 +211,13 @@ function Flightoptions({_data , _fromparent , _type}){
         // datas[key].checked = true
     }
 
+
+
     return (
         <>
      { datas && Object.keys(datas)?.map((key ,index) => (
                 <>
+                  {/* <>{datas[key]?.pricelist[0]?.id}</> */}
                   
                 <Box className='timeandDetails' sx={{ display :'flex' , width:'100%'}}>
 
@@ -225,6 +231,7 @@ function Flightoptions({_data , _fromparent , _type}){
                                     <Box className='from'>
                                     <input
                                     type="radio"
+                                    id={datas[key]?.pricelist[0]?.id}
                                     name = {`${index}${datas[key]?.dept_obj?.city}`}
                                     checked={datas[key]?.checked}  
                                     onChange = { (e) => updatechecked(e,key) }
@@ -270,7 +277,10 @@ export default function Comboview(props) {
     const [ listflightroundfilter , setListflightroundfilter]  = React.useState(_listflightroundfilter)
     const [ storeindex , setStoreindex ] = React.useState(false);
 
+    const navigate = useNavigate()
 
+
+    const [ fare , setFare ] = React.useState("")
 
 
     const TabChange = (newValue) => {
@@ -282,6 +292,16 @@ export default function Comboview(props) {
         setTabValueoption(newValue);
         setTabValue(-1)
     };
+
+
+
+    // subscribe from search.js to get filtered records
+    comboService.comboObservable().subscribe(res=>{
+     //   console.log(res);
+        setListflightroundfilter(res)
+        setStoreindex(!storeindex)
+    },[])
+
 
     React.useEffect(()=>{
         setListflightroundfilter(listflightroundfilter)
@@ -313,10 +333,13 @@ export default function Comboview(props) {
         // on change radio button for more option
     }
 
+
+
+
     const radiochangeevent = (i,totalPriceList , e) => {
 
-        console.log(i);
-        console.log(totalPriceList);
+        // console.log(i);
+        // console.log(totalPriceList);
         let id = e.target.value;
 
         let currentobj =  listflightroundfilter
@@ -328,6 +351,63 @@ export default function Comboview(props) {
 
 
     }
+
+    const fareifreview = data => {
+
+        let onward_departure = moment(data.frmt[0]?.dept_obj?.datetime).format('YYYY-MM-DD HH:mm')
+        let onward_arrival = moment(data.frmt[0]?.arrival_obj?.datetime).format('YYYY-MM-DD HH:mm')
+ 
+        let return_departure = moment(data.frmt[1]?.dept_obj?.datetime).format('YYYY-MM-DD HH:mm')
+        let return_arrival = moment(data.frmt[1]?.arrival_obj?.datetime).format('YYYY-MM-DD HH:mm')
+ 
+        let Originalfare = data.allfare
+        var ind ;
+        Originalfare.map((dd,index) => {
+         let going = dd?.sI?.filter(d => d.isRs == false)
+         let _return = dd?.sI?.filter(d => d.isRs == true)
+ 
+                 let g1 = going[0];
+                 let g2 = going[going.length - 1];
+ 
+                 let r1 = _return[0];
+                 let r2 = _return[_return.length - 1];
+ 
+                let g1date =  moment(g1.dt).format('YYYY-MM-DD HH:mm')
+                let g2date =  moment(g2.at).format('YYYY-MM-DD HH:mm')
+ 
+                let r1date =  moment(r1.dt).format('YYYY-MM-DD HH:mm')
+                let r2date =  moment(r2.at).format('YYYY-MM-DD HH:mm')
+ 
+                if((g1date == onward_departure && g2date == onward_arrival) && (r1date==return_departure && r2date==return_arrival)){
+                 ind = index
+                }
+        })
+ 
+     let getfare = Originalfare[ind]
+ 
+    // console.log(data);
+
+    let multipleselectedfare = data.totalPriceList.findIndex(a => a.checked )
+    let id = getfare?.totalPriceList[multipleselectedfare].id
+    console.log(multipleselectedfare);
+    console.log(getfare?.totalPriceList);
+    setFare(id)
+ 
+        const headers = {
+         'Content-Type': 'application/json',
+         'apikey': process.env.REACT_APP_FLIGHT_API_KEY
+         }
+ 
+            let pricd = {
+                priceIds : [id]
+            }
+        
+            navigate(`/booking/${id}`)
+            //  axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/review`,pricd , { headers : headers}  ).then(res=>{
+            //    console.log(res);
+            //  })
+ 
+     }
 
 
   return (
@@ -429,8 +509,8 @@ export default function Comboview(props) {
                                                                             <Box className='price' >
                                                                             <Typography className='priceText'> 
                                                                             
-                                                                            <div>
-                                                                                <span>
+                                                                            <div id={fare}>
+                                                                                <span id={fare}>
                                                                                 <Radio
                                                                                         checked={totaldata?.checked}
                                                                                         id= {totaldata?.id}
@@ -474,6 +554,8 @@ export default function Comboview(props) {
                                                                 </Grid>
                                                             </Box>
                                                         )}
+
+                                                        <Button onClick={()=>fareifreview(data)}>Book</Button>
 
 
 

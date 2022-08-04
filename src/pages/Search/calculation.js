@@ -79,7 +79,6 @@ import moment from 'moment'
             return `${Math.floor(tot / 60)}h ${tot % 60}m`
         },
         combofrmt: function(speddata ){
-
                 let dept_obj = {
                     timing    : moment(speddata[0]?.dt).format("HH:mm"),
                     timewords : moment(speddata[0]?.dt).format("MMMM DD"),
@@ -109,10 +108,996 @@ import moment from 'moment'
                 let flight_code =  speddata.map((indata,ind) => (
                     `${indata?.fD?.aI?.code}-${indata?.fD?.fN}${ speddata?.length -1 == ind ? '' : ',' }`
                     ))
-                return { dept_obj , arrival_obj , stopwords ,stopinnumber  , flight_code , grouptime , duration ,flightdetail,checked }
+                    let pricelist = []
+                return { dept_obj , arrival_obj , stopwords ,stopinnumber  , flight_code , grouptime , duration ,flightdetail,checked , pricelist }
 
     
-        }
+        },
+        noofstop_filter : function (imm , unmutatee) {
+            var filterrecord;
+            if(imm.length > 0 ) {
+                var sorted = imm.sort((a,b)=>a-b)
+                let arrOfNum = sorted.map(str => {
+                    return Number(str);
+                  });
+                var len =  arrOfNum.length; 
+                if(len > 2){
+                     arrOfNum.slice(-1)
+                }
+                    
+    
+                filterrecord =  unmutatee.filter(function(t){
+                    if(len == 1 && arrOfNum[0] >= 2){
+                        return t.stopinnumber >=2
+                    } else {
+                        if(arrOfNum.includes(t.stopinnumber)){
+                            return true
+                        }
+                    }
+                   
+                    if(len > 2){
+                        return t.stopinnumber >=2
+                    }
+                    return false;
+                });
+            } else {
+                filterrecord = unmutatee
+            }
+
+            return filterrecord
+        },
+        ranger : function (ranger,filterrecord) {
+            var filterrecord;
+                let pr = ranger[1].label;          
+                let ft = pr.replace(/\,/g,'')
+
+
+                filterrecord = filterrecord.filter(t=>  t.totalPriceList[0].totalamount + 0.4 <= ft);
+            
+            return filterrecord
+        },
+        depaturefilter : function (depature,filterrecord) {
+           
+
+                var format = 'HH:mm';
+    
+                // var time = moment() gives you current time. no format required.
+               
+    
+                var _filterrecord =  filterrecord.filter(function(t){
+                    
+                    if(depature.includes(1)){
+                        let time = moment(t?.dept_obj?.timing,format),
+                        beforeTime = moment('00:00', format),
+                        afterTime = moment('00:06', format);
+                        if (time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          }
+                    }
+    
+                    if(depature.includes(2)){
+                        let time = moment(t?.dept_obj?.timing,format),
+                        beforeTime = moment('06:00', format),
+                        afterTime = moment('12:59', format);
+                        if (time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          }
+                    }
+    
+                    if(depature.includes(3)){
+                        let time = moment(t?.dept_obj?.timing,format),
+                        beforeTime = moment('12:00', format),
+                        afterTime = moment('18:59', format);
+                        if (time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          }
+                    }
+    
+                    if(depature.includes(4)){
+                        let time = moment(t?.dept_obj?.timing,format),
+                        beforeTime = moment('18:00', format),
+                        afterTime = moment('00:59', format);
+                        if (time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          }
+                    }
+    
+    
+                })
+
+                return _filterrecord;
+           
+
+        },
+        arrivalfilter : function (arrival , filterrecord) {
+
+            var format = 'HH:mm';
+            filterrecord =  filterrecord.filter(function(t){
+                
+                if(arrival.includes(1)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('00:00', format),
+                    afterTime = moment('00:06', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(arrival.includes(2)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('06:00', format),
+                    afterTime = moment('12:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(arrival.includes(3)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('12:00', format),
+                    afterTime = moment('18:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+
+                if(arrival.includes(4)){
+                    let time = moment(t?.arrival_obj?.timing,format),
+                    beforeTime = moment('18:00', format),
+                    afterTime = moment('00:59', format);
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+            })
+
+        },
+        combofilter : function (index,imm , unmutatee) {
+            var filterrecord;
+            if(imm.length > 0 ) {
+                var sorted = imm.sort((a,b)=>a-b)
+                let arrOfNum = sorted.map(str => {
+                    return Number(str);
+                  });
+                var len =  arrOfNum.length; 
+                if(len > 2){
+                     arrOfNum.slice(-1)
+                }
+ 
+
+                filterrecord =  unmutatee.filter(function(t){
+
+                    if(len == 1 && arrOfNum[0] >= 2){
+                        return t.frmt[index].stopinnumber >=2
+
+                    } else {
+                        if(arrOfNum.includes(t.frmt[index].stopinnumber)){
+                            return true
+                        }
+                    }
+                    
+
+                    if(len > 2){
+                        return t.frmt[index].stopinnumber >=2
+                    }
+                    return false;
+                });
+            } else {
+                filterrecord = unmutatee
+            }
+
+            return filterrecord
+        },
+
+
+        combodepaturefrom : function (arrival , filterrecord) {
+            var format = 'HH:mm';
+            filterrecord =  filterrecord.filter(function(t){
+                if(arrival.includes(1)){
+                    let time = moment(t?.frmt[0]?.dept_obj?.timing,format),
+                    beforeTime = moment('00:00', format),
+                    afterTime = moment('06:00', format);
+                  
+                      // nested object filter
+                      for (const key in t.going) {
+                        let row = t.going[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          } 
+                    }
+                    // nested object filter
+    
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+    
+                if(arrival.includes(2)){
+                    let time = moment(t?.frmt[0]?.dept_obj?.timing,format),
+                    beforeTime = moment('06:00', format),
+                    afterTime = moment('12:59', format);
+                       // nested object filter
+                       for (const key in t.going) {
+                        let row = t.going[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          } 
+                    }
+                    // nested object filter
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+    
+                if(arrival.includes(3)){
+                    let time = moment(t?.frmt[0]?.dept_obj?.timing,format),
+                    beforeTime = moment('12:59', format),
+                    afterTime = moment('18:59', format);
+                       // nested object filter
+                       for (const key in t.going) {
+                        let row = t.going[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          } 
+                    }
+                    // nested object filter
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+    
+                if(arrival.includes(4)){
+                    let time = moment(t?.frmt[0]?.dept_obj?.timing,format),
+                    beforeTime = moment('18:59', format),
+                    afterTime = moment('23:59', format);
+                       // nested object filter
+                       for (const key in t.going) {
+                        let row = t.going[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(beforeTime, afterTime)) {
+                            return true
+                          } 
+                    }
+                    // nested object filter
+                    if (time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      }
+                }
+            }).map(res=>{
+                if(Object.keys(res.going).length > 1){
+    
+                   var _beforeTime,_afterTime
+                    if(arrival.includes(1)){
+                        _beforeTime = moment('00:00', format);
+                        _afterTime = moment('06:59', format);
+                    // nested object filter
+    
+                        let _going = {}
+                        for (const key in res.going) {
+                            let row = res.going[key]
+                            let _time = moment(row?.dept_obj?.timing,format);
+                            if (_time.isBetween(_beforeTime, _afterTime)) {
+                              //  console.log(row);
+                              _going[key] = row
+                              } 
+                        }
+        
+        
+                        if(Object.keys(_going).length > 0){
+                            for (var prop in _going) {
+                                _going[prop].checked = true
+    
+                                res.frmt[0] = _going[prop]
+                                break;
+                            }
+                        }
+                        res.going = _going
+    
+    
+                    }
+                    if(arrival.includes(2)){
+                        _beforeTime = moment('06:00', format);
+                        _afterTime = moment('12:59', format);
+    
+                        let _going = {}
+                        for (const key in res.going) {
+                            let row = res.going[key]
+                            let _time = moment(row?.dept_obj?.timing,format);
+                            if (_time.isBetween(_beforeTime, _afterTime)) {
+                              //  console.log(row);
+                              _going[key] = row
+                              } 
+                        }
+        
+        
+                        if(Object.keys(_going).length > 0){
+                            for (var prop in _going) {
+                                _going[prop].checked = true
+                                res.frmt[1] = _going[prop]
+                                break;
+                            }
+                        }
+                        res.going = _going
+    
+    
+                    }
+                    if(arrival.includes(3)){
+                        _beforeTime = moment('12:00', format);
+                        _afterTime = moment('18:59', format);
+    
+                        let _going = {}
+                        for (const key in res.going) {
+                            let row = res.going[key]
+                            let _time = moment(row?.dept_obj?.timing,format);
+                            if (_time.isBetween(_beforeTime, _afterTime)) {
+                              //  console.log(row);
+                              _going[key] = row
+                              } 
+                        }
+        
+        
+                        if(Object.keys(_going).length > 0){
+                            for (var prop in _going) {
+                                _going[prop].checked = true
+                                res.frmt[0] = _going[prop]
+                                break;
+                            }
+                        }
+                        res.returns = _going
+    
+    
+                    }
+                    if(arrival.includes(4)){
+                        _beforeTime = moment('18:59', format);
+                        _afterTime = moment('23:59', format);
+    
+                        let _going = {}
+                        for (const key in res.going) {
+                            let row = res.going[key]
+                            let _time = moment(row?.dept_obj?.timing,format);
+                            if (_time.isBetween(_beforeTime, _afterTime)) {
+                              //  console.log(row);
+                              _going[key] = row
+                              } 
+                        }
+        
+        
+                        if(Object.keys(_going).length > 0){
+                            for (var prop in _going) {
+                                _going[prop].checked = true
+                                res.frmt[0] = _going[prop]
+                                break;
+                            }
+                        }
+                        res.returns = _going
+                    }
+                } 
+                return res
+            })
+            return filterrecord
+        },
+
+
+    comboarrivalfrom : function (arrival , filterrecord) {
+        var format = 'HH:mm';
+        filterrecord =  filterrecord.filter(function(t){
+            if(arrival.includes(1)){
+                let time = moment(t?.frmt[0]?.arrival_obj?.timing,format),
+                beforeTime = moment('00:00', format),
+                afterTime = moment('06:00', format);
+              
+                  // nested object filter
+                  for (const key in t.going) {
+                    let row = t.going[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(2)){
+                let time = moment(t?.frmt[0]?.arrival_obj?.timing,format),
+                beforeTime = moment('06:00', format),
+                afterTime = moment('12:59', format);
+                   // nested object filter
+                   for (const key in t.going) {
+                    let row = t.going[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                // nested object filter
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(3)){
+                let time = moment(t?.frmt[0]?.arrival_obj?.timing,format),
+                beforeTime = moment('12:59', format),
+                afterTime = moment('18:59', format);
+                   // nested object filter
+                   for (const key in t.going) {
+                    let row = t.going[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                // nested object filter
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(4)){
+                let time = moment(t?.frmt[0]?.arrival_obj?.timing,format),
+                beforeTime = moment('18:59', format),
+                afterTime = moment('23:59', format);
+                   // nested object filter
+                   for (const key in t.going) {
+                    let row = t.going[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                // nested object filter
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+        }).map(res=>{
+            if(Object.keys(res.going).length > 1){
+
+               var _beforeTime,_afterTime
+                if(arrival.includes(1)){
+                    _beforeTime = moment('00:00', format);
+                    _afterTime = moment('06:59', format);
+                // nested object filter
+
+                    let _going = {}
+                    for (const key in res.going) {
+                        let row = res.going[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                          _going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(_going).length > 0){
+                        for (var prop in _going) {
+                            _going[prop].checked = true
+
+                            res.frmt[0] = _going[prop]
+                            break;
+                        }
+                    }
+                    res.going = _going
+
+
+                }
+                if(arrival.includes(2)){
+                    _beforeTime = moment('06:00', format);
+                    _afterTime = moment('12:59', format);
+
+                    let _going = {}
+                    for (const key in res.going) {
+                        let row = res.going[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                          _going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(_going).length > 0){
+                        for (var prop in _going) {
+                            _going[prop].checked = true
+                            res.frmt[1] = _going[prop]
+                            break;
+                        }
+                    }
+                    res.going = _going
+
+
+                }
+                if(arrival.includes(3)){
+                    _beforeTime = moment('12:00', format);
+                    _afterTime = moment('18:59', format);
+
+                    let _going = {}
+                    for (const key in res.going) {
+                        let row = res.going[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                          _going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(_going).length > 0){
+                        for (var prop in _going) {
+                            _going[prop].checked = true
+                            res.frmt[0] = _going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = _going
+
+
+                }
+                if(arrival.includes(4)){
+                    _beforeTime = moment('18:59', format);
+                    _afterTime = moment('23:59', format);
+
+                    let _going = {}
+                    for (const key in res.going) {
+                        let row = res.going[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                          _going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(_going).length > 0){
+                        for (var prop in _going) {
+                            _going[prop].checked = true
+                            res.frmt[0] = _going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = _going
+                }
+            } 
+            return res
+        })
+        return filterrecord
+    },
+
+
+
+
+
+
+    combodepatureto : function (arrival , filterrecord) {
+
+        
+        var format = 'HH:mm';
+        
+        filterrecord =  filterrecord.filter(function(t){
+            
+            if(arrival.includes(1)){
+                let time = moment(t?.frmt[1]?.dept_obj?.timing,format),
+                beforeTime = moment('00:00', format),
+                afterTime = moment('06:59', format);
+
+                // nested object filter
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.dept_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                // nested object filter
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  } 
+            }
+
+
+
+            if(arrival.includes(2)){
+                let time = moment(t?.frmt[1]?.dept_obj?.timing,format),
+                beforeTime = moment('06:00', format),
+                afterTime = moment('12:59', format);
+                                // nested object filter
+
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.dept_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(3)){
+                let time = moment(t?.frmt[1]?.dept_obj?.timing,format),
+                beforeTime = moment('12:00', format),
+                afterTime = moment('18:59', format);
+                                // nested object filter
+
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.dept_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(4)){
+                let time = moment(t?.frmt[1]?.dept_obj?.timing,format),
+                beforeTime = moment('18:59', format),
+                afterTime = moment('23:59', format);
+                                // nested object filter
+
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.dept_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+         })
+        .map(res=>{
+            if(Object.keys(res.returns).length > 1){
+
+               var _beforeTime,_afterTime
+                if(arrival.includes(1)){
+                    _beforeTime = moment('00:00', format);
+                    _afterTime = moment('06:59', format);
+                // nested object filter
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+                if(arrival.includes(2)){
+                    _beforeTime = moment('06:00', format);
+                    _afterTime = moment('12:59', format);
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+                if(arrival.includes(3)){
+                    _beforeTime = moment('12:00', format);
+                    _afterTime = moment('18:59', format);
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+                if(arrival.includes(4)){
+                    _beforeTime = moment('18:59', format);
+                    _afterTime = moment('23:59', format);
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.dept_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+                }
+            } 
+            return res
+        })
+        return filterrecord
+
+    },
+
+
+
+
+
+
+    comboarrivalto : function (arrival , filterrecord) {
+
+        
+        var format = 'HH:mm';
+        
+        filterrecord =  filterrecord.filter(function(t){
+            
+            if(arrival.includes(1)){
+                let time = moment(t?.frmt[1]?.arrival_obj?.timing,format),
+                beforeTime = moment('00:00', format),
+                afterTime = moment('06:59', format);
+
+                // nested object filter
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  } 
+                
+
+            }
+
+
+
+            if(arrival.includes(2)){
+                let time = moment(t?.frmt[1]?.arrival_obj?.timing,format),
+                beforeTime = moment('06:00', format),
+                afterTime = moment('12:59', format);
+                                // nested object filter
+
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(3)){
+                let time = moment(t?.frmt[1]?.arrival_obj?.timing,format),
+                beforeTime = moment('12:00', format),
+                afterTime = moment('18:59', format);
+                                // nested object filter
+
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+
+            if(arrival.includes(4)){
+                let time = moment(t?.frmt[1]?.arrival_obj?.timing,format),
+                beforeTime = moment('18:00', format),
+                afterTime = moment('23:59', format);
+                                // nested object filter
+
+                for (const key in t.returns) {
+                    let row = t.returns[key]
+                    let _time = moment(row?.arrival_obj?.timing,format);
+                    if (_time.isBetween(beforeTime, afterTime)) {
+                        return true
+                      } 
+                }
+                                // nested object filter
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    return true
+                  }
+            }
+         })
+        .map(res=>{
+            if(Object.keys(res.returns).length > 1){
+
+               var _beforeTime,_afterTime
+                if(arrival.includes(1)){
+                    _beforeTime = moment('00:00', format);
+                    _afterTime = moment('06:59', format);
+                // nested object filter
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+                if(arrival.includes(2)){
+                    _beforeTime = moment('06:00', format);
+                    _afterTime = moment('12:59', format);
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+                if(arrival.includes(3)){
+                    _beforeTime = moment('12:00', format);
+                    _afterTime = moment('18:59', format);
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+                if(arrival.includes(4)){
+                    _beforeTime = moment('18:00', format);
+                    _afterTime = moment('23:59', format);
+
+                    let going = {}
+                    for (const key in res.returns) {
+                        let row = res.returns[key]
+                        let _time = moment(row?.arrival_obj?.timing,format);
+                        if (_time.isBetween(_beforeTime, _afterTime)) {
+                          //  console.log(row);
+                            going[key] = row
+                          } 
+                    }
+    
+    
+                    if(Object.keys(going).length > 0){
+                        for (var prop in going) {
+                            going[prop].checked = true
+                            res.frmt[1] = going[prop]
+                            break;
+                        }
+                    }
+                    res.returns = going
+
+
+                }
+
+             
+            } 
+            return res
+
+
+        })
+        return filterrecord
+
+    },
+   
     }
 
     export default helpers;

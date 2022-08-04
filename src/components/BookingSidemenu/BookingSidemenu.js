@@ -1,7 +1,9 @@
-import React, { memo } from 'react' 
+import React, { memo , useContext } from 'react' 
 // import { useNavigate } from "react-router-dom";
 import { TextField, Box, Typography, Slider, FormGroup, FormControlLabel, Checkbox, FormControl, IconButton } from '@mui/material';
 import { Add, Close, Check } from '@mui/icons-material';
+import TripinfoContext from "../../pages/BookingSteps/context"
+
 import "./style.css";
 
 let promoList = [
@@ -32,6 +34,13 @@ let promoList = [
 ]
 
 export default function BookingSidemenu() {
+
+  const things = useContext(TripinfoContext)
+  const [ fare , setFare ] = React.useState(things?.totalPriceInfo)
+
+  console.log(things?.totalPriceInfo);
+
+
   return (
     <Box className='sidemenu booking'>
       <Box className='sidemenu_wrapper'>
@@ -42,7 +51,7 @@ export default function BookingSidemenu() {
                 <Add className='iconplus'/>  {'Base Fare'}
               </Box>
               <Box className='fareprice'>
-                {'14,000'}
+              ₹{ (fare?.totalFareDetail?.fC?.BF).toLocaleString() }
               </Box>
             </Box>
             <Box className='listitem'>
@@ -50,15 +59,57 @@ export default function BookingSidemenu() {
                 <Add className='iconplus'/>  {'Fees & Subcharges'}
               </Box>
               <Box className='fareprice'>
-                {'1,857'}
+              ₹{ (fare?.totalFareDetail?.fC?.TAF).toLocaleString('en', { minimumFractionDigits: 2 }) }
               </Box>
+
             </Box>
+
+           
+
+            <Box>
+                <Box style={{ display : 'flex',justifyContent:'space-between'}}>
+                  <Typography className="tct">Airline GST</Typography>
+                  <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.AGST).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>
+                </Box>
+                <Box style={{ display : 'flex',justifyContent:'space-between'}}>
+                  <Typography className="tct">Management Fee</Typography>
+                  <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.MF).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>
+                </Box>
+                <Box style={{ display : 'flex',justifyContent:'space-between'}}>
+                  <Typography className="tct">Management Fee Tax</Typography>
+                  <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.MFT).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>
+                </Box>
+                <Box style={{ display : 'flex',justifyContent:'space-between'}}>
+                  <Typography className="tct">Other Taxes</Typography>
+                  <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.OT).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>
+                </Box>
+
+
+              { fare?.totalFareDetail?.afC?.TAF?.YR && 
+               <Box style={{ display : 'flex',justifyContent:'space-between'}}>
+               <Typography className="tct">YR</Typography>
+               <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.YR).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>
+             </Box>
+
+              }
+
+              { fare?.totalFareDetail?.afC?.TAF?.YQ && 
+               <Box style={{ display : 'flex',justifyContent:'space-between'}}>
+               <Typography className="tct">YQ</Typography>
+               <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.YQ).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>
+             </Box>
+
+              }
+               
+
+            </Box>
+
             <Box className='listitem bsolid' style={{ borderBottomStyle : 'solid' }}>
               <Box className='farelabel' style={{ fontWeight : '600' }}>
                  {'Total Amount'}
               </Box>
               <Box className='fareprice'  style={{ fontWeight : '600' }}>
-                {'16,407'}
+              ₹{ (fare?.totalFareDetail?.fC?.TF).toLocaleString('en', { minimumFractionDigits: 2 }) } 
               </Box>
             </Box>
         </Box>
