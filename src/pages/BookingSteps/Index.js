@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { TripinfoProvider } from "./context"
 import { Outlet } from 'react-router-dom';
 import './style.css';
+import { useHistory ,useLocation ,matchRoutes } from 'react-router-dom';
 
 const steps = [
     {
@@ -35,7 +36,27 @@ const steps = [
     },
 ];
 export default function Index() { 
-    const [activeStep, setActiveStep] = React.useState(0);
+  const location = useLocation()
+  let ind = location.pathname.split("/")[2]
+  var index;
+  switch (ind) {
+    case "flight":
+      index = 0
+      break;
+    case "passangers":
+      index = 1
+      break;
+    case "passangers":
+      index = 2
+      break;
+  
+    default:
+      index = 0
+      break;
+  }
+
+
+    const [activeStep, setActiveStep] = React.useState(index);
     const [completed, setCompleted] = React.useState({});
     const [ tripInfos , setTripInfos ] = React.useState([])
     const [ totalPriceInfo , setTotalPriceInfo ] = React.useState({})
@@ -44,39 +65,42 @@ export default function Index() {
 
     const { id }  = useParams();
     var value
+    var pricd = {
+      priceIds : [id]
+  }
 
-    // React.useEffect(()=>{
+    React.useMemo(()=>{
 
-    //   const headers = {
-    //     'Content-Type': 'application/json',
-    //     'apikey': process.env.REACT_APP_FLIGHT_API_KEY
-    //     }
 
-    //   let pricd = {
-    //       priceIds : [id]
-    //   }
-       
-    //   axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/review`,pricd , { headers : headers}  ).then(res=>{
-    //     console.log(res?.data);
-    //     if(res?.data?.status?.httpStatus == 200) {
-    //       let info = res?.data
-    //        value = info;
-    //       setTripInfos(info)
-    //      // setTotalPriceInfo(res?.data?.totalPriceInfo)
-    //     }
+     console.log("sd");
+      const headers = {
+        'Content-Type': 'application/json',
+        'apikey': process.env.REACT_APP_FLIGHT_API_KEY
+        }
+
+     
+      axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/review`,pricd , { headers : headers}  ).then(res=>{
+        console.log(res?.data);
+        if(res?.data?.status?.httpStatus == 200) {
+          let info = res?.data
+           value = info;
+          setTripInfos(info)
+         // setTotalPriceInfo(res?.data?.totalPriceInfo)
+        }
         
-    //   }).catch(e=>{
+      }).catch(e=>{
 
-    //     console.log(e?.response?.data?.status?.success);
-    //     if(e?.response?.data?.status?.success == false){
+        console.log(e?.response?.data?.status?.success);
+        if(e?.response?.data?.status?.success == false){
          
-    //         alert(e?.response?.data?.errors[0]?.message)
-    //       //  navigate(-1)
+            alert(e?.response?.data?.errors[0]?.message)
+          //  navigate(-1)
          
-    //     }
-    //   })
+        }
+      })
 
-    // },[id])
+    },[])
+
   
     const totalSteps = () => {
         return steps.length;
@@ -103,17 +127,34 @@ export default function Index() {
             : activeStep + 1;
         setActiveStep(newActiveStep);
 
+        console.log(newActiveStep);
 
-      // if(newActiveStep == 1){
-      //   navigate("/booking/passangers");
-
-      // }
+      if(newActiveStep == 0){
+        navigate(`/booking/flight/${id}`);
+      }
+      if(newActiveStep == 1){
+        navigate(`/booking/passangers/${id}`);
+      }
+      if(newActiveStep == 2){
+        navigate(`/booking/step3/${id}`);
+      }
 
 
       };
     
       const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
+
+        if((activeStep - 1 )== 0 ){
+          navigate(`/booking/flight/${id}`);
+        }
+        if((activeStep - 1) == 1){
+          navigate(`/booking/passangers/${id}`);
+        }
+        if((activeStep - 1) == 2){
+          navigate(`/booking/step3/${id}`);
+        }
+
       };
     
       const handleStep = (step) => () => {
@@ -168,12 +209,28 @@ export default function Index() {
     //   }
     // }
 
+    // latest
+    // const getStep = (step) => {
+    //   switch (step) {
+    //     case 0:
+    //       return <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Step1/> </TripinfoProvider> }</>;
+    //     case 1:
+    //       return <Step2 stepObj={steps[step]}/>;
+    //     case 2:
+    //       return <Step2 stepObj={steps[step]} activestatus={activeStep}/>;
+    //     case 3:
+    //       return <Step4 />;
+    //     default:
+    //       return "Completed";
+    //   }
+    // }
+
     const getStep = (step) => {
       switch (step) {
         case 0:
-          // return <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Step1/> </TripinfoProvider> }</>;
+          return <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Outlet/> </TripinfoProvider> }</>;
         case 1:
-          return <Step2 stepObj={steps[step]}/>;
+          return <Outlet/>;
         case 2:
           return <Step2 stepObj={steps[step]} activestatus={activeStep}/>;
         case 3:
@@ -223,7 +280,10 @@ export default function Index() {
                                     </Box>
                                 </React.Fragment>
                                 ) : (
-                                    getStep(activeStep)
+
+                      Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Outlet/> </TripinfoProvider> 
+                    //  getStep(activeStep)
+
                                 )}
                             </div>
                             {/* { activeStep == '0' && (
@@ -261,9 +321,9 @@ export default function Index() {
                             </Box>
                         </Box>
                     </Grid>
-                    {/* <Grid item md={3}>
+                    <Grid item md={3}>
                     <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <BookingSidemenu /> </TripinfoProvider> }</>
-                    </Grid> */}
+                    </Grid>
                 </Grid>
             </Container>
         </Box>

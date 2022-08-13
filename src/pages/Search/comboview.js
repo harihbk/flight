@@ -402,7 +402,7 @@ export default function Comboview(props) {
                 priceIds : [id]
             }
         
-            navigate(`/booking/${id}`)
+            navigate(`/booking/flight/${id}`)
             //  axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/review`,pricd , { headers : headers}  ).then(res=>{
             //    console.log(res);
             //  })

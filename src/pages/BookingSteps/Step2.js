@@ -10,6 +10,9 @@ import { ArrowRightAlt } from '@mui/icons-material';
 import { ReactComponent as CompleteIcon } from '../../assets/icons/tick.svg';
 import TripinfoContext from "./context"
 import * as Yup from "yup";
+import moment from 'moment'
+import axios from "axios";
+import Seatpopup from "./seatpopup"
 
 import { ErrorMessage, Field, FieldArray, Form, Formik ,useFormikContext , getIn} from "formik";
 
@@ -38,14 +41,19 @@ export default function Step2(props){
     const [openPage3, setOpenPage3] = React.useState(false);
     const [promocard, setpromocard] = React.useState('promo1');
     const [startDate, setStartDate] = React.useState(new Date());
+    const [paxinfo, setPaxinfo] = React.useState({});
+    const [ currflightdetial , setCurrflightdetial ] = React.useState([])
+    const [ selectflightdetail , setSelectflightdetail ] = React.useState([])
 
     const things = useContext(TripinfoContext)
 
     const [data ,setData] = React.useState(things)
 
+
+
     const { stepObj } = props;
     const { activestatus } = props;
-    console.log(activestatus);
+    console.log(things);
 
     const changegstType = (event) => {
         setHasGst(event.target.value);
@@ -71,9 +79,24 @@ export default function Step2(props){
         setOpenPage3(false);
     }
     
-    const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
     useEffect(() =>{
+
+
+        // var paxmodify = []
+        // for (const key in data?.searchQuery?.paxInfo) {
+        //     let k = data?.searchQuery?.paxInfo[key]
+        //      for (let index = 1; index <= k ; index++) {
+        //          let obj = {
+        //              label : key,
+        //              value : index
+        //          }
+        //          paxmodify.push(obj)
+        //      }
+
+        // }
+        // setPaxinfo(paxmodify);
+
         if(activestatus == 2){
             setOpenPage3(true)
         }
@@ -125,34 +148,110 @@ export default function Step2(props){
     }
 
 
-    const initialValues = {
-        adult : [
-            {
-                title : '',
-                firstname : '',
-                lastname : '',
-                passportinfo : {
-                    nationality : '',
-                    passportno  : '',
-                    issuedate : '',
-                    expirydate : '',
-                    dob : ''
-                }
-            },
-            {
-                title : '',
-                firstname : '',
-                lastname : '',
-                passportinfo : {
-                    nationality : '',
-                    passportno  : '',
-                    issuedate : '',
-                    expirydate : '',
-                    dob : ''
-                }
-            }
-        ]
-    };
+   // data.searchQuery.paxInfo
+   var _initialValues = {}
+
+   try {
+
+    for (const key in data?.searchQuery?.paxInfo) {
+       if(data.searchQuery.paxInfo[key] > 0){
+           let cnt = data.searchQuery.paxInfo[key];
+           let hh = []
+
+           for (let index = 0; index < cnt; index++) {
+              
+
+               let o = {
+                 title : '',
+                 firstname : '',
+                 lastname : '',
+                 passportinfo : {
+                     nationality : '',
+                     passportno  : '',
+                     issuedate : '',
+                     expirydate : '',
+                     dob : ''
+                 }
+             };
+             hh.push(o)
+           }
+
+           _initialValues[key.toLowerCase()] = hh
+       }
+    }
+    
+
+    var paxmodify = []
+    for (const key in data?.searchQuery?.paxInfo) {
+        let k = data?.searchQuery?.paxInfo[key]
+         for (let index = 1; index <= k ; index++) {
+             let obj = {
+                 label : key,
+                 value : index
+             }
+             paxmodify.push(obj)
+         }
+
+    }
+    _initialValues['baggage'] = paxmodify
+   // setPaxinfo(paxmodify);
+
+
+   } catch (error) {
+       console.log(error);
+   }
+  
+
+    const validationSchemachild = {
+        child : Yup.array().of(
+            Yup.object().shape({
+                title : Yup.string().required("Title is Required"),
+                firstname : Yup.string().required("Firstname is required"),
+                lastname : Yup.string().required("Lastname is required")
+
+            })
+        ),
+       
+    }
+
+    const validationSchemainfant = {
+        infant : Yup.array().of(
+            Yup.object().shape({
+                title : Yup.string().required("Title is Required"),
+                firstname : Yup.string().required("Firstname is required"),
+                lastname : Yup.string().required("Lastname is required")
+
+            })
+        ),
+       
+    }
+
+    var schemaobj = {}
+    if(data.searchQuery.paxInfo.CHILD > 0){
+        schemaobj = {
+           ...validationSchemachild
+        }
+    }
+
+    if(data.searchQuery.paxInfo.INFANT > 0){
+        schemaobj = {
+            ...schemaobj,
+           ...validationSchemainfant
+        }
+    }
+
+
+    const validationSchemabaggagemeals = {
+        baggage : Yup.array().of(
+            Yup.object().shape({
+                baggage : Yup.string(),
+                meals : Yup.string(),
+
+            })
+        ),
+       
+    }
+
 
     const validationSchema = Yup.object().shape({
         adult : Yup.array().of(
@@ -162,22 +261,112 @@ export default function Step2(props){
                 lastname : Yup.string().required("Lastname is required")
 
             })
-        )
+        ),
+        ...schemaobj,
+        ...validationSchemabaggagemeals
     })
 
+
+
     function onSubmit(fields) {
+
         // display form field values on success
        console.log(fields);
+    }
+
+    const [seats , setSeats ] = React.useState([])
+    const [seatloading , setSeatloading] = React.useState(true)
+    const [open, setOpen] = React.useState(false);
+    const [ currentrow , setSetcurrentrow ] = React.useState([])
+    const [ rowid , setRowid ] = React.useState("")
+
+    function getflightapi(){
+        
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'apikey': process.env.REACT_APP_FLIGHT_API_KEY
+            }
+    
+            if(seats.length == 0 ){
+                axios.post(`${process.env.REACT_APP_FLIGHT_URL}/fms/v1/seat`,{bookingId:data.bookingId} , { headers : headers}  ).then(res=>{
+                  //  console.log(res?.data);
+                    setSeatloading(false)
+                    setSeats(res?.data?.tripSeatMap)
+                  }).catch(e=>{
+            
+                    alert(e?.response?.data?.errors[0]?.message)
+                    setSeatloading(false)
+        
+                  })
+            }
+    }
+
+
+    // this method is used for seat flight details
+
+    React.useEffect(()=>{
+       var frmtobj = []
+       for (const key in  data?.searchQuery?.paxInfo) {
+          let cnnt = data?.searchQuery?.paxInfo[key]
+          if(key != "INFANT"){
+            for (let index = 0; index < cnnt; index++) {
+                let obj = {
+                 passanger : key,
+                 key       : index + 1,
+                 seat      : '',
+                 fees      : ''
+                }
+                frmtobj.push(obj)
+            }
+          }
+       }
+
+    var seatmap=[]
+     data?.tripInfos?.map((h,i)=>{
+        let oo
+        h.sI?.map((n,ii)=>{
+             oo = {}
+            oo[n.id] = frmtobj
+            seatmap.push(oo)
+         })
+     })
+
+     setCurrflightdetial(seatmap)
+
+    },[])
+        // this method is used for seat flight details
+
+
+
+    function getSets(pp){
+        setRowid(pp.id)
+        setSelectflightdetail(pp)
+        let curr_row  = seats?.tripSeat?.[pp.id]
+        console.log(curr_row);
+        if(curr_row == undefined){
+            alert("Seat Selection not applicable")
+        }else{
+            setSetcurrentrow(curr_row)
+            setOpen(true) 
+        }
+             
     }
 
     
 
     return(
         <div>
+          { open   &&  <Seatpopup _open={open} _rowid={rowid} _setOpen={setOpen} _selectflightdetail={selectflightdetail} _currentrow={currentrow} _currflightdetial={currflightdetial}/>} 
             <Box className="stepWrapper">
                 <Box className="stepcontHeader">
-                    <Typography className="stitle">{stepObj.label}</Typography>
+                    <Typography className="stitle">dsf</Typography>
                 </Box>
+
+                <Formik initialValues={_initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
+                                {({ errors, values, touched, setValues,setFieldValue }) => (
+                                
+                <Form>
 
                 <Box className="boxcont">
                     <Box className="form">
@@ -186,11 +375,8 @@ export default function Step2(props){
                                 <Box className="icon"></Box> <Typography>Adult {'1'}</Typography>
                             </Box>
 
-                                <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-                                {({ errors, values, touched, setValues,setFieldValue }) => (
-                                
-                                        <Form>
-                                               <FieldArray name="adult" >
+                              
+                                               <FieldArray name="adult" key={'adults'}>
                                                         {() => (values.adult.map((adult, i) => {
                                                         const ticketErrors = errors.adult?.length && errors.adult[i] || {};
                                                         const ticketTouched = touched.adult?.length && touched.adult[i] || {};
@@ -257,31 +443,270 @@ export default function Step2(props){
                                                                     </Box>
                                                                     <Box>
                                                                         Expiry Date
+                                                                        <DatePicker    
+                                                                            name={`adult.${i}.passportinfo.expiredate`}
+                                                                            selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                                            value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
+                                                                            }   
+                                                                            />
                                                                     </Box>
                                                                     <Box>
                                                                         Date of Birth
+                                                                        <DatePicker    
+                                                                            name={`adult.${i}.passportinfo.dob`}
+                                                                            selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                            value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`adult.${i}.passportinfo.dob`, e)
+                                                                            }   
+                                                                            />
                                                                     </Box>
 
                                                                 </Box>
                                                             </Box>
-
-
                                                             </>
-
-                                                           
-
-
-
                                                         );
                                                     }))}
                                                     </FieldArray>
-                                                    <button type="submit">Form Submit</button>
-                                        </Form>
-                                )}
+
+                                                    {/* child */}
+
+
+                                            { values?.child?.length > 0  && 
+                                               <FieldArray name="child" key={'childs'}>
+                                                        {() => (values.child.map((child, i) => {
+                                                        const ticketErrors = errors.child?.length && errors.child[i] || {};
+                                                        const ticketTouched = touched.child?.length && touched.child[i] || {};
+                                                        return (
+                                                            <>
+                                                            <div key={i} className="list-group list-group-flush" >
+                                                                <div className="list-group-item">
+                                                                    <h5 className="card-title">child {i + 1}</h5>
+                                                                    <div className="form-row" style={{display:'flex'}}>
+                                                                        <div className="form-group col-6">
+                                                                            <label>Title</label>
+
+                                                                            <Field as="select" name={`child.${i}.title`}>
+                                                                                <option value="0">Select</option>
+                                                                                <option value="mrs">Mrs</option>
+                                                                                <option value="ms">Ms</option>
+                                                                            </Field>
+
+                                                                            <ErrorMessage name={`child.${i}.title`} component="div" className="invalid-feedback" />
+                                                                        </div>
+                                                                        <div className="form-group col-6">
+                                                                            <label>First Name</label>
+                                                                            <Field name={`child.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                                            <ErrorMessage name={`child.${i}.firstname`} component="div" className="invalid-feedback" />
+                                                                        </div>
+                                                                        <div className="form-group col-6">
+                                                                            <label>Last Name</label>
+                                                                            <Field name={`child.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
+                                                                            <ErrorMessage name={`child.${i}.lastname`} component="div" className="invalid-feedback" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <Box>
+                                                                <Typography>ADD PASSPORT INFORMATION</Typography>
+                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
+                                                                    <Box>
+                                                                            <label>Nationality</label>
+                                                                            <Field as="select" name={`child.${i}.passportinfo.nationality`}>
+                                                                                <option value="0">Select</option>
+                                                                                <option value="mrs">Mrs</option>
+                                                                                <option value="ms">Ms</option>
+                                                                            </Field>
+                                                                    </Box>
+                                                                    <Box>
+                                                                        <label>Passport No</label>
+                                                                        <Field name={`child.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+
+                                                                    </Box>
+                                                                    <Box>
+                                                                        <label>Issue Date</label>
+                                                                        <DatePicker    
+                                                                            name={`child.${i}.passportinfo.issuedate`}
+                                                                            selected={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
+                                                                            value={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`child.${i}.passportinfo.issuedate`, e)
+                                                                            }   
+                                                                            />
+
+                                                                    </Box>
+                                                                    <Box>
+                                                                        Expiry Date
+                                                                        <DatePicker    
+                                                                            name={`child.${i}.passportinfo.expiredate`}
+                                                                            selected={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
+                                                                            value={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`child.${i}.passportinfo.expiredate`, e)
+                                                                            }   
+                                                                            />
+                                                                    </Box>
+                                                                    <Box>
+                                                                        Date of Birth
+                                                                        <DatePicker    
+                                                                            name={`child.${i}.passportinfo.dob`}
+                                                                            selected={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                            value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`child.${i}.passportinfo.dob`, e)
+                                                                            }   
+                                                                            />
+                                                                    </Box>
+
+                                                                </Box>
+                                                            </Box>
+                                                            </>
+                                                        );
+                                                    }))}
+                                                    </FieldArray> 
+                                            }
+
+                                                    {/* INFANT */}
+
+
+                                            { values?.infant?.length > 0  && 
+                                                    <FieldArray name="infant"  key={'infants'}>
+                                                        {() => (values.infant.map((infant, i) => {
+                                                        const ticketErrors = errors.infant?.length && errors.infant[i] || {};
+                                                        const ticketTouched = touched.infant?.length && touched.infant[i] || {};
+                                                        return (
+                                                            <>
+                                                            <div key={i} className="list-group list-group-flush" >
+                                                                <div className="list-group-item">
+                                                                    <h5 className="card-title">infant {i + 1}</h5>
+                                                                    <div className="form-row" style={{display:'flex'}}>
+                                                                        <div className="form-group col-6">
+                                                                            <label>Title</label>
+
+                                                                            <Field as="select" name={`infant.${i}.title`}>
+                                                                                <option value="0">Select</option>
+                                                                                <option value="mrs">Mrs</option>
+                                                                                <option value="ms">Ms</option>
+                                                                            </Field>
+
+                                                                            <ErrorMessage name={`infant.${i}.title`} component="div" className="invalid-feedback" />
+                                                                        </div>
+                                                                        <div className="form-group col-6">
+                                                                            <label>First Name</label>
+                                                                            <Field name={`infant.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                                            <ErrorMessage name={`infant.${i}.firstname`} component="div" className="invalid-feedback" />
+                                                                        </div>
+                                                                        <div className="form-group col-6">
+                                                                            <label>Last Name</label>
+                                                                            <Field name={`infant.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
+                                                                            <ErrorMessage name={`infant.${i}.lastname`} component="div" className="invalid-feedback" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <Box>
+                                                                <Typography>ADD PASSPORT INFORMATION</Typography>
+                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
+                                                                    <Box>
+                                                                            <label>Nationality</label>
+                                                                            <Field as="select" name={`infant.${i}.passportinfo.nationality`}>
+                                                                                <option value="0">Select</option>
+                                                                                <option value="mrs">Mrs</option>
+                                                                                <option value="ms">Ms</option>
+                                                                            </Field>
+                                                                    </Box>
+                                                                    <Box>
+                                                                        <label>Passport No</label>
+                                                                        <Field name={`infant.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+
+                                                                    </Box>
+                                                                    <Box>
+                                                                        <label>Issue Date</label>
+                                                                        <DatePicker    
+                                                                            name={`infant.${i}.passportinfo.issuedate`}
+                                                                            selected={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
+                                                                            value={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`infant.${i}.passportinfo.issuedate`, e)
+                                                                            }   
+                                                                            />
+
+                                                                    </Box>
+                                                                    <Box>
+                                                                        Expiry Date
+                                                                        <DatePicker    
+                                                                            name={`infant.${i}.passportinfo.expiredate`}
+                                                                            selected={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
+                                                                            value={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`infant.${i}.passportinfo.expiredate`, e)
+                                                                            }   
+                                                                            />
+                                                                    </Box>
+                                                                    <Box>
+                                                                        Date of Birth
+                                                                        <DatePicker    
+                                                                            name={`infant.${i}.passportinfo.dob`}
+                                                                            selected={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
+                                                                            value={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
+                                                                            onChange={(e) =>
+                                                                            setFieldValue(`infant.${i}.passportinfo.dob`, e)
+                                                                            }   
+                                                                            />
+                                                                    </Box>
+
+                                                                </Box>
+                                                            </Box>
+                                                            </>
+                                                        );
+                                                    }))}
+                                                    </FieldArray>
+                                            }
 
 
 
-                                </Formik>
+                                {/* { values?.baggage?.length > 0  && 
+                                
+                                <FieldArray name="baggagemeals" >
+                                {() => (values.baggage.map((baggagemeals, i) => {
+                                const ticketErrors = errors.baggagemeals?.length && errors.baggagemeals[i] || {};
+                                const ticketTouched = touched.baggagemeals?.length && touched.baggagemeals[i] || {};
+                                return (
+                                    <>
+                                    
+
+                                    <Box key={i}>
+                                        <Box style={{ display:'flex',justifyContent:'space-between' }}>
+                                           
+                                            <Box>
+                                                <label>Baggage</label>
+                                                <Field name={`baggagemeals.${i}.baggage`} type="text" className={'form-control'} />
+                                            </Box>
+
+                                            <Box>
+                                                <label>Meals</label>
+                                                <Field name={`baggagemeals.${i}.meals`} type="text" className={'form-control'} />
+                                            </Box>
+                                           
+
+                                        </Box>
+                                    </Box>
+                                    </>
+                                );
+                            }))}
+                            </FieldArray>
+                                
+                                } */}
+
+
+
+
+
+                             
 
                               
                         </Box>
@@ -306,275 +731,109 @@ export default function Step2(props){
                     <Box className="flight_addon_tab">
                         <TabsUnstyled defaultValue={0} >
                             <TabsListUnstyled className='tablistnav'>
-                                <TabUnstyled>Add Baggage</TabUnstyled>
-                                <TabUnstyled>Meals</TabUnstyled>
-                                <TabUnstyled>Seats</TabUnstyled>
+                                <TabUnstyled>Add Baggage , Meals</TabUnstyled>
+                                {/* <TabUnstyled>Meals</TabUnstyled> */}
+                                <TabUnstyled onChange={()=> getflightapi() }>Seats</TabUnstyled>
                             </TabsListUnstyled>
                             <TabPanelUnstyled value={0} >
-                                <Grid container alignItems={'center'}>
-                                    <Grid item sx={{ paddingX : 2 }}>
-                                        <Typography>{'1'} Adult</Typography>
-                                    </Grid>
-                                    <Grid item md={3}>
-                                        <Box className="location_badge">
-                                            <Typography>New Delhi</Typography>
-                                            <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                            <Typography>Chennai</Typography>
+
+                                { data?.tripInfos?.length > 0 &&  
+                                data?.tripInfos?.map((a,pi)=>(
+                                    
+                                    <>
+                                    { a?.sI.map((b,pii)=>(
+                                        <>
+                                        {
+                                            b?.ssrInfo?.BAGGAGE?.length > 0 && b?.ssrInfo?.MEAL?.length > 0 &&
+                                            <>
+                                            <Typography> { b?.da?.city } - { b?.aa?.city } on { moment(b?.dt).format("ddd, MMM Do YYYY ") } </Typography> 
+                                 
+                                 { values?.baggage?.length > 0  && 
+                                
+                                <FieldArray name="baggagemeals" key={'bagg'}>
+                                {() => (values.baggage.map((baggagemeals, i) => {
+                                return (
+                                    <>
+                                    <Box key={i}>
+                                        <Typography><label>{baggagemeals.label}{baggagemeals.value}</label></Typography>
+                                        <Box style={{ display:'flex',justifyContent:'space-between' }}>
+                                           
+                                            <Box>
+                                             <label>Baggage</label>
+                                                <Field as="select" name={`baggagemeals.${pi + pii}.${baggagemeals.label}.${i}.baggage`}>
+                                                                                <option value="0">Select</option>
+                                                                                { b?.ssrInfo?.BAGGAGE.length > 0 && b?.ssrInfo?.BAGGAGE.map((bagg)=>(
+                                                                                    <option value={bagg.code}>{bagg.desc} @ {bagg.amount}</option>
+                                                                                ))}
+                                                                            </Field>
+                                            </Box>
+
+                                            <Box>
+                                                <label>Meals</label>
+                                                <Field as="select" name={`baggagemeals.${pi + pii}.${baggagemeals.label}.${i}.meals`}>
+                                                                                <option value="0">Select</option>
+                                                                                { b?.ssrInfo?.MEAL.length > 0 && b?.ssrInfo?.MEAL.map((meal)=>(
+                                                                                    <option value={meal.code}>{meal.desc} @ {meal.amount}</option>
+                                                                                ))}
+                                                                            </Field>
+                                            </Box>
+                                           
+
                                         </Box>
-                                    </Grid>
-                                    <Grid item sx={{ paddingX : 3 }}>
-                                        <Typography className="date">{'Wed Jun 01 2022'}</Typography>
-                                    </Grid>
-                                    <Grid item md={4}>
-                                        <FormControl sx={{ width: '100%' }}> 
-                                        <InputLabel id="baggage-label">Baggage Information</InputLabel>
-                                            <Select
-                                                size="small"
-                                                labelId="demo-simple-select-helper-label"
-                                                id="baggage-label-helper"
-                                                value={baggageInfo}
-                                                label="Baggage Information"
-                                                onChange={changeBaggageInfo} >
+                                    </Box>
 
-                                                <MenuItem value="">
-                                                    <em>None</em>
-                                                </MenuItem>
-                                                <MenuItem value={10}>10Kg @ 1,807</MenuItem>
-                                                <MenuItem value={20}>15Kg @ 1,807</MenuItem>
-                                                <MenuItem value={30}>20Kg @ 1,807</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
+                                    </>
+                                );
+                                }))}
+                                </FieldArray>
+                                
+                                } 
 
-                                <Grid container alignItems={'center'} sx={{ marginTop: 3}}>
-                                    <Grid item sx={{ paddingX : 2 }}>
-                                        <Typography>{'1'} Adult</Typography>
-                                    </Grid>
-                                    <Grid item md={3}>
-                                        <Box className="location_badge">
-                                            <Typography>New Delhi</Typography>
-                                            <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                            <Typography>Chennai</Typography>
-                                        </Box>
-                                    </Grid>
-                                    <Grid item sx={{ paddingX : 3 }}>
-                                        <Typography className="date">{'Wed Jun 01 2022'}</Typography>
-                                    </Grid>
-                                    <Grid item md={4}>
-                                        <FormControl sx={{ width: '100%' }}> 
-                                        <InputLabel id="baggage-label">Baggage Information</InputLabel>
-                                            <Select
-                                                size="small"
-                                                labelId="demo-simple-select-helper-label"
-                                                id="baggage-label-helper"
-                                                value={baggageInfo}
-                                                label="Baggage Information"
-                                                onChange={changeBaggageInfo} >
+                                            </>
+                                            
+                                        }
 
-                                                <MenuItem value="">
-                                                    <em>None</em>
-                                                </MenuItem>
-                                                <MenuItem value={10}>10Kg @ 1,807</MenuItem>
-                                                <MenuItem value={20}>15Kg @ 1,807</MenuItem>
-                                                <MenuItem value={30}>20Kg @ 1,807</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
+                               
+                                       
+                                        </>
+                                    ))}
+
+                                    </>
+                                )) }
+                               
+
+
                             </TabPanelUnstyled>
+
+
+                           
                             <TabPanelUnstyled value={1}>
-                                <Box className="wrapper meals_wrapper">
-                                    <TabsUnstyled defaultValue={0} orientation="vertical" className="mealstab">
-                                        <Grid container justifyContent={'space-between'}> 
-                                            <Grid item style={{ maxWidth : 240 }}>
-                                                <TabsListUnstyled className='tablistnav noborder'>
-                                                    <TabUnstyled>
-                                                        <Typography style={{ fontSize : 13 }}>Adult</Typography>
-                                                        <Typography className="place_text" style={{ fontWeight : '300' }}>{'New Delhi'}
-                                                        <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                                        {'Chennai'}</Typography>
-                                                        <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">{'Fri Jun 05 2022'}</Typography>
-                                                    </TabUnstyled>
-                                                    <TabUnstyled>
-                                                        <Typography style={{ fontSize : 13 }}>Adult</Typography>
-                                                        <Typography className="place_text" style={{ fontWeight : '300' }}>{'New Delhi'}
-                                                        <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                                        {'Chennai'}</Typography>
-                                                        <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">{'Fri Jun 05 2022'}</Typography>
-                                                    </TabUnstyled>
-                                                </TabsListUnstyled>
-                                            </Grid>
-                                            <Grid item md={8}>
-                                                <TabPanelUnstyled value={0}>
-                                                    <Box className="foodlist">
-                                                        <Box className="fooditem">
-                                                            <Box className="thumbnail">
-                                                                <img src={require('../../assets/food/cookie.png')} alt="food" />
-                                                            </Box>
-                                                            <Typography className="foofname">UNIBIC CHOCOLATE CHIPS COOKIES 50 GMS</Typography>
-                                                            <Typography className="fprice" >₹ {'175'}</Typography>
-                                                            <Box className="quantity"
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    '& > *': {
-                                                                    m: 1,
-                                                                    },
-                                                                }} >
-                                                                <ButtonGroup size="small" aria-label="small button group" className={'qtygroup'}>
-                                                                     <Button key="increment">+</Button>
-                                                                    <TextField size="small"></TextField>
-                                                                    <Button key="decrement">-</Button>
-                                                                </ButtonGroup>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box className="fooditem" style={{ marginTop : 2 }}>
-                                                            <Box className="thumbnail">
-                                                                <img src={require('../../assets/food/cookie.png')} alt="food" />
-                                                            </Box>
-                                                            <Typography className="foofname">UNIBIC CHOCOLATE CHIPS COOKIES 50 GMS</Typography>
-                                                            <Typography className="fprice" >₹ {'175'}</Typography>
-                                                            <Box className="quantity"
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    '& > *': {
-                                                                    m: 1,
-                                                                    },
-                                                                }} >
-                                                                <ButtonGroup size="small" aria-label="small button group" className={'qtygroup'}>
-                                                                     <Button key="increment">+</Button>
-                                                                    <TextField size="small"></TextField>
-                                                                    <Button key="decrement">-</Button>
-                                                                </ButtonGroup>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box className="fooditem" style={{ marginTop : 2 }}>
-                                                            <Box className="thumbnail">
-                                                                <img src={require('../../assets/food/cookie.png')} alt="food" />
-                                                            </Box>
-                                                            <Typography className="foofname">UNIBIC CHOCOLATE CHIPS COOKIES 50 GMS</Typography>
-                                                            <Typography className="fprice" >₹ {'175'}</Typography>
-                                                            <Box className="quantity"
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    '& > *': {
-                                                                    m: 1,
-                                                                    },
-                                                                }} >
-                                                                <ButtonGroup size="small" aria-label="small button group" className={'qtygroup'}>
-                                                                     <Button key="increment">+</Button>
-                                                                    <TextField size="small"></TextField>
-                                                                    <Button key="decrement">-</Button>
-                                                                </ButtonGroup>
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                </TabPanelUnstyled>
-                                                <TabPanelUnstyled value={1}>
-                                                    <Box className="foodlist">
-                                                        <Box className="fooditem">
-                                                            <Box className="thumbnail">
-                                                                <img src={require('../../assets/food/cookie.png')} alt="food" />
-                                                            </Box>
-                                                            <Typography className="foofname">UNIBIC CHOCOLATE CHIPS COOKIES 50 GMS</Typography>
-                                                            <Typography className="fprice" >₹ {'175'}</Typography>
-                                                            <Box className="quantity"
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    '& > *': {
-                                                                    m: 1,
-                                                                    },
-                                                                }} >
-                                                                <ButtonGroup size="small" aria-label="small button group" className={'qtygroup'}>
-                                                                     <Button key="increment">+</Button>
-                                                                    <TextField size="small"></TextField>
-                                                                    <Button key="decrement">-</Button>
-                                                                </ButtonGroup>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box className="fooditem" style={{ marginTop : 2 }}>
-                                                            <Box className="thumbnail">
-                                                                <img src={require('../../assets/food/cookie.png')} alt="food" />
-                                                            </Box>
-                                                            <Typography className="foofname">UNIBIC CHOCOLATE CHIPS COOKIES 50 GMS</Typography>
-                                                            <Typography className="fprice" >₹ {'175'}</Typography>
-                                                            <Box className="quantity"
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    '& > *': {
-                                                                    m: 1,
-                                                                    },
-                                                                }} >
-                                                                <ButtonGroup size="small" aria-label="small button group" className={'qtygroup'}>
-                                                                     <Button key="increment">+</Button>
-                                                                    <TextField size="small"></TextField>
-                                                                    <Button key="decrement">-</Button>
-                                                                </ButtonGroup>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box className="fooditem" style={{ marginTop : 2 }}>
-                                                            <Box className="thumbnail">
-                                                                <img src={require('../../assets/food/cookie.png')} alt="food" />
-                                                            </Box>
-                                                            <Typography className="foofname">UNIBIC CHOCOLATE CHIPS COOKIES 50 GMS</Typography>
-                                                            <Typography className="fprice" >₹ {'175'}</Typography>
-                                                            <Box className="quantity"
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'column',
-                                                                    alignItems: 'center',
-                                                                    '& > *': {
-                                                                    m: 1,
-                                                                    },
-                                                                }} >
-                                                                <ButtonGroup size="small" aria-label="small button group" className={'qtygroup'}>
-                                                                    <Button key="increment">+</Button>
-                                                                    <FormControl  >
-                                                                        <TextField size="small" ></TextField>
-                                                                    </FormControl>
-                                                                    <Button key="decrement">-</Button>
-                                                                </ButtonGroup>
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                </TabPanelUnstyled>
-                                            </Grid>
-                                        </Grid>
-                                    </TabsUnstyled>
-                                </Box>
-                            </TabPanelUnstyled>
-                            <TabPanelUnstyled value={2}>
                                 <Box className="wrapper seats_wrapper">
                                     <TabsUnstyled defaultValue={0} orientation="vertical" className="mealstab">
                                         <Grid container> 
                                             <Grid item style={{ maxWidth : 240 }}>
                                                 <TabsListUnstyled className='tablistnav noborder'>
-                                                    <TabUnstyled>
-                                                        <Typography style={{ fontSize : 13 }}>Adult</Typography>
-                                                        <Typography className="place_text" style={{ fontWeight : '300' }}>{'New Delhi'}
-                                                        <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                                        {'Chennai'}</Typography>
-                                                        <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">{'Fri Jun 05 2022'}</Typography>
-                                                    </TabUnstyled>
-                                                    <TabUnstyled>
-                                                        <Typography style={{ fontSize : 13 }}>Adult</Typography>
-                                                        <Typography className="place_text" style={{ fontWeight : '300' }}>{'New Delhi'}
-                                                        <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                                        {'Chennai'}</Typography>
-                                                        <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">{'Fri Jun 05 2022'}</Typography>
-                                                    </TabUnstyled>
-                                                </TabsListUnstyled>
 
+                                           
+                                                { data?.tripInfos?.map((p,pi)=>(
+                                                <>
+                                                    { p?.sI?.map((pp,ppi)=>( 
+                                                        <TabUnstyled onClick={()=>getSets(pp )}>
+                                                        <Typography className="place_text" style={{ fontWeight : '300' }}>{pp.da.city}
+                                                        <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
+                                                        {pp.aa.city}</Typography>
+                                                        <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">on { moment(pp?.dt).format("MMM Do YYYY ") } </Typography>
+                                                        </TabUnstyled>
+                                                    ))}
+                                                </>
+                                                   
+
+                                            )) }
+                                               
+
+
+                                                </TabsListUnstyled>
+{/* 
                                                 <Box className="seatsinfo">
                                                     <Typography className="title">Adult {1}</Typography>
                                                     <Box className="hint price_low">
@@ -591,44 +850,12 @@ export default function Step2(props){
                                                             <CrossIcon />
                                                         </Box> <Typography component={'span'}>Occupied</Typography>
                                                     </Box>
-                                                </Box>
+                                                </Box> */}
                                             </Grid>
                                             <Grid item md={8}>
                                                 <TabPanelUnstyled value={0}>
-                                                    <Box className="seatsbox" sx={{ display : 'flex', width : 'fit-content', marginLeft : 'auto' }}> 
-                                                        <div className="seats_row">
-                                                            <Typography className="flight_seat_title">Front</Typography>
-                                                            {Array.apply(0, Array(15)).map(function (x, i) {
-                                                                return  <Grid container>
-                                                                            <Grid item className="seatno">
-                                                                                {i+1}
-                                                                            </Grid>
-                                                                            <Grid item>
-                                                                                <Checkbox className="seatselect" {...label}  sx={{ '& .MuiSvgIcon-root': { fontSize: 40 } }} icon={<SeatEmty />} checkedIcon={<CompleteIcon className="complete_icon"/>}  /> 
-                                                                            </Grid>
-                                                                            <Grid item>
-                                                                                <Checkbox {...label}  sx={{ '& .MuiSvgIcon-root': { fontSize: 40 } }} icon={<SeatEmty />} checkedIcon={<CompleteIcon className="complete_icon"/>}  /> 
-                                                                            </Grid>
-                                                                            <Grid item>
-                                                                                <Checkbox {...label}  sx={{ '& .MuiSvgIcon-root': { fontSize: 40 } }} icon={<SeatEmty />} checkedIcon={<CompleteIcon className="complete_icon"/>}  /> 
-                                                                            </Grid>
-                                                                            <Grid item className="empty"></Grid>
-                                                                            <Grid item>
-                                                                                <Checkbox {...label}  sx={{ '& .MuiSvgIcon-root': { fontSize: 40 } }} icon={<SeatEmty />} checkedIcon={<CompleteIcon className="complete_icon"/>}  /> 
-                                                                            </Grid>
-                                                                            <Grid item>
-                                                                                <Checkbox {...label} disabled sx={{ '& .MuiSvgIcon-root': { fontSize: 40 } }} icon={<CrossIcon />} checkedIcon={<CompleteIcon className="complete_icon"/>}  /> 
-                                                                            </Grid>
-                                                                            <Grid item>
-                                                                                <Checkbox {...label}  sx={{ '& .MuiSvgIcon-root': { fontSize: 40 } }} icon={<SeatEmty />} checkedIcon={<CompleteIcon className="complete_icon"/>}  /> 
-                                                                            </Grid>
-                                                                            <Grid item className="seatno">
-                                                                                {i+1}
-                                                                            </Grid>
-                                                                        </Grid>                                               
-                                                            })}
-                                                        </div>
-                                                    </Box>
+                                            { seatloading &&  <Typography>LOADING.....</Typography> }
+                                               
                                                 </TabPanelUnstyled>
                                                 <TabPanelUnstyled value={1}>
                                                     
@@ -641,6 +868,23 @@ export default function Step2(props){
                         </TabsUnstyled>                        
                     </Box>
                 </Box>
+
+
+                                                    <button type="submit">Form Submit</button>
+
+
+
+</Form>
+)}
+
+
+
+</Formik>
+
+
+
+
+
 
                 <Modal
                     className="review_step"

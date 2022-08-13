@@ -41,7 +41,7 @@ export default function Step3(props){
         <div>
             <Box className="stepWrapper">
                 <Box className="stepcontHeader">
-                    <Typography className="stitle">{stepObj.label}</Typography>
+                    <Typography className="stitle">3</Typography>
                 </Box>
 
                 <Box className="boxcont">
