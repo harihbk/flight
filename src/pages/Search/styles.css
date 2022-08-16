@@ -1,3 +1,4 @@
+
 .innerwrapper{
     /* background-image: url(../../assets/icons/images/banner-01.svg); */
 }
@@ -49,7 +50,7 @@
 }
 
 .searchPage {
-    background: linear-gradient(to bottom, #2e3563 400px, #f2f0f3 20%);
+    background: linear-gradient(to bottom, #2e3563 400px, #f2f0f3 400px);
 }
 .bookingStripe_search  .tripType{
     max-width: 103px;

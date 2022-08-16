@@ -37,7 +37,7 @@
 .booking_input{
     border: 2px solid #c0c0c2;
     border-radius: 8px;
-    height:47px;
+    height:78px;
     background: rgb(255, 255, 255);
     cursor: pointer;
     position: relative;
@@ -76,7 +76,10 @@
     padding-left: 45px;
 }
 .departure.booking_input, .return.booking_input {
-    max-width: 110px;
+    max-width: 146px;
+}
+.return.booking_input .inputTitle{
+    line-height: 1.2em;
 }
 .traveler.booking_input{
     max-width: 155px;
