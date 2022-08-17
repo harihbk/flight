@@ -13,6 +13,7 @@ import * as Yup from "yup";
 import moment from 'moment'
 import axios from "axios";
 import Seatpopup from "./seatpopup"
+import Skeleton from '@mui/material/Skeleton';
 
 import { ErrorMessage, Field, FieldArray, Form, Formik ,useFormikContext , getIn} from "formik";
 
@@ -343,7 +344,7 @@ export default function Step2(props){
         setRowid(pp.id)
         setSelectflightdetail(pp)
         let curr_row  = seats?.tripSeat?.[pp.id]
-        console.log(curr_row);
+       // console.log(curr_row);
         if(curr_row == undefined){
             alert("Seat Selection not applicable")
         }else{
@@ -353,11 +354,36 @@ export default function Step2(props){
              
     }
 
+   
+
+    function seatbookingreturntoparentfn(temp){
+        let updateCurrflightdetial = [...currflightdetial]
+        let getRowid = rowid;
+        console.log(getRowid);
+        // console.log(updateCurrflightdetial);
+
+
+        var ind ;
+        for (const key in updateCurrflightdetial) {
+            if (Object.hasOwnProperty.call(updateCurrflightdetial, key)) {
+              const element = Object.keys(updateCurrflightdetial[key]);
+              if(element == getRowid){
+                ind = key
+              }
+            }
+          }
+
+        updateCurrflightdetial[ind][rowid] = temp
+        setCurrflightdetial(updateCurrflightdetial)
+        // console.log(getobjbuid);
+        // console.log(temp);
+    }
+
     
 
     return(
         <div>
-          { open   &&  <Seatpopup _open={open} _rowid={rowid} _setOpen={setOpen} _selectflightdetail={selectflightdetail} _currentrow={currentrow} _currflightdetial={currflightdetial}/>} 
+          { open   &&  <Seatpopup _open={open} _rowid={rowid} _setOpen={setOpen} _selectflightdetail={selectflightdetail} _currentrow={currentrow} _currflightdetial={currflightdetial} seatbookingreturntoparentfn={seatbookingreturntoparentfn}/>} 
             <Box className="stepWrapper">
                 <Box className="stepcontHeader">
                     <Typography className="stitle">dsf</Typography>
@@ -731,7 +757,7 @@ export default function Step2(props){
                     <Box className="flight_addon_tab">
                         <TabsUnstyled defaultValue={0} >
                             <TabsListUnstyled className='tablistnav'>
-                                <TabUnstyled>Add Baggage , Meals</TabUnstyled>
+                                <TabUnstyled>Add Baggage,Meals</TabUnstyled>
                                 {/* <TabUnstyled>Meals</TabUnstyled> */}
                                 <TabUnstyled onChange={()=> getflightapi() }>Seats</TabUnstyled>
                             </TabsListUnstyled>
@@ -808,62 +834,50 @@ export default function Step2(props){
 
                            
                             <TabPanelUnstyled value={1}>
-                                <Box className="wrapper seats_wrapper">
-                                    <TabsUnstyled defaultValue={0} orientation="vertical" className="mealstab">
-                                        <Grid container> 
-                                            <Grid item style={{ maxWidth : 240 }}>
-                                                <TabsListUnstyled className='tablistnav noborder'>
 
-                                           
-                                                { data?.tripInfos?.map((p,pi)=>(
-                                                <>
-                                                    { p?.sI?.map((pp,ppi)=>( 
-                                                        <TabUnstyled onClick={()=>getSets(pp )}>
-                                                        <Typography className="place_text" style={{ fontWeight : '300' }}>{pp.da.city}
-                                                        <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                                        {pp.aa.city}</Typography>
-                                                        <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">on { moment(pp?.dt).format("MMM Do YYYY ") } </Typography>
-                                                        </TabUnstyled>
-                                                    ))}
-                                                </>
-                                                   
+                            { seatloading == false && 
+                            <Box className="wrapper seats_wrapper">
+                            <TabsUnstyled defaultValue={0} orientation="vertical" className="mealstab">
+                                        <TabsListUnstyled className='tablistnav noborder'>
+                                        { data?.tripInfos?.map((p,pi)=>(
+                                        <>
+                                            { p?.sI?.map((pp,ppi)=>( 
+                                                <Grid container style={{ width : '100%'}} justifyContent="space-between">
+                                                <Grid item style={{ width : '20%'}}>
+                                                    <TabUnstyled >
+                                                    <Typography className="place_text" style={{ fontWeight : '300' }}>{pp.da.city}
+                                                    <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
+                                                    {pp.aa.city}</Typography>
+                                                    <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">on { moment(pp?.dt).format("MMM Do YYYY ") } </Typography>
+                                                    </TabUnstyled>
+                                                </Grid>
+                                                <Grid>
+                                                    no Seat Selected
+                                                </Grid>
+                                                <Grid>
+                                                    <Button variant="outlined" onClick={()=>getSets(pp )}>Show Seat Map</Button>
+                                                </Grid>
+                                                </Grid>     
+                                            ))}
+                                        </>
+                                    )) }
+                                        </TabsListUnstyled>
+                            </TabsUnstyled>
+                        </Box>
+                            }
 
-                                            )) }
-                                               
+                    { seatloading == true &&  
+                        <Box sx={{ width: '100%' }}>
+                            <Skeleton />
+                            <Skeleton animation="wave" />
+                            <Skeleton animation={false} />
+                        </Box>
+                    }
+                                
 
 
-                                                </TabsListUnstyled>
-{/* 
-                                                <Box className="seatsinfo">
-                                                    <Typography className="title">Adult {1}</Typography>
-                                                    <Box className="hint price_low">
-                                                        <Box className="icon"></Box> <Typography component={'span'}>600</Typography>
-                                                    </Box>
-                                                    <Box className="hint price_med">
-                                                        <Box className="icon"></Box> <Typography component={'span'}>1144</Typography>
-                                                    </Box>
-                                                    <Box className="hint price_high">
-                                                        <Box className="icon"></Box> <Typography component={'span'}>1907</Typography>
-                                                    </Box>
-                                                    <Box className="hint booked">
-                                                        <Box className="icon">
-                                                            <CrossIcon />
-                                                        </Box> <Typography component={'span'}>Occupied</Typography>
-                                                    </Box>
-                                                </Box> */}
-                                            </Grid>
-                                            <Grid item md={8}>
-                                                <TabPanelUnstyled value={0}>
-                                            { seatloading &&  <Typography>LOADING.....</Typography> }
-                                               
-                                                </TabPanelUnstyled>
-                                                <TabPanelUnstyled value={1}>
-                                                    
-                                                </TabPanelUnstyled>
-                                            </Grid>
-                                        </Grid>
-                                    </TabsUnstyled>
-                                </Box>
+
+
                             </TabPanelUnstyled>
                         </TabsUnstyled>                        
                     </Box>

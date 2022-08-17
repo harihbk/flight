@@ -521,7 +521,8 @@ export default function Comboview(props) {
                                                                                     />
                                                                                 </span>
                                                                                 <span>₹</span>
-                                                                            {helpers.calculatetotalamount(totaldata,_paxtypeget)} 
+                                                                            {helpers.calculatetotalamount(totaldata,_paxtypeget)}
+                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}}>{totaldata.fareIdentifier}</Typography> 
                                                                             </div>
                                                                                 </Typography>
                                                                                 <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ _cabinClassget }</Typography>

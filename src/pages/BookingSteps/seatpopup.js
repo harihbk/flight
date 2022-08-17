@@ -10,6 +10,7 @@ import { Paper } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Grid } from '@mui/material';
 import colors from "./colors"
+import cloneDeep from 'lodash/cloneDeep';
 
 
 import "antd/dist/antd.css";
@@ -24,7 +25,7 @@ function Emptycol(){
 }
 
 export default function MaxWidthDialog(props) {
-  let { _open , _setOpen , _currentrow , _selectflightdetail , _currflightdetial ,_rowid } = props
+  let { _open , _setOpen , _currentrow , _selectflightdetail , _currflightdetial ,_rowid , seatbookingreturntoparentfn} = props
 
 
   const [fullWidth, setFullWidth] = React.useState(true);
@@ -32,22 +33,23 @@ export default function MaxWidthDialog(props) {
   const [ listprice , setListprice ] = React.useState([])
   const [ temporary , setTemporary ] = React.useState([])
   const [ indexset , setIndexset ] = React.useState(0)
-  const [ prevrow , setPrevrow ] = React.useState('')
+  const [ prevrow , setPrevrow ] = React.useState([])
 
-
+  
   React.useEffect(()=>{
     var ind
-    for (const key in _currflightdetial) {
-      if (Object.hasOwnProperty.call(_currflightdetial, key)) {
-        const element = Object.keys(_currflightdetial[key]);
+    let _currflightdetials = [..._currflightdetial]
+    for (const key in _currflightdetials) {
+      if (Object.hasOwnProperty.call(_currflightdetials, key)) {
+        const element = Object.keys(_currflightdetials[key]);
         if(element == _rowid){
           ind = key
         }
       }
     }
-    let allocateseat = _currflightdetial[ind][_rowid]
+    let allocateseat = [..._currflightdetials[ind][_rowid]]
     setTemporary(allocateseat)
-  },[_currflightdetial])
+  },[])
 
   
 
@@ -84,6 +86,8 @@ export default function MaxWidthDialog(props) {
   };
 
   const handleClose = () => {
+    setIndexset(0);
+    setTemporary([]);
     _setOpen(false);
   };
 
@@ -109,12 +113,12 @@ export default function MaxWidthDialog(props) {
 
    function seatselect(ind){
    let curr = currd?.[ind]
-   console.log(currd);
-   console.log(ind);
+  
+   let seats = temporary.map(e=>e.seat).filter(n=>n)
 
     switch (curr?.isBooked) {
       case false:
-        return <Button  variant="outlined" style={{ backgroundColor: curr.color}} onClick={()=>seatselection(curr)}>{curr.seatNo}</Button>
+        return <Button  variant="outlined" style={{ backgroundColor:  ( seats.includes(curr.code) ? '#c8ee90' : curr.color )  }} onClick={()=>seatselection(curr)}>{curr.seatNo}</Button>
       case true:
         return <Button color="error" variant="contained" style={{ cursor : 'not-allowed' }}>{curr.seatNo}</Button>
     }
@@ -125,30 +129,37 @@ export default function MaxWidthDialog(props) {
 
   function seatselection(row){
 
-    let temp = [...temporary]
+ //   let temp = [...temporary]
+    let temp = cloneDeep(temporary);
+
     let code = row.code;
     let indx = temp.findIndex(a => a.seat == row.code)
+
+
+    let _currdindx = _currentrow?.sInfo.findIndex(a=>a.code == temp[indexset]['seat']);
+
+    let amt = _currentrow?.sInfo[_currdindx]?.amount
+   let idx = listprice.findIndex(d=>d.amount == amt)
+   if(_currentrow?.sInfo[_currdindx]){
+    _currentrow.sInfo[_currdindx].color =  listprice[idx]?.color
+   }
+
     if(indx == -1){
       row.color = "#c8ee90"
       temp[indexset]['seat'] = row.code
       temp[indexset]['fees'] = row.amount
       setTemporary(temp)
     } 
-    let temp1 = [...temporary]
-
-   let seat =  temp1[indexset].seat
-   let _currdindx = _currentrow?.sInfo.findIndex(a=>a.code == seat)
-   if(_currdindx != -1){
-    console.log(_currdindx);
-   }
-   
-
   }
 
   const temporarySeta = (a,i) => {
     setIndexset(i)
-    // console.log(i);
-    // console.log(a);
+  }
+
+  const onProcess = () => {
+    let temp = cloneDeep(temporary);
+    seatbookingreturntoparentfn(temp)
+    _setOpen(false);
   }
 
 
@@ -207,7 +218,7 @@ export default function MaxWidthDialog(props) {
                ))}
               </tbody>
             </table>
-            <Button variant="outlined">Process</Button>
+            <Button variant="outlined" onClick={()=>onProcess()}>Process</Button>
           </Box>
         </Box>
 
