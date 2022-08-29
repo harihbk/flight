@@ -74,3 +74,45 @@ body .color_secondary.Mui-disabled{
   opacity: .4;
   color: #fff;
 }
+
+/* form styles */
+.form-control {
+  display: block;
+  width: 100%;
+  height: 45px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.invalid-feedback {
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: #c00;
+}
+
+.flist_drop li:not(:last-child){
+  /* border-top: 1px solid #e8e8e8; */
+}
+.flist_drop  .MuiListItemText-secondary{
+  font-size: 13px;
+}
+.adult_list{
+  border: 1px solid #ccc;
+  box-shadow: none !important;
+  border-radius: 5px !important;
+}
+
+.adult_title {
+  font-weight: 500;
+  text-align: center;
+} 
+
+
+body .dropdown_box{
+  box-shadow: 0px 6px 10px 0px #00000017
+}
+
+.formpicker{
+  
+}

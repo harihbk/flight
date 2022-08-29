@@ -483,7 +483,7 @@ export default function Step2(props){
           { open   &&  <Seatpopup _open={open} _rowid={rowid} _setOpen={setOpen} _selectflightdetail={selectflightdetail} _currentrow={currentrow} _currflightdetial={currflightdetial} seatbookingreturntoparentfn={seatbookingreturntoparentfn}/>} 
             <Box className="stepWrapper">
                 <Box className="stepcontHeader">
-                    <Typography className="stitle">dsf</Typography>
+                    <Typography className="stitle">Passenger Details</Typography>
                 </Box>
 
                 <Formik 
@@ -499,110 +499,111 @@ export default function Step2(props){
 
                 <Box className="boxcont">
                     <Box className="form">
-                        <Box className="form_item">
-                            <Box className="formtitle" sx={{ marginBottom : 2 }}> 
-                                <Box className="icon"></Box> <Typography>Adult {'1'}</Typography>
-                            </Box>
+                        <Box className="form_item_wrapper">
+                                <FieldArray name="adult" key={'adults'}>
+                                        {() => (values.adult.map((adult, i) => {
+                                        const ticketErrors = errors.adult?.length && errors.adult[i] || {};
+                                        const ticketTouched = touched.adult?.length && touched.adult[i] || {};
+                                        return (
+                                            <>
+                                            <Box key={i} className="list-group list-group-flush adultdetail" sx={{ marginBottom : 3 }}>
+                                                <Box className="list-group-item">
+                                                    <Box className="formtitle" sx={{ marginBottom : 1 }}> 
+                                                        <Box className="icon"></Box> <Typography>ADULT {i + 1}</Typography>
+                                                    </Box>
+                                                    <Box className="form-row" style={{display:'flex'}}>
+                                                        <Grid container spacing={2}>
+                                                            <Grid item md={4} className="form-group col-6">
+                                                                <label>Title1</label>
 
-                              
-                                               <FieldArray name="adult" key={'adults'}>
-                                                        {() => (values.adult.map((adult, i) => {
-                                                        const ticketErrors = errors.adult?.length && errors.adult[i] || {};
-                                                        const ticketTouched = touched.adult?.length && touched.adult[i] || {};
-                                                        return (
-                                                            <>
-                                                            <div key={i} className="list-group list-group-flush" >
-                                                                <div className="list-group-item">
-                                                                    <h5 className="card-title">Adult {i + 1}</h5>
-                                                                    <div className="form-row" style={{display:'flex'}}>
-                                                                        <div className="form-group col-6">
-                                                                            <label>Title</label>
+                                                                <Field as="select" name={`adult.${i}.title`} className='form-control'>
+                                                                    <option value="0">Select</option>
+                                                                    <option value="mrs">Mrs</option>
+                                                                    <option value="ms">Ms</option>
+                                                                </Field>
 
-                                                                            <Field as="select" name={`adult.${i}.title`}>
-                                                                                <option value="0">Select</option>
-                                                                                <option value="mrs">Mrs</option>
-                                                                                <option value="ms">Ms</option>
-                                                                            </Field>
+                                                                {/* <Field name={`adult.${i}.title`} type="text" className={'form-control' + (ticketErrors.title && ticketTouched.title ? ' is-invalid' : '' )} /> */}
+                                                                <ErrorMessage name={`adult.${i}.title`} component="div" className="invalid-feedback form-control" />
+                                                            </Grid>
+                                                            <Grid item md={4}  className="form-group col-6">
+                                                                <label>First Name</label>
+                                                                <Field name={`adult.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                                <ErrorMessage name={`adult.${i}.firstname`} component="div" className="invalid-feedback" />
+                                                            </Grid>
+                                                            <Grid item md={4}  className="form-group col-6">
+                                                                <label>Last Name</label>
+                                                                <Field name={`adult.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
+                                                                <ErrorMessage name={`adult.${i}.lastname`} component="div" className="invalid-feedback" />
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
 
-                                                                            {/* <Field name={`adult.${i}.title`} type="text" className={'form-control' + (ticketErrors.title && ticketTouched.title ? ' is-invalid' : '' )} /> */}
-                                                                            <ErrorMessage name={`adult.${i}.title`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                        <div className="form-group col-6">
-                                                                            <label>First Name</label>
-                                                                            <Field name={`adult.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
-                                                                            <ErrorMessage name={`adult.${i}.firstname`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                        <div className="form-group col-6">
-                                                                            <label>Last Name</label>
-                                                                            <Field name={`adult.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
-                                                                            <ErrorMessage name={`adult.${i}.lastname`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                            <Box className="passportdetail" sx={{ marginBottom : 3 }}>
+                                                <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                                    <Box className="icon"></Box> <Typography>ADD PASSPORT INFORMATION</Typography>
+                                                </Box>
+                                                <Grid container spacing={2} >
+                                                    <Grid item md={2}  >
+                                                        <label>Nationality</label>
+                                                        <Field as="select" name={`adult.${i}.passportinfo.nationality`} className='form-control'>
+                                                            <option value="0">Select</option>
+                                                            <option value="mrs">Mrs</option>
+                                                            <option value="ms">Ms</option>
+                                                        </Field>
+                                                    </Grid>
+                                                    <Grid item md={4}  >
+                                                        <label>Passport No</label>
+                                                        <Field name={`adult.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
 
-                                                            <Box>
-                                                                <Typography>ADD PASSPORT INFORMATION</Typography>
-                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
-                                                                    <Box>
-                                                                            <label>Nationality</label>
-                                                                            <Field as="select" name={`adult.${i}.passportinfo.nationality`}>
-                                                                                <option value="0">Select</option>
-                                                                                <option value="mrs">Mrs</option>
-                                                                                <option value="ms">Ms</option>
-                                                                            </Field>
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <label>Passport No</label>
-                                                                        <Field name={`adult.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                    </Grid>
+                                                    <Grid item md={2}  >
+                                                        <label>Issue Date</label>
+                                                        {/* <DatePicker name={`adult.${i}.passportinfo.issuedate`} onChange={e=> datechange(e) }/> */}
+                                                        <DatePicker    
+                                                            className="form-control"
+                                                            name={`adult.${i}.passportinfo.issuedate`}
+                                                            selected={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
+                                                            value={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
+                                                            onChange={(e) =>
+                                                            setFieldValue(`adult.${i}.passportinfo.issuedate`, e)
+                                                            }   
+                                                            />
 
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <label>Issue Date</label>
-                                                                        {/* <DatePicker name={`adult.${i}.passportinfo.issuedate`} onChange={e=> datechange(e) }/> */}
-                                                                        <DatePicker    
-                                                                            name={`adult.${i}.passportinfo.issuedate`}
-                                                                            selected={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
-                                                                            value={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
-                                                                            onChange={(e) =>
-                                                                            setFieldValue(`adult.${i}.passportinfo.issuedate`, e)
-                                                                            }   
-                                                                            />
+                                                    </Grid>
+                                                    <Grid item md={2}  >
+                                                        Expiry Date
+                                                        <DatePicker    
+                                                            className="form-control"
+                                                            name={`adult.${i}.passportinfo.expiredate`}
+                                                            selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                            value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                            onChange={(e) =>
+                                                            setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
+                                                            }   
+                                                            />
+                                                    </Grid>
+                                                    <Grid item md={2}  >
+                                                        Date of Birth
+                                                        <DatePicker   
+                                                            className="form-control" 
+                                                            name={`adult.${i}.passportinfo.dob`}
+                                                            selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                            value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                            onChange={(e) =>
+                                                            setFieldValue(`adult.${i}.passportinfo.dob`, e)
+                                                            }   
+                                                            />
+                                                    </Grid>
 
-                                                                    </Box>
-                                                                    <Box>
-                                                                        Expiry Date
-                                                                        <DatePicker    
-                                                                            name={`adult.${i}.passportinfo.expiredate`}
-                                                                            selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
-                                                                            value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
-                                                                            onChange={(e) =>
-                                                                            setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
-                                                                            }   
-                                                                            />
-                                                                    </Box>
-                                                                    <Box>
-                                                                        Date of Birth
-                                                                        <DatePicker    
-                                                                            name={`adult.${i}.passportinfo.dob`}
-                                                                            selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                                            value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                                            onChange={(e) =>
-                                                                            setFieldValue(`adult.${i}.passportinfo.dob`, e)
-                                                                            }   
-                                                                            />
-                                                                    </Box>
-
-                                                                </Box>
-                                                            </Box>
-                                                            </>
-                                                        );
-                                                    }))}
-                                                    </FieldArray>
-
-                                                    {/* child */}
-
-
+                                                </Grid>
+                                            </Box>
+                                            </>
+                                        );
+                                    }))}
+                                    </FieldArray>
+                                            {/* child */}
                                             { values?.child?.length > 0  && 
                                                <FieldArray name="child" key={'childs'}>
                                                         {() => (values.child.map((child, i) => {
@@ -643,12 +644,12 @@ export default function Step2(props){
                                                                 <Typography>ADD PASSPORT INFORMATION</Typography>
                                                                 <Box style={{ display:'flex',justifyContent:'space-between' }}>
                                                                     <Box>
-                                                                            <label>Nationality</label>
-                                                                            <Field as="select" name={`child.${i}.passportinfo.nationality`}>
-                                                                                <option value="0">Select</option>
-                                                                                <option value="mrs">Mrs</option>
-                                                                                <option value="ms">Ms</option>
-                                                                            </Field>
+                                                                        <label>Nationality</label>
+                                                                        <Field as="select" name={`child.${i}.passportinfo.nationality`}>
+                                                                            <option value="0">Select</option>
+                                                                            <option value="mrs">Mrs</option>
+                                                                            <option value="ms">Ms</option>
+                                                                        </Field>
                                                                     </Box>
                                                                     <Box>
                                                                         <label>Passport No</label>
@@ -756,6 +757,7 @@ export default function Step2(props){
                                                                     <Box>
                                                                         <label>Issue Date</label>
                                                                         <DatePicker    
+                                                                            className="formpicker"
                                                                             name={`infant.${i}.passportinfo.issuedate`}
                                                                             selected={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
                                                                             value={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
@@ -767,7 +769,8 @@ export default function Step2(props){
                                                                     </Box>
                                                                     <Box>
                                                                         Expiry Date
-                                                                        <DatePicker    
+                                                                        <DatePicker  
+                                                                            className="formpicker"  
                                                                             name={`infant.${i}.passportinfo.expiredate`}
                                                                             selected={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
                                                                             value={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
@@ -779,6 +782,7 @@ export default function Step2(props){
                                                                     <Box>
                                                                         Date of Birth
                                                                         <DatePicker    
+                                                                            className="formpicker"
                                                                             name={`infant.${i}.passportinfo.dob`}
                                                                             selected={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
                                                                             value={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
@@ -797,49 +801,51 @@ export default function Step2(props){
                                             }
 
 
-                         <Box>
-                            <Typography>Contact Details</Typography>
-                            <Box display="flex">
-                                <div className="form-group">
-                                <label htmlFor="Country">Country</label>
-                                <Field as="select" name="countryCode">
-                                <option value="0">Select</option>    
-                                    { country.map(d =>(
-                                        <option value={d.code}>{d.country}</option>
-                                    )) }
-                                </Field>
-                                <div className="invalid-feedback">{errors.countryCode}</div>
-                            </div>
+                                <Box className="contact" sx={{ marginTop : 2 }}>
+                                    <Box className="formtitle" sx={{ marginBottom : 1 }}> 
+                                        <Box className="icon"></Box> <Typography>CONTACT DETAILS</Typography>
+                                    </Box>
+                                    <Grid container spacing={2} >
+                                        <Grid item md={2} className="form-group">
+                                            <label htmlFor="Country">Country</label>
+                                            <Field as="select" name="countryCode" className='form-control'>
+                                            <option value="0">Select</option>    
+                                                { country.map(d =>(
+                                                    <option value={d.code}>{d.country}</option>
+                                                )) }
+                                            </Field>
+                                            <div className="invalid-feedback">{errors.countryCode}</div>
+                                        </Grid>
 
 
-                                <div className="form-group">
-                                <label htmlFor="email">Mobile</label>
-                                    <Field
-                                    type="text"
-                                    name="mobile"
-                                    placeholder="Enter mobile"
-                                    autocomplete="off"
-                                    className={`mt-2 form-control
-                                    ${touched.mobile && errors.mobile ? "is-invalid" : ""}`}
-                                    />
-            
-                            <div className="invalid-feedback">{errors.mobile}</div>
+                                        <Grid item md={4} className="form-group">
+                                                <label htmlFor="email">Mobile</label>
+                                                    <Field
+                                                    type="text"
+                                                    name="mobile"
+                                                    placeholder="Enter mobile"
+                                                    autocomplete="off"
+                                                    className={`mt-2 form-control
+                                                    ${touched.mobile && errors.mobile ? "is-invalid" : ""}`}
+                                                    />
+                    
+                                                <div className="invalid-feedback">{errors.mobile}</div>
 
-                            </div>
-                                <div className="form-group">
-                                <label htmlFor="email">Email</label>
-                                    <Field
-                                    type="email"
-                                    name="email"
-                                    placeholder="Enter email"
-                                    autocomplete="off"
-                                    className={`mt-2 form-control
-                                    ${touched.email && errors.email ? "is-invalid" : ""}`}
-                                    />
-                                    <div className="invalid-feedback">{errors.email}</div>
-                            </div>
-                            </Box>
-                        </Box>
+                                        </Grid>
+                                        <Grid item md={4}  className="form-group">
+                                            <label htmlFor="email">Email</label>
+                                                <Field
+                                                type="email"
+                                                name="email"
+                                                placeholder="Enter email"
+                                                autocomplete="off"
+                                                className={`mt-2 form-control
+                                                ${touched.email && errors.email ? "is-invalid" : ""}`}
+                                                />
+                                                <div className="invalid-feedback">{errors.email}</div>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
                              
                         
                               
@@ -880,8 +886,6 @@ export default function Step2(props){
                                            return a?.sI.map((b,pii)=>{
                                                     return (
                                                         <>
-                                                            {( b?.ssrInfo?.BAGGAGE?.length > 0 || b?.ssrInfo?.MEAL?.length > 0 ) && 
-                                                            <Typography> { b?.da?.city } - { b?.aa?.city } on { moment(b?.dt).format("ddd, MMM Do YYYY ") } </Typography> }
                                                             { values?.baggagemeals?.length > 0  &&  
                                                             
                                                                 <FieldArray name="baggagemeals" key={'bagg'}>
@@ -894,34 +898,43 @@ export default function Step2(props){
                                                                                          ii++
                                                                                         return (
                                                                                             <>
-                                                                                            <Box key={i}>
-                                                                                                <Typography><label>{_baggagemeals.label}{_baggagemeals.value}</label></Typography>
-                                                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
-                                                                                                
-                                                                                                    <Box>
-                                                                                                    <label>Baggage {ii-1}</label>
-                                                                                                        <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.baggage`} >
-                                                                                                                                        <option value="0">Select</option>
-                                                                                                                                        { b?.ssrInfo?.BAGGAGE?.length > 0 && b?.ssrInfo?.BAGGAGE?.map((bagg)=>(
-                                                                                                                                            <option value={bagg.code}>{bagg.desc} @ {bagg.amount}</option>
-                                                                                                                                        ))}
-                                                                                                                                    </Field>
-                                                                                                    </Box>
-                                        
-                                                                                                    <Box>
-                                                                                                        <label>Meals</label>
-                                                                                                        <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.meals`}>
-                                                                                                                                        <option value="0">Select</option>
-                                                                                                                                        { b?.ssrInfo?.MEAL?.length > 0 && b?.ssrInfo?.MEAL?.map((meal)=>(
-                                                                                                                                            <option value={meal.code}>{meal.desc} @ {meal.amount}</option>
-                                                                                                                                        ))}
-                                                                                                                                    </Field>
-                                                                                                    </Box>
-                                                                                                
-                                        
+                                                                                                <Box key={i} sx={{ marginBottom : 2 }}>
+                                                                                                    <Grid container spacing={2} alignItems={'center'}>
+                                                                                                        <Grid item>
+                                                                                                            <Typography>{_baggagemeals.label}{_baggagemeals.value}</Typography>
+                                                                                                        </Grid>
+                                                                                                        <Grid item md={4}>
+                                                                                                            {( b?.ssrInfo?.BAGGAGE?.length > 0 || b?.ssrInfo?.MEAL?.length > 0 ) && 
+                                                                                                                <Box className="location_badge">
+                                                                                                                    <Typography> { b?.da?.city } - { b?.aa?.city }  { moment(b?.dt).format("ddd, MMM Do YYYY ") } </Typography>
+                                                                                                                </Box> 
+                                                                                                            }
+                                                                                                        </Grid>
+                                                                                                        <Grid item md={3}>
+                                                                                                            <FormGroup>
+                                                                                                                <label>Baggage {ii-1}</label>
+                                                                                                                <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.baggage`}  className='form-control'>
+                                                                                                                    <option value="0">Select</option>
+                                                                                                                    { b?.ssrInfo?.BAGGAGE?.length > 0 && b?.ssrInfo?.BAGGAGE?.map((bagg)=>(
+                                                                                                                        <option value={bagg.code}>{bagg.desc} @ {bagg.amount}</option>
+                                                                                                                    ))}
+                                                                                                                </Field>
+                                                                                                            </FormGroup>
+                                                                                                        </Grid>
+                                            
+                                                                                                        <Grid item md={3}>
+                                                                                                            <FormGroup>
+                                                                                                                <label>Meals</label>
+                                                                                                                <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.meals`} className='form-control'>
+                                                                                                                    <option value="0">Select</option>
+                                                                                                                    { b?.ssrInfo?.MEAL?.length > 0 && b?.ssrInfo?.MEAL?.map((meal)=>(
+                                                                                                                        <option value={meal.code}>{meal.desc} @ {meal.amount}</option>
+                                                                                                                    ))}
+                                                                                                                </Field>
+                                                                                                            </FormGroup>
+                                                                                                        </Grid>
+                                                                                                    </Grid>
                                                                                                 </Box>
-                                                                                            </Box>
-                                        
                                                                                             </>
                                                                                         )
                                                                                     })

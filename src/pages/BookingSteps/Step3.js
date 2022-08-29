@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, InputLabel ,MenuItem ,Grid, Box, Typography, Button, ButtonGroup, Modal, FormGroup, FormControl, TextField, FormControlLabel, RadioGroup, Radio,Select, Checkbox } from '@mui/material';
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -13,6 +13,7 @@ export default function Step3(props){
     const [updateSms, setUpdateSms] = React.useState(true);
     const [addonTab, setAddonTab] = React.useState();
     const [baggageInfo, setBaggageInfo] = React.useState(10);
+    const [passenger, setPassenger] = React.useState();
 
     const changegstType = (event) => {
         setHasGst(event.target.value);
@@ -33,117 +34,225 @@ export default function Step3(props){
     
     const { stepObj } = props;
     const { activeStatus } = props;
-    console.log(activeStatus);
     const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
+
+    useEffect(()=>{
+        setPassenger(JSON.parse(window.localStorage.getItem('passangerdetail')));
+
+        console.log(passenger);
+
+
+    },[]);
 
     return(
         <div>
             <Box className="stepWrapper">
                 <Box className="stepcontHeader">
-                    <Typography className="stitle">3</Typography>
+                    <Typography className="stitle"> Review</Typography>
                 </Box>
 
                 <Box className="boxcont">
                     <Box className="form">
-                        <Box className="form_item">
-                            <Box className="formtitle" sx={{ marginBottom : 2 }}> 
-                                <Box className="icon"></Box> <Typography>Adult {'1'}</Typography>
-                            </Box>
-                            <FormGroup>
-                                <Grid container spacing={2} >
-                                    <Grid item md={4} sx={{ display : 'flex', columnGap : 2 }}>
-                                        <FormControl className="width80" style={{ width : 100 }}>
-                                            <TextField id="nametitle" value={'Mr'} label="Title" variant="outlined"  sx={{
-                                                width : 80 ,
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
-                                                    fontSize : 10
+                        
+
+                        { passenger?.adult && passenger?.adult.map((data, index) => (
+                            <Box className="form_item" key={index}>
+                                <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                    <Box className="icon"></Box> <Typography>Adult {index + 1}</Typography>
+                                </Box>
+                                <FormGroup>
+                                    <Grid container spacing={2} >
+                                        <Grid item md={4} sx={{ display : 'flex', columnGap : 2 }}>
+                                            <FormControl className="width80" style={{ width : 100 }}>
+                                                <TextField id="nametitle" value={data?.title} label="Title" variant="outlined"  sx={{
+                                                    width : 80 ,
+                                                    '& .MuiOutlinedInput-root': {
+                                                        'fieldset' :{
+                                                        borderColor: '#a9a9a9',
+                                                        fontSize : 10
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                        borderColor: '#21325d',
                                                     },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
+                                                    },
+                                                    '& label.Mui-focused': {
+                                                        color: '#21325d',
+                                                    },
+                                                }} size="small"/>
+                                            </FormControl>
+                                            <FormControl>
+                                                <TextField id="fname" value={data?.firstname} label="First Name" variant="outlined" sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        'fieldset' :{
+                                                        borderColor: '#a9a9a9',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                        borderColor: '#21325d',
+                                                    },
+                                                    },
+                                                    '& label.Mui-focused': {
                                                     color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                        <FormControl>
-                                            <TextField id="fname" value={''} label="First Name" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
                                                     },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item md={4}>
-                                        <FormControl>
-                                            <TextField id="lname" value={''} label="Last Name" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
+                                                }} size="small"/>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={4}>
+                                            <FormControl>
+                                                <TextField id="lname" value={data?.lastname} label="Last Name" variant="outlined" sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        'fieldset' :{
+                                                        borderColor: '#a9a9a9',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                        borderColor: '#21325d',
                                                     },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item md={4}>
-                                        <FormControl>
-                                            <TextField id="fname" value={''} label="Mobile Number" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
                                                     },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
+                                                    '& label.Mui-focused': {
+                                                    color: '#21325d',
+                                                    },
+                                                }} size="small"/>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={4}>
+                                            <FormControl>
+                                                <TextField id="pasenger_mobile" value={passenger?.mobile} label="Mobile Number" variant="outlined" sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        'fieldset' :{
+                                                        borderColor: '#a9a9a9',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                        borderColor: '#21325d',
+                                                    },
+                                                    },
+                                                    '& label.Mui-focused': {
+                                                    color: '#21325d',
+                                                    },
+                                                }} size="small"/>
+                                            </FormControl>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
 
 
-                                <Grid container spacing={2} >
-                                    <Grid item md={4} >
-                                        <FormControl sx={{ marginTop : 2 }}>
-                                            <TextField id="email" value={''} label="Email Address" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
+                                    <Grid container spacing={2} >
+                                        <Grid item md={4} >
+                                            <FormControl sx={{ marginTop : 2 }}>
+                                                <TextField id="passengeremail" value={passenger?.email} label="Email Address" variant="outlined" sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        'fieldset' :{
+                                                        borderColor: '#a9a9a9',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                        borderColor: '#21325d',
                                                     },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
+                                                    },
+                                                    '& label.Mui-focused': {
+                                                    color: '#21325d',
+                                                    },
+                                                }} size="small"/>
+                                            </FormControl>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </FormGroup>    
-                        </Box>
+                                </FormGroup>  
+                                
+                                <Box className="passport_details" style={{ marginTop : 20 }}>
+                                    <Box className="formtitle">
+                                        <Box className="icon"></Box> 
+                                        <Typography sx={{ display : 'flex', alignItems : 'center', columnGap : 1 }}>Passport Details</Typography>
+                                    </Box>
+
+                                    <FormGroup>
+                                        <Grid container spacing={2} >
+                                            <Grid item md={2} >
+                                                <FormControl >
+                                                    <TextField id="normality" value={data?.passportinfo?.nationality} label="Normality" variant="outlined" sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            'fieldset' :{
+                                                            borderColor: '#a9a9a9',
+                                                            },
+                                                            '&.Mui-focused fieldset': {
+                                                            borderColor: '#21325d',
+                                                        },
+                                                        },
+                                                        '& label.Mui-focused': {
+                                                        color: '#21325d',
+                                                        },
+                                                    }} size="small"/>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item md={4} >
+                                                <FormControl >
+                                                    <TextField id="passportno" value={data?.passportinfo?.passportno} label="Passport Number" variant="outlined" sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            'fieldset' :{
+                                                            borderColor: '#a9a9a9',
+                                                            },
+                                                            '&.Mui-focused fieldset': {
+                                                            borderColor: '#21325d',
+                                                        },
+                                                        },
+                                                        '& label.Mui-focused': {
+                                                        color: '#21325d',
+                                                        },
+                                                    }} size="small"/>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item md={2} >
+                                                <FormControl >
+                                                    <TextField id="issuedate" value={data?.passportinfo?.issuedate} label="Issue Date" variant="outlined" sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            'fieldset' :{
+                                                            borderColor: '#a9a9a9',
+                                                            },
+                                                            '&.Mui-focused fieldset': {
+                                                            borderColor: '#21325d',
+                                                        },
+                                                        },
+                                                        '& label.Mui-focused': {
+                                                        color: '#21325d',
+                                                        },
+                                                    }} size="small"/>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item md={2} >
+                                                <FormControl >
+                                                    <TextField id="issuedate" value={data?.passportinfo?.expiredate} label="Expiry Date" variant="outlined" sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            'fieldset' :{
+                                                            borderColor: '#a9a9a9',
+                                                            },
+                                                            '&.Mui-focused fieldset': {
+                                                            borderColor: '#21325d',
+                                                        },
+                                                        },
+                                                        '& label.Mui-focused': {
+                                                        color: '#21325d',
+                                                        },
+                                                    }} size="small"/>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item md={2} >
+                                                <FormControl >
+                                                    <TextField id="dob" value={data?.passportinfo?.dob} label="DOB" variant="outlined" sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            'fieldset' :{
+                                                            borderColor: '#a9a9a9',
+                                                            },
+                                                            '&.Mui-focused fieldset': {
+                                                            borderColor: '#21325d',
+                                                        },
+                                                        },
+                                                        '& label.Mui-focused': {
+                                                        color: '#21325d',
+                                                        },
+                                                    }} size="small"/>
+                                                </FormControl>
+                                            </Grid>
+                                        </Grid>
+                                    </FormGroup>    
+                                </Box>  
+                            </Box>
+                        ))}
 
 
                         <Box className="form_item" style={{ marginTop : 20 }}>
@@ -206,102 +315,6 @@ export default function Step3(props){
                         </Box>
 
 
-                        <Box className="form_item" style={{ marginTop : 20 }}>
-                            <Box className="formtitle">
-                                <Box className="icon"></Box> 
-                                <Typography sx={{ display : 'flex', alignItems : 'center', columnGap : 1 }}>Passport Details</Typography>
-                            </Box>
-
-                            <FormGroup>
-                                <Grid container spacing={2} >
-                                    <Grid item md={2} >
-                                        <FormControl >
-                                            <TextField id="normality" value={''} label="Normality" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item md={4} >
-                                        <FormControl >
-                                            <TextField id="passportno" value={''} label="Passport Number" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item md={2} >
-                                        <FormControl >
-                                            <TextField id="issuedate" value={''} label="Issue Date" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item md={2} >
-                                        <FormControl >
-                                            <TextField id="issuedate" value={''} label="Expiry Date" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item md={2} >
-                                        <FormControl >
-                                            <TextField id="dob" value={''} label="DOB" variant="outlined" sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    'fieldset' :{
-                                                    borderColor: '#a9a9a9',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                    borderColor: '#21325d',
-                                                },
-                                                },
-                                                '& label.Mui-focused': {
-                                                color: '#21325d',
-                                                },
-                                            }} size="small"/>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                            </FormGroup>    
-                        </Box>
 
                         <Box className="update_status" sx={{ display : 'flex', alignItems : 'center', columnGap : 1, marginTop : 2 }}>
                             <Checkbox 
@@ -314,7 +327,7 @@ export default function Step3(props){
                     </Box>
                 </Box>
 
-                <Box className="addonTab_wrapper" style={{ marginTop : 2 }}>
+                <Box className="addonTab_wrapper" style={{ marginTop : 2, display : 'none' }}>
                     <Box className="flight_addon_tab">
                         <TabsUnstyled defaultValue={0} >
                             <TabsListUnstyled className='tablistnav'>
