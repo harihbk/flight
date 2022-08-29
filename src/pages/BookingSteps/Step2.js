@@ -1,4 +1,4 @@
-import React, { useEffect , useContext} from "react";
+import React, { useEffect , useContext , useRef} from "react";
 import { Container, InputLabel ,MenuItem ,Grid, Box, Typography, Button, ButtonGroup, Modal, FormGroup, FormControl, TextField, FormControlLabel, RadioGroup, Radio,Select, Checkbox } from '@mui/material';
 import { List, ListItem } from '@mui/material';
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
@@ -14,24 +14,57 @@ import moment from 'moment'
 import axios from "axios";
 import Seatpopup from "./seatpopup"
 import Skeleton from '@mui/material/Skeleton';
+import { country } from "./country"
+import { completeservice } from "./rxjs";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik ,useFormikContext , getIn} from "formik";
+import { _, debounce } from 'lodash'
+import { useOutletContext } from "react-router-dom";
+
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-function DatePickerField({ name }) {
-    const formik = useFormikContext();
-    const field = formik.getFieldProps(name);
-  
-    console.log(name);
+
+function Showseatselectfn( obj ) {
+
+
+    const { _currflightdetial , _pp , _setOpen , _open } = obj
+    const [ seats , setSeats ] = React.useState('')
+    const [ seatstatus , setSeatstatus ] = React.useState('')
+
+    React.useEffect(()=>{
+        var ind
+        for (const key in _currflightdetial) {
+        if (Object.hasOwnProperty.call(_currflightdetial, key)) {
+            const element = Object.keys(_currflightdetial[key]);
+            if(element == _pp.id){
+            ind = key
+            }
+        }
+        }
+        let fd = _currflightdetial?.[ind]?.[_pp.id];
+        if(fd !=null){
+                   var dis='';
+                   var dff=''
+                   for (const key in fd) {
+                       let lab = fd[key];
+                       dis += `${lab['passanger']}-${lab['key']}-${lab['seat']},`
+                       dff += lab['seat']
+                   }
+                   setSeats(dis)
+                }
+    },[_open])
+
     return (
-      <DatePicker
-        value={field.value}
-        onChange={value => formik.setFieldValue(name, value)}
-      />
+       <>
+        { seats.length > 0 && <> { seats } </> }
+        { seats.length == 0 && <> No seat Selected </> }
+       </>
     );
-  }
+}
+
+
 
 
 export default function Step2(props){
@@ -44,17 +77,21 @@ export default function Step2(props){
     const [startDate, setStartDate] = React.useState(new Date());
     const [paxinfo, setPaxinfo] = React.useState({});
     const [ currflightdetial , setCurrflightdetial ] = React.useState([])
+    const [ currflightdetiallocalstorage , setCurrflightdetiallocalstorage ] = React.useState([])
+
     const [ selectflightdetail , setSelectflightdetail ] = React.useState([])
 
     const things = useContext(TripinfoContext)
 
     const [data ,setData] = React.useState(things)
-
+    const formRef = useRef()
+    let incv = useRef(0)
 
 
     const { stepObj } = props;
     const { activestatus } = props;
-    console.log(things);
+
+    const { reff } = useOutletContext();
 
     const changegstType = (event) => {
         setHasGst(event.target.value);
@@ -154,29 +191,47 @@ export default function Step2(props){
 
    try {
 
+
+    var dff = JSON.parse(window.localStorage.getItem('passangerdetail'))
+    console.log(dff);
+
+    const df = date => {
+        if(date){
+         return new Date(date)
+        }
+        return ''
+
+    }
+
+
     for (const key in data?.searchQuery?.paxInfo) {
        if(data.searchQuery.paxInfo[key] > 0){
            let cnt = data.searchQuery.paxInfo[key];
            let hh = []
 
            for (let index = 0; index < cnt; index++) {
-              
+            let result = key.toLowerCase();
+            let localdata = dff?.[result][index];
+
+
+
 
                let o = {
-                 title : '',
-                 firstname : '',
-                 lastname : '',
+                 title : localdata?.title || '',
+                 firstname : localdata?.firstname || '',
+                 lastname :  localdata?.lastname || '',
                  passportinfo : {
-                     nationality : '',
-                     passportno  : '',
-                     issuedate : '',
-                     expirydate : '',
-                     dob : ''
+                     nationality : localdata?.passportinfo?.nationality || '',
+                     passportno  : localdata?.passportinfo?.passportno || '',
+                     issuedate : df(localdata?.passportinfo?.issuedate) ,
+                     expiredate : df(localdata?.passportinfo?.expiredate),
+                     dob :  df(localdata?.passportinfo?.dob)
                  }
              };
              hh.push(o)
            }
 
+           
            _initialValues[key.toLowerCase()] = hh
        }
     }
@@ -188,14 +243,21 @@ export default function Step2(props){
          for (let index = 1; index <= k ; index++) {
              let obj = {
                  label : key,
-                 value : index
+                 value : index,
+                
              }
              paxmodify.push(obj)
+            
+
          }
 
     }
-    _initialValues['baggage'] = paxmodify
+    _initialValues['baggagemeals'] = paxmodify
    // setPaxinfo(paxmodify);
+
+   _initialValues['countryCode'] = dff?.countryCode || ''
+   _initialValues['email'] = dff?.email || ''
+   _initialValues['mobile'] = dff?.mobile || ''
 
 
    } catch (error) {
@@ -243,7 +305,7 @@ export default function Step2(props){
 
 
     const validationSchemabaggagemeals = {
-        baggage : Yup.array().of(
+        baggagemeals : Yup.array().of(
             Yup.object().shape({
                 baggage : Yup.string(),
                 meals : Yup.string(),
@@ -253,6 +315,13 @@ export default function Step2(props){
        
     }
 
+    const validationcontactdetail = {
+        countryCode: Yup.string().required("Country is required"),
+        mobile : Yup.string().required("Mobile is required"),
+        email  : Yup.string()
+        .email("Invalid email address format")
+        .required("Email is required")
+    }
 
     const validationSchema = Yup.object().shape({
         adult : Yup.array().of(
@@ -260,14 +329,14 @@ export default function Step2(props){
                 title : Yup.string().required("Title is Required"),
                 firstname : Yup.string().required("Firstname is required"),
                 lastname : Yup.string().required("Lastname is required")
-
             })
         ),
         ...schemaobj,
-        ...validationSchemabaggagemeals
+        ...validationSchemabaggagemeals,
+        ...validationcontactdetail
     })
 
-
+   console.log(validationSchema);
 
     function onSubmit(fields) {
 
@@ -308,6 +377,7 @@ export default function Step2(props){
 
     React.useEffect(()=>{
        var frmtobj = []
+      
        for (const key in  data?.searchQuery?.paxInfo) {
           let cnnt = data?.searchQuery?.paxInfo[key]
           if(key != "INFANT"){
@@ -316,25 +386,31 @@ export default function Step2(props){
                  passanger : key,
                  key       : index + 1,
                  seat      : '',
-                 fees      : ''
+                 fees      : '',
+                
                 }
                 frmtobj.push(obj)
+               
             }
           }
        }
 
     var seatmap=[]
+     var ii = 0
      data?.tripInfos?.map((h,i)=>{
         let oo
         h.sI?.map((n,ii)=>{
              oo = {}
+             n['inc'] = ii++
             oo[n.id] = frmtobj
             seatmap.push(oo)
+           
          })
      })
-
+     console.log(data?.tripInfos);
+   //  setCurrflightdetial(JSON.stringify(window.localStorage.setItem('updateCurrflightdetial',seatmap)));
      setCurrflightdetial(seatmap)
-
+  //  alert(1)
     },[])
         // this method is used for seat flight details
 
@@ -357,6 +433,9 @@ export default function Step2(props){
    
 
     function seatbookingreturntoparentfn(temp){
+
+       // console.log(temp);
+
         let updateCurrflightdetial = [...currflightdetial]
         let getRowid = rowid;
         console.log(getRowid);
@@ -374,12 +453,30 @@ export default function Step2(props){
           }
 
         updateCurrflightdetial[ind][rowid] = temp
+        window.localStorage.setItem('updateCurrflightdetial',JSON.stringify(updateCurrflightdetial))
         setCurrflightdetial(updateCurrflightdetial)
-        // console.log(getobjbuid);
-        // console.log(temp);
+        
     }
 
-    
+    React.useEffect(()=>{
+    try {
+       // setCurrflightdetiallocalstorage(JSON.parse(window.localStorage.getItem('updateCurrflightdetial')));
+       var getd = JSON.parse(window.localStorage.getItem('updateCurrflightdetial'))
+    //   console.log(getd);
+       if(getd != null ){
+        setCurrflightdetial(JSON.parse(window.localStorage.getItem('updateCurrflightdetial')));
+       }
+
+
+    } catch (error) {
+        console.log(error);
+    }
+   // alert(2)
+
+    },[])
+
+   
+
 
     return(
         <div>
@@ -389,7 +486,13 @@ export default function Step2(props){
                     <Typography className="stitle">dsf</Typography>
                 </Box>
 
-                <Formik initialValues={_initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
+                <Formik 
+                innerRef={reff} 
+                initialValues={_initialValues} 
+                validationSchema={validationSchema} 
+                onSubmit={onSubmit}
+               
+                >
                                 {({ errors, values, touched, setValues,setFieldValue }) => (
                                 
                 <Form>
@@ -694,46 +797,51 @@ export default function Step2(props){
                                             }
 
 
-
-                                {/* { values?.baggage?.length > 0  && 
-                                
-                                <FieldArray name="baggagemeals" >
-                                {() => (values.baggage.map((baggagemeals, i) => {
-                                const ticketErrors = errors.baggagemeals?.length && errors.baggagemeals[i] || {};
-                                const ticketTouched = touched.baggagemeals?.length && touched.baggagemeals[i] || {};
-                                return (
-                                    <>
-                                    
-
-                                    <Box key={i}>
-                                        <Box style={{ display:'flex',justifyContent:'space-between' }}>
-                                           
-                                            <Box>
-                                                <label>Baggage</label>
-                                                <Field name={`baggagemeals.${i}.baggage`} type="text" className={'form-control'} />
-                                            </Box>
-
-                                            <Box>
-                                                <label>Meals</label>
-                                                <Field name={`baggagemeals.${i}.meals`} type="text" className={'form-control'} />
-                                            </Box>
-                                           
-
-                                        </Box>
-                                    </Box>
-                                    </>
-                                );
-                            }))}
-                            </FieldArray>
-                                
-                                } */}
+                         <Box>
+                            <Typography>Contact Details</Typography>
+                            <Box display="flex">
+                                <div className="form-group">
+                                <label htmlFor="Country">Country</label>
+                                <Field as="select" name="countryCode">
+                                <option value="0">Select</option>    
+                                    { country.map(d =>(
+                                        <option value={d.code}>{d.country}</option>
+                                    )) }
+                                </Field>
+                                <div className="invalid-feedback">{errors.countryCode}</div>
+                            </div>
 
 
+                                <div className="form-group">
+                                <label htmlFor="email">Mobile</label>
+                                    <Field
+                                    type="text"
+                                    name="mobile"
+                                    placeholder="Enter mobile"
+                                    autocomplete="off"
+                                    className={`mt-2 form-control
+                                    ${touched.mobile && errors.mobile ? "is-invalid" : ""}`}
+                                    />
+            
+                            <div className="invalid-feedback">{errors.mobile}</div>
 
-
-
+                            </div>
+                                <div className="form-group">
+                                <label htmlFor="email">Email</label>
+                                    <Field
+                                    type="email"
+                                    name="email"
+                                    placeholder="Enter email"
+                                    autocomplete="off"
+                                    className={`mt-2 form-control
+                                    ${touched.email && errors.email ? "is-invalid" : ""}`}
+                                    />
+                                    <div className="invalid-feedback">{errors.email}</div>
+                            </div>
+                            </Box>
+                        </Box>
                              
-
+                        
                               
                         </Box>
 
@@ -763,69 +871,85 @@ export default function Step2(props){
                             </TabsListUnstyled>
                             <TabPanelUnstyled value={0} >
 
-                                { data?.tripInfos?.length > 0 &&  
-                                data?.tripInfos?.map((a,pi)=>(
-                                    
-                                    <>
-                                    { a?.sI.map((b,pii)=>(
-                                        <>
-                                        {
-                                            b?.ssrInfo?.BAGGAGE?.length > 0 && b?.ssrInfo?.MEAL?.length > 0 &&
-                                            <>
-                                            <Typography> { b?.da?.city } - { b?.aa?.city } on { moment(b?.dt).format("ddd, MMM Do YYYY ") } </Typography> 
-                                 
-                                 { values?.baggage?.length > 0  && 
-                                
-                                <FieldArray name="baggagemeals" key={'bagg'}>
-                                {() => (values.baggage.map((baggagemeals, i) => {
-                                return (
-                                    <>
-                                    <Box key={i}>
-                                        <Typography><label>{baggagemeals.label}{baggagemeals.value}</label></Typography>
-                                        <Box style={{ display:'flex',justifyContent:'space-between' }}>
-                                           
-                                            <Box>
-                                             <label>Baggage</label>
-                                                <Field as="select" name={`baggagemeals.${pi + pii}.${baggagemeals.label}.${i}.baggage`}>
-                                                                                <option value="0">Select</option>
-                                                                                { b?.ssrInfo?.BAGGAGE.length > 0 && b?.ssrInfo?.BAGGAGE.map((bagg)=>(
-                                                                                    <option value={bagg.code}>{bagg.desc} @ {bagg.amount}</option>
-                                                                                ))}
-                                                                            </Field>
-                                            </Box>
 
-                                            <Box>
-                                                <label>Meals</label>
-                                                <Field as="select" name={`baggagemeals.${pi + pii}.${baggagemeals.label}.${i}.meals`}>
-                                                                                <option value="0">Select</option>
-                                                                                { b?.ssrInfo?.MEAL.length > 0 && b?.ssrInfo?.MEAL.map((meal)=>(
-                                                                                    <option value={meal.code}>{meal.desc} @ {meal.amount}</option>
-                                                                                ))}
-                                                                            </Field>
-                                            </Box>
-                                           
 
-                                        </Box>
-                                    </Box>
+                                { (()=>{
+                                    var ii=0
+                                    return (
+                                        data?.tripInfos?.map((a,pi)=>{
+                                           return a?.sI.map((b,pii)=>{
+                                                    return (
+                                                        <>
+                                                            {( b?.ssrInfo?.BAGGAGE?.length > 0 || b?.ssrInfo?.MEAL?.length > 0 ) && 
+                                                            <Typography> { b?.da?.city } - { b?.aa?.city } on { moment(b?.dt).format("ddd, MMM Do YYYY ") } </Typography> }
+                                                            { values?.baggagemeals?.length > 0  &&  
+                                                            
+                                                                <FieldArray name="baggagemeals" key={'bagg'}>
 
-                                    </>
-                                );
-                                }))}
-                                </FieldArray>
-                                
-                                } 
+                                                                    { (()=>{
+                                                                        return (
+                                                                           <>
+                                                                                {
+                                                                                     values?.baggagemeals?.map((_baggagemeals, i) => {
+                                                                                         ii++
+                                                                                        return (
+                                                                                            <>
+                                                                                            <Box key={i}>
+                                                                                                <Typography><label>{_baggagemeals.label}{_baggagemeals.value}</label></Typography>
+                                                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
+                                                                                                
+                                                                                                    <Box>
+                                                                                                    <label>Baggage {ii-1}</label>
+                                                                                                        <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.baggage`} >
+                                                                                                                                        <option value="0">Select</option>
+                                                                                                                                        { b?.ssrInfo?.BAGGAGE?.length > 0 && b?.ssrInfo?.BAGGAGE?.map((bagg)=>(
+                                                                                                                                            <option value={bagg.code}>{bagg.desc} @ {bagg.amount}</option>
+                                                                                                                                        ))}
+                                                                                                                                    </Field>
+                                                                                                    </Box>
+                                        
+                                                                                                    <Box>
+                                                                                                        <label>Meals</label>
+                                                                                                        <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.meals`}>
+                                                                                                                                        <option value="0">Select</option>
+                                                                                                                                        { b?.ssrInfo?.MEAL?.length > 0 && b?.ssrInfo?.MEAL?.map((meal)=>(
+                                                                                                                                            <option value={meal.code}>{meal.desc} @ {meal.amount}</option>
+                                                                                                                                        ))}
+                                                                                                                                    </Field>
+                                                                                                    </Box>
+                                                                                                
+                                        
+                                                                                                </Box>
+                                                                                            </Box>
+                                        
+                                                                                            </>
+                                                                                        )
+                                                                                    })
+                                                                                }
+                                                                           </>
+                                                                        )
+                                                                    })() }
 
-                                            </>
-                                            
-                                        }
+                                                                </FieldArray>
+                                                              
+                                                                
+                                                            }
+                                                        </>    
+                                                        
+                                                    )   
+                                            })
+                                        })
+                                    );
+                                })(values) }
+
 
                                
-                                       
-                                        </>
-                                    ))}
 
-                                    </>
-                                )) }
+                                
+                               
+                                
+                                
+                                
                                
 
 
@@ -839,8 +963,10 @@ export default function Step2(props){
                             <Box className="wrapper seats_wrapper">
                             <TabsUnstyled defaultValue={0} orientation="vertical" className="mealstab">
                                         <TabsListUnstyled className='tablistnav noborder'>
+                                      
                                         { data?.tripInfos?.map((p,pi)=>(
-                                        <>
+                                           
+                                        <React.Fragment>
                                             { p?.sI?.map((pp,ppi)=>( 
                                                 <Grid container style={{ width : '100%'}} justifyContent="space-between">
                                                 <Grid item style={{ width : '20%'}}>
@@ -851,16 +977,18 @@ export default function Step2(props){
                                                     <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">on { moment(pp?.dt).format("MMM Do YYYY ") } </Typography>
                                                     </TabUnstyled>
                                                 </Grid>
-                                                <Grid>
-                                                    no Seat Selected
+                                                <Grid item>
+                                                   
+                                                    <Showseatselectfn _setOpen={setOpen} _open={open} _currflightdetial={currflightdetial} _pp={pp}/>
+                                                    
                                                 </Grid>
                                                 <Grid>
                                                     <Button variant="outlined" onClick={()=>getSets(pp )}>Show Seat Map</Button>
                                                 </Grid>
                                                 </Grid>     
                                             ))}
-                                        </>
-                                    )) }
+                                        </React.Fragment>
+                                        )) }
                                         </TabsListUnstyled>
                             </TabsUnstyled>
                         </Box>
@@ -884,7 +1012,7 @@ export default function Step2(props){
                 </Box>
 
 
-                                                    <button type="submit">Form Submit</button>
+                                                    {/* <button type="submit">Form Submit</button> */}
 
 
 
@@ -900,281 +1028,6 @@ export default function Step2(props){
 
 
 
-                <Modal
-                    className="review_step"
-                    open={activestatus == 2}
-                    onClose={handleClosePage3}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                    <Box className="modal_wrapper">
-                        <Box component={'div'} className='mainBookingrow'>
-                            <Grid container>
-                                <Grid item md={4}>
-                                    <Typography className='depart_place'> Departure <span className='interTextDot'>.</span> Indigo  </Typography>
-                                    <Box component={'div'} className="flight_timerow">
-                                        <Box className='time' sx={flexGap2}>
-                                            <div className='icons'>
-                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                            </div>
-                                            <Typography className='start_time timeText' style={timetext1}>07:10  </Typography>
-                                            <ArrowRightAlt className='miniArrow'/>
-                                            <Typography className='end_time timeText' style={timetext1}>08:10</Typography>
-                                        </Box>
-                                        <Box className='price'>
-                                            ₹ 6,552
-                                        </Box>
-                                    </Box>
-                                    <Typography className='details_text'> Flight Details </Typography>
-                                </Grid>
-                                <Grid item md={4} >
-                                    <Typography className='retun_place'> Return <span className='interTextDot'>.</span> Indigo  </Typography>
-                                    <Box component={'div'} className="flight_timerow">
-                                        <Box className='time'  sx={flexGap2}>
-                                            <div className='icons'>
-                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                            </div>
-                                            <Typography className='start_time timeText' style={timetext1}>07:10 </Typography>
-                                            <ArrowRightAlt className='miniArrow'/>
-                                            <Typography className='end_time timeText' style={timetext1}>08:10</Typography>
-                                        </Box>
-                                        <Box className='price'>
-                                            ₹ 5,552
-                                        </Box>
-                                    </Box>
-                                    <Typography className='details_text'> Flight Details </Typography>
-                                </Grid>
-                                <Grid item md={3} >
-                                    <Typography className='total_price' style={timetext1}>₹ 12,490</Typography>
-                                    <Typography className='details_text'>Fare Details</Typography>
-                                    <Button variant='contained' className='color_primary booknow_btn'>Book Now</Button>
-                                </Grid>
-                            </Grid>
-                        </Box>
-
-                        <Box className="promotionrow" style={{ padding : 15, backgroundColor : '#f0f0f0' }}>
-                            <Typography style={{ fontSize : 10, opacity : .6, marginBottom : 10 }}>Use Promo Code : Easefly to get flat Rs. 310 Off on this flight</Typography>
-                            <Grid container spacing={2}>
-                                <Grid item md={6}>
-                                    <Box className="promoCard" style={promoCard}>
-                                        <Box className="header" style={promocardHeader}>
-                                            <Typography variant="h6" component={'div'} >Saver</Typography>
-                                            <RadioGroup row className="" 
-                                                value={promocard}
-                                                onChange={changepromo} >
-                                                <FormControlLabel value="promo1" control={<Radio sx={{ 
-                                                    '& .MuiSvgIcon-root': {
-                                                        fontSize: 15,
-                                                    },
-                                                    color: "#ccc",
-                                                    '&.Mui-checked': {
-                                                        color: "#f59625",
-                                                    }, }}/>} label="4,566" sx={{
-                                                        '& .MuiTypography-root' : {
-                                                            fontSize : 17, fontWeight : '500'
-                                                        },
-                                                    }} />
-                                            </RadioGroup>
-                                        </Box>
-
-                                        <Box className="card_cont">
-                                            <List sx={{
-                                                paddingY : 2,
-                                                '& li' : { fontSize : 12, paddingBottom : .31, fontWeight : '500' },
-                                                '& svg' : { fontSize : 15, marginRight : 1, color : 'green' }
-                                            }}>
-                                                <ListItem><CheckCircleIcon /> Cabin Baggage included</ListItem>
-                                                <ListItem><CheckCircleIcon /> Check - in Baggage included</ListItem>
-                                                <ListItem><CheckCircleIcon /> Cancellation fees apply</ListItem>
-                                                <ListItem><CheckCircleIcon /> Date change chargeable </ListItem>
-                                            </List>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                                <Grid item md={6}>
-                                    <Box className="promoCard" style={promoCard}>
-                                        <Box className="header" style={promocardHeader}>
-                                            <Typography variant="h6" component={'div'} >Saver</Typography>
-                                            <RadioGroup row className="promotype" 
-                                                value={promocard}
-                                                onChange={changepromo} >
-                                                <FormControlLabel value="promo2" control={<Radio sx={{ 
-                                                    '& .MuiSvgIcon-root': {
-                                                        fontSize: 15,
-                                                    },
-                                                    color: "#ccc",
-                                                    '&.Mui-checked': {
-                                                        color: "#f59625",
-                                                    }, }}/>} label="8,566" sx={{
-                                                        '& .MuiTypography-root' : {
-                                                            fontSize : 17, fontWeight : '500'
-                                                        },
-                                                    }} />
-                                            </RadioGroup>
-                                        </Box>
-
-                                        <Box className="card_cont">
-                                            <List sx={{
-                                                paddingY : 2,
-                                                '& li' : { fontSize : 12, paddingBottom : .31, fontWeight : '500' },
-                                                '& svg' : { fontSize : 15, marginRight : 1, color : 'green' }
-                                            }}>
-                                                <ListItem><CheckCircleIcon /> Cabin Baggage included</ListItem>
-                                                <ListItem><CheckCircleIcon /> Check - in Baggage included</ListItem>
-                                                <ListItem><CheckCircleIcon /> Lower Cancellation fees</ListItem>
-                                                <ListItem><CheckCircleIcon /> Free Date change allowed</ListItem>
-                                                <ListItem><CheckCircleIcon /> Free Seats Avaliable</ListItem>
-                                            </List>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </Box>
-
-                        <Box className="modal_tabs review_step">
-                            <TabsUnstyled defaultValue={0} >
-                                <TabsListUnstyled className='navs noborder' style={{ backgroundColor : '#21325d',  padding:  5, paddingLeft : 20, paddingRight : 20}}>
-                                    <TabUnstyled style={tabButton}>Flight Details</TabUnstyled>
-                                    <TabUnstyled style={tabButton}>Fare Summary</TabUnstyled>
-                                    <TabUnstyled style={tabButton}>Cancellation </TabUnstyled>
-                                    <TabUnstyled style={tabButton}>Date Change </TabUnstyled>
-                                </TabsListUnstyled>
-                                <TabPanelUnstyled value={0}>
-                                    <Box style={{ padding : 15, backgroundColor : '#f0f0f0' }}>
-                                        <Grid container spacing={2}>
-                                            <Grid item md={6}>
-                                                <Box style={promoCard}>
-                                                    <Box className="header" sx={{ fontSize : 18, fontWeight : '300', padding : 1, 'border-bottom' : '1px solid #ccc' }}>
-                                                        {'New Delhi'} to {'Chennai'} , {'20 May'}
-                                                    </Box>
-                                                    <Box className="content" sx={{ padding : 2, backgroundColor : '#fff'  }}>
-                                                        <Box className="brand_detail">
-                                                            <Box className="left" sx={{ display : 'flex', alignItems : 'center', columnGap : 1 }}>
-                                                                <img style={{ width : 25  }} src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                <Typography sx={{ fontWeight : '500' }}>IndiGo</Typography>
-                                                                <Typography sx={{ fontSize : 16, opacity : .7 }}>{'6E'} | {'2059'}</Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box className="flighthours" sx={{ marginTop : 1.3 , display : 'flex', alignItems : 'center', justifyContent : 'space-between' }}>
-                                                            <Box className="left">
-                                                                <Typography sx={{ fontSize : 17, fontWeight : '500', textTransform : 'uppercase'  }}>{'07:10'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textTransform : 'uppercase'  }}>{'Fri, 20 May 22'}</Typography>
-                                                            </Box>
-                                                            <Box className="midle">
-                                                                <Typography sx={{ fontSize : 9, fontWeight : '500',  textAlign : 'center'  }}>{'03 h 20 m'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textAlign : 'center'   }}>{'Non stop'}</Typography>
-                                                            </Box>
-                                                            <Box className="right">
-                                                                <Typography sx={{ fontSize : 17, fontWeight : '500', textTransform : 'uppercase'   }}>{'10:30'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textTransform : 'uppercase'  }}>{'Fri, 20 May 22'}</Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box className="flightTerminal" sx={{ marginTop : 1 , display : 'flex', alignItems : 'center', justifyContent : 'space-between' }}>
-                                                            <Box className="left">
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'Terminal 2'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'New Delhi, India'}</Typography>
-                                                            </Box>
-                                                            <Box className="midle">
-                                                                <Typography></Typography>
-                                                            </Box>
-                                                            <Box className="right">
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'Terminal 2'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'New Delhi, India'}</Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box className="baggage" sx={{ marginTop : 1.3 , display : 'flex', alignItems : 'center', justifyContent : 'space-between' }}>
-                                                            <Box className="left">
-                                                                <Typography sx={{ fontSize : 14, fontWeight : '500', textTransform : 'uppercase'  }}>{'Baggage'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textTransform : 'uppercase'  }}>{'Adult'}</Typography>
-                                                            </Box>
-                                                            <Box className="midle">
-                                                                <Typography sx={{ fontSize : 14, fontWeight : '500', textTransform : 'uppercase'  }}>{'Check In'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'15 kgs (1 peace only)'}</Typography>
-                                                            </Box>
-                                                            <Box className="right">
-                                                                <Typography sx={{ fontSize : 14, fontWeight : '500', textTransform : 'uppercase'   }}>{'Cabin'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'7 kgs (1 peace only)'}</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item md={6}>
-                                                <Box style={promoCard}>
-                                                    <Box className="header" sx={{ fontSize : 18, fontWeight : '300', padding : 1, 'border-bottom' : '1px solid #ccc' }}>
-                                                        {'New Delhi'} to {'Chennai'} , {'20 May'}
-                                                    </Box>
-                                                    <Box className="content" sx={{ padding : 2, backgroundColor : '#fff' }}>
-                                                        <Box className="brand_detail" sx={{ display : 'flex', alignItems : 'center', justifyContent : 'space-between'}}>
-                                                            <Box className="left" sx={{ display : 'flex', alignItems : 'center', columnGap : 1 }}>
-                                                                <img style={{ width : 25  }} src={require('../../assets/icons/flighticon.png')} alt='flight' />
-                                                                <Typography sx={{ fontWeight : '500' }}>IndiGo</Typography>
-                                                                <Typography sx={{ fontSize : 16, opacity : .7 }}>{'6E'} | {'2059'}</Typography>
-                                                            </Box>
-                                                            <Box className="right" sx={{ width: '25%' }}>
-                                                                <Typography sx={{ fontSize : 10, opacity: .7, fontWeight : '500' }}>{'Economy, free Meals, Refundable'}</Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box className="flighthours" sx={{ marginTop : 1.3 , display : 'flex', alignItems : 'center', justifyContent : 'space-between' }}>
-                                                            <Box className="left">
-                                                                <Typography sx={{ fontSize : 17, fontWeight : '500', textTransform : 'uppercase'  }}>{'07:10'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textTransform : 'uppercase'  }}>{'Fri, 20 May 22'}</Typography>
-                                                            </Box>
-                                                            <Box className="midle">
-                                                                <Typography sx={{ fontSize : 9, fontWeight : '500',  textAlign : 'center'  }}>{'03 h 20 m'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textAlign : 'center'   }}>{'Non stop'}</Typography>
-                                                            </Box>
-                                                            <Box className="right">
-                                                                <Typography sx={{ fontSize : 17, fontWeight : '500', textTransform : 'uppercase'   }}>{'10:30'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textTransform : 'uppercase'  }}>{'Fri, 20 May 22'}</Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box className="flightTerminal" sx={{ marginTop : 1.3 , display : 'flex', alignItems : 'center', justifyContent : 'space-between' }}>
-                                                            <Box className="left">
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'Terminal 2'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'New Delhi, India'}</Typography>
-                                                            </Box>
-                                                            <Box className="midle">
-                                                                <Typography></Typography>
-                                                            </Box>
-                                                            <Box className="right">
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'Terminal 2'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'New Delhi, India'}</Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box className="baggage" sx={{ marginTop : 1.3 , display : 'flex', alignItems : 'center', justifyContent : 'space-between' }}>
-                                                            <Box className="left">
-                                                                <Typography sx={{ fontSize : 14, fontWeight : '500', textTransform : 'uppercase'  }}>{'Baggage'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7, textTransform : 'uppercase'  }}>{'Adult'}</Typography>
-                                                            </Box>
-                                                            <Box className="midle">
-                                                                <Typography sx={{ fontSize : 14, fontWeight : '500', textTransform : 'uppercase'  }}>{'Check In'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'15 kgs (1 peace only)'}</Typography>
-                                                            </Box>
-                                                            <Box className="right">
-                                                                <Typography sx={{ fontSize : 14, fontWeight : '500', textTransform : 'uppercase'   }}>{'Cabin'}</Typography>
-                                                                <Typography sx={{ fontSize : 10, opacity : .7  }}>{'7 kgs (1 peace only)'}</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                </TabPanelUnstyled>
-                                <TabPanelUnstyled value={1}></TabPanelUnstyled>
-                                <TabPanelUnstyled value={2}></TabPanelUnstyled>
-                                <TabPanelUnstyled value={3}></TabPanelUnstyled>
-                            </TabsUnstyled>
-                        </Box>
-                    </Box>
-                </Modal>
 
             </Box>
         </div>

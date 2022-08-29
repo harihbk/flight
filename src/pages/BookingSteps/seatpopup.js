@@ -39,6 +39,7 @@ export default function MaxWidthDialog(props) {
   React.useEffect(()=>{
     var ind
     let _currflightdetials = [..._currflightdetial]
+    
     for (const key in _currflightdetials) {
       if (Object.hasOwnProperty.call(_currflightdetials, key)) {
         const element = Object.keys(_currflightdetials[key]);
@@ -47,6 +48,7 @@ export default function MaxWidthDialog(props) {
         }
       }
     }
+
     let allocateseat = [..._currflightdetials[ind][_rowid]]
     setTemporary(allocateseat)
   },[])

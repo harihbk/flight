@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState , createRef, useEffect, useRef } from 'react';
 import Header from '../../components/header';
 import { Container,Grid, Box, Typography, Button } from '@mui/material';
 import { Step,StepButton, Stepper, Paper,StepContent, StepLabel } from '@mui/material';
@@ -60,6 +60,7 @@ export default function Index() {
     const [completed, setCompleted] = React.useState({});
     const [ tripInfos , setTripInfos ] = React.useState([])
     const [ totalPriceInfo , setTotalPriceInfo ] = React.useState({})
+    const formRef = useRef();
 
     const navigate = useNavigate();
 
@@ -119,28 +120,68 @@ export default function Index() {
       };
     
       const handleNext = () => {
+       
+
         const newActiveStep =
           isLastStep() && !allStepsCompleted()
-            ? // It's the last step, but not all steps have been completed,
-              // find the first step that has been completed
-              steps.findIndex((step, i) => !(i in completed))
+            ? steps.findIndex((step, i) => !(i in completed))
             : activeStep + 1;
         setActiveStep(newActiveStep);
 
-        console.log(newActiveStep);
+        // console.log(newActiveStep);
+       // const newActiveStep = 2
 
       if(newActiveStep == 0){
         navigate(`/booking/flight/${id}`);
       }
       if(newActiveStep == 1){
+      
+     //   completeservice.comborevent("next")
         navigate(`/booking/passangers/${id}`);
+
+
       }
       if(newActiveStep == 2){
-        navigate(`/booking/step3/${id}`);
+
+
+        formRef.current.handleSubmit()
+        formRef.current.validateForm().then(r=>{
+          let len = Object.keys(r).length
+          if(len == 0){
+
+            let data = formRef.current.values
+            window.localStorage.setItem('passangerdetail',JSON.stringify(data))
+            navigate(`/booking/step3/${id}`);
+
+          } else {
+            setActiveStep(newActiveStep-1)
+          }
+         
+        })
+
+
+      //   let st = formRef.current.isValid;
+      //   let len = Object.keys(formRef.current.errors).length
+      //  console.log(len);
+      //  console.log(formRef.current);
+      //   if(len > 0){
+      //     setActiveStep(newActiveStep-1)
+      //   }else{
+      //     let data = formRef.current.values
+      //     console.log(data);
+
+      //     window.localStorage.setItem('passangerdetail',JSON.stringify(data))
+
+
+      //   navigate(`/booking/step3/${id}`);
+      //   }
+    
       }
 
 
       };
+
+    
     
       const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -239,6 +280,11 @@ export default function Index() {
           return "Completed";
       }
     }
+
+
+    const handleevent = () => {
+      console.log('sdfgh');
+    }
   
   return (
     <div>
@@ -281,7 +327,7 @@ export default function Index() {
                                 </React.Fragment>
                                 ) : (
 
-                      Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Outlet/> </TripinfoProvider> 
+                      Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Outlet context={{reff:formRef}}/> </TripinfoProvider> 
                     //  getStep(activeStep)
 
                                 )}
@@ -300,7 +346,7 @@ export default function Index() {
                                     sx={{ mr: 1 }}>
                                     Back
                                 </Button>
-                                <Button onClick={handleNext} sx={{ mr: 1 }} className="color_primary" variant='contained'>
+                                <Button onClick={handleNext}  sx={{ mr: 1 }} className="color_primary" variant='contained'>
                                     Continue
                                 </Button>
                             </Box>

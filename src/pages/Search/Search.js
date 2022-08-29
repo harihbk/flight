@@ -241,7 +241,10 @@ export default function Search({ isVisible }) {
 
 
     React.useEffect(()=>{
+        window.localStorage.removeItem("updateCurrflightdetial")
+        window.localStorage.removeItem("passangerdetail")
 
+        
         var itinerary = searchParams.get('itinerary');
         var tripType = searchParams.get('tripType');
         var paxType = searchParams.get('paxType');

@@ -10,6 +10,7 @@ import Index from './pages/BookingSteps/Index';
 import Step1 from './pages/BookingSteps/step1';
 import Step2 from './pages/BookingSteps/Step2';
 import Step3 from './pages/BookingSteps/Step3';
+import Test from './pages/test';
 
 export default function Commonroutes() {
   return (
@@ -19,6 +20,7 @@ export default function Commonroutes() {
 
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/test" element={<Test />} />
 
         {/* <Route path="/booking/:id" element={<Index />} /> */}
         <Route path="/booking" element={<Index />} >
