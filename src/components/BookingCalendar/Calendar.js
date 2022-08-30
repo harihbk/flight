@@ -106,7 +106,6 @@ date.setDate(date.getDate() + 1);
                 mode="single"
                 selected={selected}
                 onSelect={setSelected} 
-                numberOfMonths={2} 
                 labels={singleLabels}
              invalid={singleInvalid}
              onPageLoading={onPageLoadingSingle}

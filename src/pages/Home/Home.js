@@ -662,50 +662,50 @@ export default function Home(props) {
 
                         <Model open={passangeropen} onClickOutside={()=> setPassangeropen(false)}>
                               <Box
+                              className='dropdown_box'
                               sx={{
                                 display: 'flex',
                                 flexWrap: 'wrap',
                                 '& > :not(style)': {
                                   m: 0,
                                   width: '35rem',
-                                  height: 250,
+                                  // height: 250,
+                                  padding : 3,
                                   zIndex : 10,
                                   position  : 'absolute',
                                   left : -300 ,
-                                  top : 47
+                                  top : 47,
+                                  'box-shadow' : '0px 6px 10px 0px #00000017'
+                                  
                                 },
                               }}
                               >
                                 <Paper elevation={2}>
-                                  <Grid container justifyContent="space-between" sx={{ paddingLeft : 2 , paddingRight : 2 , marginTop : 3 , marginBottom : 3}}>
-                                    <Grid Item sx={{ display:'flex' }} xs={4}>
-                                        <Typography component="h4" m={1}>
-                                          Adult
-                                        </Typography>
-                                        <Paper elevation={2} sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
-                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT + 1 }) ) }> + </Typography>
-                                            <Typography> {travellerclass.ADULT} </Typography>
+                                  <Grid container justifyContent="space-between" sx={{ paddingLeft : 2 , paddingRight : 2 , marginBottom : 3}}>
+                                    <Grid Item  xs={4} sx={{ paddingRight : 2, paddingLeft : 2}}>
+                                        <Typography  className='adult_title' m={1}> Adult  </Typography>
+                                        <Paper className='adult_list' sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
                                             <Typography variant="h5"  onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT > 1 ? state.ADULT - 1 : 1 }) )  } > - </Typography>
-
+                                            <Typography> {travellerclass.ADULT} </Typography>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT + 1 }) ) }> + </Typography>
                                         </Paper>
 
                                     </Grid>
-                                    <Grid Item sx={{ display:'flex' }} xs={4}>
-                                    <Typography component="h4" m={1}>Child</Typography>
-                                    <Paper elevation={2} sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
-                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD + 1 }) ) }> + </Typography>
-                                            <Typography> {travellerclass.CHILD}  </Typography>
-                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD > 0 ? state.CHILD - 1 : 0 }) )  }> - </Typography>
-
-                                    </Paper>
+                                    <Grid Item  xs={4} sx={{ paddingRight : 2, paddingLeft : 2}}>
+                                        <Typography className='adult_title' m={1}>Child</Typography>
+                                        <Paper className='adult_list'  sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                              <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD > 0 ? state.CHILD - 1 : 0 }) )  }> - </Typography>
+                                              <Typography> {travellerclass.CHILD}  </Typography>
+                                              <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD + 1 }) ) }> + </Typography>
+                                        </Paper>
                                     </Grid>
-                                    <Grid Item  sx={{ display:'flex' }} xs={4}>
-                                    <Typography component="h4" m={1}>Infant</Typography>
-                                    <Paper elevation={2} sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
-                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT + 1 }) ) }> + </Typography>
-                                            <Typography> {travellerclass.INFANT}  </Typography>
+                                    <Grid Item sx={{ paddingRight : 2, paddingLeft : 2}}  xs={4}>
+                                        <Typography className='adult_title' m={1}>Infant</Typography>
+                                        <Paper className='adult_list'  sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
                                             <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT > 0 ? state.INFANT - 1 : 0 }) )  }> - </Typography>
-                                    </Paper>
+                                            <Typography> {travellerclass.INFANT}  </Typography>
+                                            <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT + 1 }) ) }> + </Typography>
+                                        </Paper>
                                     </Grid>
 
                                   </Grid>
@@ -713,31 +713,27 @@ export default function Home(props) {
 
                                   <Divider  />
 
-                                  <Typography variant="h5" mt={2} mb={2} textAlign="center">Travel Class</Typography>
+                                  <Typography className='adult_title' m={2 }>Travel Class</Typography>
 
                                    <Grid container justifyContent="space-around" mb={2}>
-                                     <Grid Item><Button variant={ (travelclass == "Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Economy") } >Economy</Button></Grid>
-                                     <Grid Item><Button variant={ (travelclass == "Premium Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Premium Economy") }>Premium Economy</Button></Grid>
-                                     <Grid Item><Button variant={ (travelclass == "Business" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Business") }>Business</Button></Grid>
-                                     <Grid Item><Button variant={ (travelclass == "First Class" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("First Class") }>First Class</Button></Grid>
-
+                                     <Grid Item><Button className={ (travelclass == "Economy" ? "color_secondary" : "outline_gray") } variant={ (travelclass == "Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Economy") } >Economy</Button></Grid>
+                                     <Grid Item><Button className={ (travelclass == "Premium Economy" ? "color_secondary" : "outline_gray") }  variant={ (travelclass == "Premium Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Premium Economy") }>Premium Economy</Button></Grid>
+                                     <Grid Item><Button className={ (travelclass == "Business" ? "color_secondary" : "outline_gray") }  variant={ (travelclass == "Business" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Business") }>Business</Button></Grid>
+                                     <Grid Item><Button className={ (travelclass == "First Class" ? "color_secondary" : "outline_gray") }  variant={ (travelclass == "First Class" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("First Class") }>First Class</Button></Grid>
                                    </Grid>
 
+                                   <Divider  />
 
-                                   <Grid container justifyContent="space-around" >
-                                      <Grid Item xs={3}></Grid>
-                                     <Grid Item xs={3}></Grid>
-                                     <Grid Item><Button variant="outlined" color="error" onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Cancel</Button></Grid>
-                                     <Grid Item><Button variant="contained" color="success" onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Done</Button></Grid>
+                                   <Grid container justifyContent="end" spacing={2} mt={3}>
+                                    <Grid Item md={3 } sx={{ paddingRight : 2 }}>
+                                      <Button className='btnt_gray empty' fullWidth={true}onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Cancel</Button>
+                                    </Grid>
+                                    <Grid Item md={3}>
+                                      <Button variant="contained" className='color_primary' fullWidth={true} onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Done</Button>
+                                    </Grid>
 
                                    </Grid>
-
-
-
                                 </Paper>
-
-                                
-
                               </Box>
                       
                         </Model>

@@ -75,6 +75,18 @@ body .color_secondary.Mui-disabled{
   color: #fff;
 }
 
+body .btnt_gray {
+  color: #868686;
+}
+body .outline_gray{
+  border-color: #868686;
+  color: #868686;
+}
+body .outline_gray:hover{
+  border-color: #868686;
+  background-color: #efefef;
+  color: #868686;
+}
 /* form styles */
 .form-control {
   display: block;
