@@ -523,7 +523,7 @@ export default function Step2(props){
                                                                 </Field>
 
                                                                 {/* <Field name={`adult.${i}.title`} type="text" className={'form-control' + (ticketErrors.title && ticketTouched.title ? ' is-invalid' : '' )} /> */}
-                                                                <ErrorMessage name={`adult.${i}.title`} component="div" className="invalid-feedback form-control" />
+                                                                <ErrorMessage name={`adult.${i}.title`} component="div" className="invalid-feedback" />
                                                             </Grid>
                                                             <Grid item md={4}  className="form-group col-6">
                                                                 <label>First Name</label>
@@ -611,46 +611,50 @@ export default function Step2(props){
                                                         const ticketTouched = touched.child?.length && touched.child[i] || {};
                                                         return (
                                                             <>
-                                                            <div key={i} className="list-group list-group-flush" >
-                                                                <div className="list-group-item">
-                                                                    <h5 className="card-title">child {i + 1}</h5>
-                                                                    <div className="form-row" style={{display:'flex'}}>
-                                                                        <div className="form-group col-6">
+                                                            <Box key={i} className="list-group list-group-flush child" >
+                                                                <Box className="list-group-item">
+                                                                    <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                                                        <Box className="icon"></Box> <Typography>CHILD {i + 1}</Typography>
+                                                                    </Box>
+                                                                    <Grid container spacing={2} className="form-row" >
+                                                                        <Grid item md={2} className="form-group col-6">
                                                                             <label>Title</label>
 
-                                                                            <Field as="select" name={`child.${i}.title`}>
+                                                                            <Field as="select" name={`child.${i}.title`} className={'form-control'}>
                                                                                 <option value="0">Select</option>
                                                                                 <option value="mrs">Mrs</option>
                                                                                 <option value="ms">Ms</option>
                                                                             </Field>
 
                                                                             <ErrorMessage name={`child.${i}.title`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                        <div className="form-group col-6">
+                                                                        </Grid>
+                                                                        <Grid item md={5} className="form-group col-6">
                                                                             <label>First Name</label>
                                                                             <Field name={`child.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
                                                                             <ErrorMessage name={`child.${i}.firstname`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                        <div className="form-group col-6">
+                                                                        </Grid>
+                                                                        <Grid item md={5} className="form-group col-6">
                                                                             <label>Last Name</label>
                                                                             <Field name={`child.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
                                                                             <ErrorMessage name={`child.${i}.lastname`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Box>
+                                                            </Box>
 
-                                                            <Box>
-                                                                <Typography>ADD PASSPORT INFORMATION</Typography>
-                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
-                                                                    <Box>
+                                                            <Box className="passportdetail">
+                                                                <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                                                    <Box className="icon"></Box> <Typography>ADD PASSPORT INFORMATION</Typography>
+                                                                </Box>
+                                                                <Grid container spacing={2} >
+                                                                    <Grid item md={2}>
                                                                         <label>Nationality</label>
                                                                         <Field as="select" name={`child.${i}.passportinfo.nationality`}>
                                                                             <option value="0">Select</option>
                                                                             <option value="mrs">Mrs</option>
                                                                             <option value="ms">Ms</option>
                                                                         </Field>
-                                                                    </Box>
+                                                                    </Grid>
                                                                     <Box>
                                                                         <label>Passport No</label>
                                                                         <Field name={`child.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
@@ -691,7 +695,7 @@ export default function Step2(props){
                                                                             />
                                                                     </Box>
 
-                                                                </Box>
+                                                                </Grid>
                                                             </Box>
                                                             </>
                                                         );

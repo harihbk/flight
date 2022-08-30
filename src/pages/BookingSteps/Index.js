@@ -346,13 +346,13 @@ export default function Index() {
                                     sx={{ mr: 1 }}>
                                     Back
                                 </Button>
-                                <Button onClick={handleNext}  sx={{ mr: 1 }} className="color_primary" variant='contained'>
-                                    Continue
-                                </Button>
                             </Box>
 
                             <Box className='right'>
-                                {activeStep !== steps.length &&
+                                <Button onClick={handleNext}  sx={{ mr: 1 }} className="color_primary" variant='contained'>
+                                    Continue
+                                </Button>
+                                {/* {activeStep !== steps.length &&
                                     (completed[activeStep] ? (
                                     <Typography variant="caption" sx={{ display: 'inline-block' }}>
                                         Step {activeStep + 1} already completed
@@ -363,7 +363,7 @@ export default function Index() {
                                         ? 'Finish'
                                         : 'Complete Step'}
                                     </Button>
-                                ))}
+                                ))} */}
                             </Box>
                         </Box>
                     </Grid>
