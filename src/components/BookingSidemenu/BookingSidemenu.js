@@ -100,8 +100,6 @@ export default function BookingSidemenu() {
              </Box>
 
               }
-               
-
             </Box>
 
             <Box className='listitem bsolid' style={{ borderBottomStyle : 'solid' }}>

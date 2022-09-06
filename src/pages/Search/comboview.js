@@ -435,117 +435,112 @@ export default function Comboview(props) {
      
                                          { listflightroundfilter && listflightroundfilter.map((data, i) => (
                                                     <Box className='flightitem'>
-                                                        {/* <RadioGroup className="faretype_radio" 
-                                                             > */}
-                                                            <Box className='flight_brand'>
-                                                                <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {  data?.frmt[0]?.dept_obj?.name }
-                                                            </Box>
-                                                            <span style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}} >
-                                                               { data?.frmt[0]?.flight_code } 
-                                                                </span>
+                                                        <Box className='timeandDetails' sx={{ display :'flex'}}>
+                                                            <Grid container  className="firstdiv" sx={{ width : '100%'}}>
 
-                                                            <Box className='timeandDetails' sx={{ display :'flex'}}>
+                                                                <Grid item md={6} className='origin fcol' style={{ paddingRight : 10 }}>
+                                                                    <Box className='flight_brand'>
+                                                                        <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {  data?.frmt[0]?.dept_obj?.name }
+                                                                    </Box>
+                                                                    <span style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}} >
+                                                                    { data?.frmt[0]?.flight_code } 
+                                                                    </span>
+                                                                    <Box sx={{ display : 'flex' , justifyContent : 'space-between'}}>
+                                                                        <Box className='from'>
+                                                                            <Typography className='timeText'>  { data?.frmt[0]?.dept_obj?.timing } </Typography>
+                                                                            <Typography className='place'> { data?.frmt[0]?.dept_obj?.city } </Typography>
+                                                                            <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[0]?.dept_obj?.timewords   } </Typography>
 
-                                                                    <Box className="firstdiv" sx={{ marginRight: 12,width : '100%'}}>
-                                                                        <Box sx={{ display : 'flex' , justifyContent : 'space-between'}}>
-                                                                                <Box className='from'>
-                                                                                    <Typography className='timeText'>  { data?.frmt[0]?.dept_obj?.timing } </Typography>
-                                                                                    <Typography className='place'> { data?.frmt[0]?.dept_obj?.city } </Typography>
-                                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[0]?.dept_obj?.timewords   } </Typography>
-
-                                                                                </Box>
-                                                                                <Box className='hours'>
-                                                                                    <Typography className='hourstext'>  { data?.frmt[0]?.duration } </Typography>
-                                                                                    <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.frmt[0]?.stopwords } </Typography>
-                                                                                </Box>
-                                                                                <Box className='to'>
-                                                                                    <Typography className='timeText'>  { data?.frmt[0]?.arrival_obj?.timing } </Typography>
-                                                                                    <Typography className='place'> { data?.frmt[0]?.arrival_obj?.city } </Typography>
-                                                                                    <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[0]?.arrival_obj?.timewords   } </Typography>
-
-                                                                                </Box>
                                                                         </Box>
+                                                                        <Box className='hours'>
+                                                                            <Typography className='hourstext'>  { data?.frmt[0]?.duration } </Typography>
+                                                                            <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.frmt[0]?.stopwords } </Typography>
+                                                                        </Box>
+                                                                        <Box className='to'>
+                                                                            <Typography className='timeText'>  { data?.frmt[0]?.arrival_obj?.timing } </Typography>
+                                                                            <Typography className='place'> { data?.frmt[0]?.arrival_obj?.city } </Typography>
+                                                                            <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[0]?.arrival_obj?.timewords   } </Typography>
 
-                                                                        <Divider/>
-
-                                                                        <Box className='flight_brand'>
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Grid>
+                                                                
+                                                                <Grid item md={6} className='destination fcol' style={{ 'border-left' : '1px dashed #efefef', paddingLeft : 10, paddingRight : 10 }}>
+                                                                    <Box className='flight_brand'>
                                                                         <img src={require('../../assets/icons/flighticon.png')} alt='flight' /> {  data?.frmt[1]?.dept_obj?.name }
-                                                                        </Box>
-                                                                        <span style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}} >
-                                                                    { data?.frmt[1]?.flight_code }
-                                                                        </span>
-
-                                                                        <Box sx={{ display : 'flex' , justifyContent : 'space-between'}}>
-                                                                        
-                                                                            <Box className='from'>
-                                                                                <Typography className='timeText'>  { data?.frmt[1]?.dept_obj?.timing } </Typography>
-                                                                                <Typography className='place'> { data?.frmt[1]?.dept_obj?.city } </Typography>
-                                                                                <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[1]?.dept_obj?.timewords   } </Typography>
-
-                                                                            </Box>
-                                                                            <Box className='hours'>
-                                                                                <Typography className='hourstext'>  { data?.frmt[1]?.duration } </Typography>
-                                                                                <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.frmt[1]?.stopwords } </Typography>
-                                                                            </Box>
-                                                                            <Box className='to'>
-                                                                                <Typography className='timeText'>  { data?.frmt[1]?.arrival_obj?.timing } </Typography>
-                                                                                <Typography className='place'> { data?.frmt[1]?.arrival_obj?.city } </Typography>
-                                                                                <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[1]?.arrival_obj?.timewords   } </Typography>
-
-                                                                            </Box>
-
-                                                                        </Box>
-
-
                                                                     </Box>
+                                                                    <span style={{ fontSize : 11 ,fontWeight : 'normal' , color:'#848f91'}} >
+                                                                        { data?.frmt[1]?.flight_code }
+                                                                    </span>
 
-                                                           
+                                                                    <Box sx={{ display : 'flex' , justifyContent : 'space-between'}}>
+                                                                    
+                                                                        <Box className='from'>
+                                                                            <Typography className='timeText'>  { data?.frmt[1]?.dept_obj?.timing } </Typography>
+                                                                            <Typography className='place'> { data?.frmt[1]?.dept_obj?.city } </Typography>
+                                                                            <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[1]?.dept_obj?.timewords   } </Typography>
 
-                                                                    <Box className="seconddiv">
-                                                                        <Box className='price'>
-
-                                                                            <span>
-                                                                        { data?.totalPriceList.map((totaldata, totindex)=>(
-                                                                            <Box className='price' >
-                                                                            <Typography className='priceText'> 
-                                                                            
-                                                                            <div id={fare}>
-                                                                                <span id={fare}>
-                                                                                <Radio
-                                                                                        checked={totaldata?.checked}
-                                                                                        id= {totaldata?.id}
-                                                                                        value={totaldata?.id}
-                                                                                        onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
-                                                                                        name={ "flights-" + totaldata?.id  }
-                                                                                        inputProps={{ 'aria-label': 'A' }}
-                                                                                    />
-                                                                                </span>
-                                                                                <span>₹</span>
-                                                                            {helpers.calculatetotalamount(totaldata,_paxtypeget)}
-                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}}>{totaldata.fareIdentifier}</Typography> 
-                                                                            </div>
-                                                                                </Typography>
-                                                                                <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ _cabinClassget }</Typography>
                                                                         </Box>
-                                                                            )) }
+                                                                        <Box className='hours'>
+                                                                            <Typography className='hourstext'>  { data?.frmt[1]?.duration } </Typography>
+                                                                            <Typography className='placeType' style={{ textAlign : 'center' }}> { data?.frmt[1]?.stopwords } </Typography>
+                                                                        </Box>
+                                                                        <Box className='to'>
+                                                                            <Typography className='timeText'>  { data?.frmt[1]?.arrival_obj?.timing } </Typography>
+                                                                            <Typography className='place'> { data?.frmt[1]?.arrival_obj?.city } </Typography>
+                                                                            <Typography variant="h6" sx={{ fontSize : 11}}>  { data?.frmt[1]?.arrival_obj?.timewords   } </Typography>
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Grid>
+                                                            </Grid>
+
+                                                    
+
+                                                            <Box className="seconddiv" style={{ width : '30%', 'border-left' : '1px dashed #efefef', paddingLeft : 10 }}>
+                                                                <Box className=''>
+
+                                                                    <span>
+                                                                { data?.totalPriceList.map((totaldata, totindex)=>(
+                                                                    <Box className='price' style={{ width : '100%' }}>
+                                                                    <Typography className='priceText'> 
+                                                                        <div id={fare}>
+                                                                            <span id={fare}>
+                                                                            <Radio
+                                                                                    checked={totaldata?.checked}
+                                                                                    id= {totaldata?.id}
+                                                                                    value={totaldata?.id}
+                                                                                    onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
+                                                                                    name={ "flights-" + totaldata?.id  }
+                                                                                    inputProps={{ 'aria-label': 'A' }}
+                                                                                />
                                                                             </span>
-
-
-
-                                                                            <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
-                                                                        {
-                                                                           (Object.keys(data?.going).length > 1 ||  Object.keys(data?.returns).length > 1) &&
-                                                                           <Typography className={`fdetails ${tabValueoption }`} onClick={() => tabValueoption == i ? TabChangeoption('-1') : TabChangeoption(i)}> {'More Option'} <KeyboardArrowDown className='down' /></Typography>
-                                                                        }
-
-
+                                                                            <span>₹</span>
+                                                                        {helpers.calculatetotalamount(totaldata,_paxtypeget)}
+                                                                        <Box style={{ display : 'flex' }}>
+                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}}>{totaldata.fareIdentifier}</Typography>  
+                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ _cabinClassget }</Typography>
                                                                         </Box>
-                                                                    </Box>
+                                                                        </div>
+                                                                    </Typography>
+                                                                </Box>
+                                                                    )) }
+                                                                    </span>
 
-                                                            </Box>  
 
 
+                                                                    <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
+                                                                {
+                                                                    (Object.keys(data?.going).length > 1 ||  Object.keys(data?.returns).length > 1) &&
+                                                                    <Typography className={`fdetails ${tabValueoption }`} onClick={() => tabValueoption == i ? TabChangeoption('-1') : TabChangeoption(i)}> {'More Option'} <KeyboardArrowDown className='down' /></Typography>
+                                                                }
 
+
+                                                                </Box>
+
+                                                                <Button className='color_primary' onClick={()=>fareifreview(data)} style={{ width : '100%', maxWidth : 300 }}>Book</Button>
+                                                            </Box>
+
+                                                        </Box>  
 
                                                         {  tabValueoption == i && (
                                                             <Box className='flight_detail_bot tab'>
@@ -555,11 +550,6 @@ export default function Comboview(props) {
                                                                 </Grid>
                                                             </Box>
                                                         )}
-
-                                                        <Button onClick={()=>fareifreview(data)}>Book</Button>
-
-
-
 
 
                                                         {/* </RadioGroup> */}

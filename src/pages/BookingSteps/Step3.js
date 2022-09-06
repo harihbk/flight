@@ -1,11 +1,17 @@
-import React, { useEffect } from "react";
-import { Container, InputLabel ,MenuItem ,Grid, Box, Typography, Button, ButtonGroup, Modal, FormGroup, FormControl, TextField, FormControlLabel, RadioGroup, Radio,Select, Checkbox } from '@mui/material';
+import React, { useEffect, useContext } from "react";
+import { Container,Divider, InputLabel ,MenuItem ,Grid, Box, Typography, Button, ButtonGroup, Modal, FormGroup, FormControl, TextField, FormControlLabel, RadioGroup, Radio,Select, Checkbox } from '@mui/material';
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { TabPanelUnstyled,TabsUnstyled, TabUnstyled, TabsListUnstyled } from '@mui/base';
 import { ReactComponent as CrossIcon } from '../../assets/flight/x.svg';
 import { ReactComponent as SeatEmty } from '../../assets/flight/seat_empty.svg';
 import { ReactComponent as CompleteIcon } from '../../assets/icons/tick.svg';
+import TripinfoContext from "./context";
+import  helper  from "../Search/calculation";
+import moment from 'moment';
+import helpers from '../Search/calculation';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import FlightLandIcon from '@mui/icons-material/FlightLand';
 
 
 export default function Step3(props){
@@ -14,6 +20,12 @@ export default function Step3(props){
     const [addonTab, setAddonTab] = React.useState();
     const [baggageInfo, setBaggageInfo] = React.useState(10);
     const [passenger, setPassenger] = React.useState();
+    const [journeyDetail, setJourneyDetail] = React.useState();
+    const things = React.useContext(TripinfoContext);
+    const [data , setData ] = React.useState(things?.tripInfos);
+    const [totalPriceInfo , setTotalPriceInfo] = React.useState(things?.totalPriceInfo);
+
+    console.log(things);
 
     const changegstType = (event) => {
         setHasGst(event.target.value);
@@ -25,7 +37,6 @@ export default function Step3(props){
 
     const TabChange = (newValue) => {
         setAddonTab(newValue);
-        console.log(newValue)
     };
     
     const changeBaggageInfo = (event) => {
@@ -40,8 +51,6 @@ export default function Step3(props){
     useEffect(()=>{
         setPassenger(JSON.parse(window.localStorage.getItem('passangerdetail')));
 
-        console.log(passenger);
-
 
     },[]);
 
@@ -54,108 +63,182 @@ export default function Step3(props){
 
                 <Box className="boxcont">
                     <Box className="form">
-                    <Box className="passengers_list borderbox_item"  style={{ marginBottom : 30 }}>
-                        <Box className="formtitle" style={{ display : 'flex' }}> 
-                            <Box className="icon">
-                                <img src={'https://cdn-icons-png.flaticon.com/512/615/615075.png'} alt="arrow" style={{ width: 26,marginRight : 10 }}/>
-                            </Box> 
-                            <Typography>Passenger Details</Typography>
-                        </Box>
-                        <Grid container className="tableheader" style={{ 'border-bottom' : '1px solid #ccc', paddingBottom : 10, marginBottom : 10 }}>
-                            <Grid item sx={{ maxWidth : 55, width : '100%' }}>
-                                <Typography>S.no</Typography>
-                            </Grid>
-                            <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
-                                <Typography>Name </Typography>
-                            </Grid>
-                            <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
-                                <Typography>Nationality & Passport</Typography>
-                            </Grid>
-                            <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
-                                <Typography>Seat Booking</Typography>
-                            </Grid>
-                            <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
-                                <Typography>Baggage & Meals</Typography>
-                            </Grid>
-                        </Grid>
+                        <Box class="journey_wrapper_review flightlist_item borderbox_item" style={{ marginBottom : 30, borderStyle : 'dashed' }}>
+                            
+                        { data.length > 0 && 
+                           data?.map((a,i) =>  (
 
+                               <>
+
+                                <Typography className="journey_review">
+                                    {a?.sI[0]?.isRs ? <FlightTakeoffIcon /> : <FlightLandIcon /> } { a?.sI[0]?.da?.city } - { a?.sI[a?.sI?.length - 1]?.aa?.city } on { moment(a?.sI[0]?.dt).format("ddd, MMM Do YYYY ") } </Typography>
+
+                               { a?.sI.map((b,ii)=>(
+                                    <>
+
+                                        <Box className='journeydetail bottom' style={{ display : 'flex', columnGap : 10, marginTop : 20, marginBottom : 17, justifyContent: 'space-between' }}>
+                                            <Box className='leftcol' style={{ display : 'flex', columnGap : 10, justifyContent : 'space-between', width : '78%' }}>
+                                                <Box className='brand' style={{ width : 60 }}>
+                                                    <img src={require('../../assets/icons/flighticon.png')} alt='flight'  style={{ width : 30 }}/>
+                                                    <Typography style={{ fontSize : 10, fontWeight : '500' }}> {b?.fD.aI?.name}</Typography>
+                                                    <Typography style={{ fontSize : 10, fontWeight : '500' }}> {b?.fD.aI?.code}-{b?.fD?.fN}</Typography>
+                                                </Box>
+                                                <Box className='time_place first'>
+                                                    <Typography className='time1' >{ moment(b?.dt).format("MMM Do,ddd, HH:mm") }</Typography>
+                                                    {/* <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>ND 20:40</Typography> */}
+                                                    <Typography className='jplace_text'>{ b?.da?.city },{b?.da?.country}</Typography>
+
+                                                    <Typography className='jplace_text'>{ b?.da?.name }</Typography>
+                                                </Box>
+
+
+                                                <Box className='hours'>
+                                                    <Typography className='hrs hours_border' style={{fontSize : 18, fontWeight : '600'}}>{ helper.converttimefrmt(b?.duration) }</Typography>
+                                                    <Typography style={{ fontSize : 10 }}>{'Flight Duration'}</Typography>
+                                                </Box>
+
+
+                                                <Box className='time_place'>
+                                                    <Typography className='time1'  >{ moment(b?.at).format("MMM Do,ddd, HH:mm") }</Typography>
+                                                    {/* <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>MAS 4:00</Typography> */}
+                                                    <Typography className='jplace_text'>{ b?.aa?.city },{b?.aa?.country}</Typography>
+                                                    <Typography className='jplace_text'>{ b?.aa?.name }</Typography>
+                                                </Box>
+                                            </Box>
+                                            <Box className='checkin_col' style={{ display : 'flex', columnGap : 10, justifyContent: 'space-between', width : '22%' }}>
+                                                <Box className='checkin'>
+                                                    <Typography className='title' style={{fontSize : 12, fontWeight : '300' }}>Check-in</Typography>
+                                                    <Typography style={{fontSize : 10,  fontWeight : '200'}}>15 kgs{'\n'} {'\n'}  {'(1 peace only)'}</Typography>
+                                                </Box>
+                                                <Box className='checkin checkout'>
+                                                    <Typography className='title' style={{fontSize : 12, fontWeight : '300' }}>Check-out</Typography>
+                                                    <Typography style={{fontSize : 10,  fontWeight : '200'}}>7 kgs{'\n'}  {'(1 peace only)'}</Typography>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+
+                                        { ( a?.sI.length > 1  && ii != a?.sI.length-1 ) && 
+                                            <Typography style={{ textAlign : 'center'}}>Required to change flight Layover Time-{ helpers.twodatetimediff(b?.at , a?.sI[ii+1]?.dt) }</Typography>
+                                         }
+
+                                    </>
+                               ))
+                               
+                              
+
+                               }
+                              
+                            { (i != data.length - 1) && <Divider  style={{ margin: 8, marginBottom : 17}}/>  }
+                              
+                               </>
+                               
+                           ))
                         
-                        { passenger?.adult && passenger?.adult.map((data, index) => (
-                            <Grid container className="tablecontent" style={{ 'border-top' : index !== 0 ? '1px solid #ccc' : '0' , paddingBottom : 10, marginBottom : 10 }} key={index}>
-                                <Grid item sx={{ maxWidth : 55, width : '100%'  }}>
-                                    <Typography>{ index + 1 }</Typography>
+                        }
+
+                        </Box>
+                        <Box className="passengers_list borderbox_item"  style={{ marginBottom : 30 }}>
+                            <Box className="formtitle" style={{ display : 'flex' }}> 
+                                <Box className="icon">
+                                    <img src={'https://cdn-icons-png.flaticon.com/512/615/615075.png'} alt="arrow" style={{ width: 26,marginRight : 10 }}/>
+                                </Box> 
+                                <Typography>Passenger Details</Typography>
+                            </Box>
+                            <Grid container className="tableheader" style={{ 'border-bottom' : '1px solid #ccc', paddingBottom : 10, marginBottom : 10 }}>
+                                <Grid item sx={{ maxWidth : 55, width : '100%' }}>
+                                    <Typography>S.no</Typography>
                                 </Grid>
                                 <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
-                                    <Typography sx={{ textTransform : 'capitalize' }}>{ data?.title } {' '} { data?.firstname + ' ' + data?.lastname }</Typography>
-                                    <Typography sx={{ color : '#9b9b9b' }}>{ data?.passportinfo?.dob }20/20/2020</Typography>
+                                    <Typography>Name </Typography>
                                 </Grid>
                                 <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
-                                    <Typography>{data?.passportinfo?.nationality} India</Typography>
-                                    <Typography>{data?.passportinfo?.passportno} Euhh9099</Typography>
+                                    <Typography>Nationality & Passport</Typography>
                                 </Grid>
                                 <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
-                                    <Typography>NA</Typography>
+                                    <Typography>Seat Booking</Typography>
                                 </Grid>
                                 <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
-                                    <Typography>NA</Typography>
+                                    <Typography>Baggage & Meals</Typography>
                                 </Grid>
                             </Grid>
-                        ))}
-                    </Box>
 
-                    
-
-                    <Box className="form_item borderbox_item contact" style={{ marginBottom : 30 }}>
-                        <Box className="formtitle" sx={{ marginBottom : 1,display : 'flex'  }}> 
-                            <Box className="icon" >
-                                <img src={'https://cdn-icons-png.flaticon.com/512/3095/3095583.png'} alt="arrow" style={{ width: 26,marginRight : 10 }}/>
-                            </Box> <Typography>Contact Details</Typography>
-                        </Box>
-
-                        <Box className="contact_details">
-                            <Box>
-                                <Typography variant="span">Mobile : </Typography>
-                                <Typography variant="span" style={{ fontSize : 14, fontWeight : '500', color : '#000' }}>{ passenger?.mobile } </Typography>
-                            </Box>
-                            <Box>
-                                <Typography variant="span">Email : </Typography>
-                                <Typography variant="span"  style={{ fontSize : 14, fontWeight : '500', color : '#000' }}>{ passenger?.email } </Typography>
-                            </Box>
-                        </Box>
-                    </Box>
-
-                    <Box className="form_item borderbox_item gstno" style={{ marginBottom : 20 }}>
-                        <Box className="formtitle" style={{ display : 'flex' }}>
-                            <Box className="icon" >
-                                <img src={'https://cdn-icons-png.flaticon.com/512/2168/2168671.png'} alt="arrow" style={{ width: 26,marginRight : 10 }}/>
-                            </Box> 
-                            <Typography sx={{ display : 'flex', alignItems : 'center', columnGap : 1 }}>I have a GST number (optional) 
-                                
-                            </Typography>
-                        </Box>
-
-                        <FormGroup className="formcontents">
-                            <Grid container spacing={2} >
-                                <Grid item md={4} >
-                                    <Typography>Company Name</Typography>
+                            
+                            { passenger?.adult && passenger?.adult.map((data, index) => (
+                                <Grid container className="tablecontent" style={{ 'border-top' : index !== 0 ? '1px solid #ccc' : '0' , paddingBottom : 10, marginBottom : 10 }} key={index}>
+                                    <Grid item sx={{ maxWidth : 55, width : '100%'  }}>
+                                        <Typography>{ index + 1 }</Typography>
+                                    </Grid>
+                                    <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
+                                        <Typography sx={{ textTransform : 'capitalize' }}>{ data?.title } {' '} { data?.firstname + ' ' + data?.lastname }</Typography>
+                                        <Typography sx={{ color : '#9b9b9b' }}>{ data?.passportinfo?.dob }20/20/2020</Typography>
+                                    </Grid>
+                                    <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
+                                        <Typography>{data?.passportinfo?.nationality} India</Typography>
+                                        <Typography>{data?.passportinfo?.passportno} Euhh9099</Typography>
+                                    </Grid>
+                                    <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
+                                        <Typography>NA</Typography>
+                                    </Grid>
+                                    <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
+                                        <Typography>NA</Typography>
+                                    </Grid>
                                 </Grid>
-                                <Grid item md={4} >
-                                    <Typography>GST Number</Typography>
+                            ))}
+                        </Box>
+
+                        
+
+                        <Box className="form_item borderbox_item contact" style={{ marginBottom : 30 }}>
+                            <Box className="formtitle" sx={{ marginBottom : 1,display : 'flex'  }}> 
+                                <Box className="icon" >
+                                    <img src={'https://cdn-icons-png.flaticon.com/512/3095/3095583.png'} alt="arrow" style={{ width: 26,marginRight : 10 }}/>
+                                </Box> <Typography>Contact Details</Typography>
+                            </Box>
+
+                            <Box className="contact_details">
+                                <Box>
+                                    <Typography variant="span">Mobile : </Typography>
+                                    <Typography variant="span" style={{ fontSize : 14, fontWeight : '500', color : '#000' }}>{ passenger?.mobile } </Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="span">Email : </Typography>
+                                    <Typography variant="span"  style={{ fontSize : 14, fontWeight : '500', color : '#000' }}>{ passenger?.email } </Typography>
+                                </Box>
+                            </Box>
+                        </Box>
+
+                        <Box className="form_item borderbox_item gstno" style={{ marginBottom : 20 }}>
+                            <Box className="formtitle" style={{ display : 'flex' }}>
+                                <Box className="icon" >
+                                    <img src={'https://cdn-icons-png.flaticon.com/512/2168/2168671.png'} alt="arrow" style={{ width: 26,marginRight : 10 }}/>
+                                </Box> 
+                                <Typography sx={{ display : 'flex', alignItems : 'center', columnGap : 1 }}>I have a GST number (optional) 
+                                    
+                                </Typography>
+                            </Box>
+
+                            <FormGroup className="formcontents">
+                                <Grid container spacing={2} >
+                                    <Grid item md={4} >
+                                        <Typography>Company Name</Typography>
+                                    </Grid>
+                                    <Grid item md={4} >
+                                        <Typography>GST Number</Typography>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </FormGroup>    
-                    </Box>
+                            </FormGroup>    
+                        </Box>
 
 
 
-                        {/* <Box className="update_status" sx={{ display : 'flex', alignItems : 'center', columnGap : 1, marginTop : 2 }}>
-                            <Checkbox 
-                                color="success"
-                                sx={{ padding : 0 }}
-                                checked={updateSms}
-                                onChange={changeUpdatesms} icon={<CircleOutlinedIcon />} checkedIcon={<CheckCircleIcon />}  />
-                                <Typography style={{ fontSize : 11 }}>Update me Order Status, Exclusive Offers via SMS, Whatsapp and Email.</Typography>
-                        </Box> */}
+                            {/* <Box className="update_status" sx={{ display : 'flex', alignItems : 'center', columnGap : 1, marginTop : 2 }}>
+                                <Checkbox 
+                                    color="success"
+                                    sx={{ padding : 0 }}
+                                    checked={updateSms}
+                                    onChange={changeUpdatesms} icon={<CircleOutlinedIcon />} checkedIcon={<CheckCircleIcon />}  />
+                                    <Typography style={{ fontSize : 11 }}>Update me Order Status, Exclusive Offers via SMS, Whatsapp and Email.</Typography>
+                            </Box> */}
                     </Box>
                 </Box>
 

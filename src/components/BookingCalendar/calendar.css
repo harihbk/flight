@@ -7,6 +7,8 @@
     left: 0;
     border-radius: 7px;
     box-shadow: 0px 6px 10px 0px #00000017;
+    color: #000;
+    z-index: 11;
 }
 .bookingCalendar_parent{
     position: relative

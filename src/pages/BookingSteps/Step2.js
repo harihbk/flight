@@ -12,7 +12,8 @@ import TripinfoContext from "./context"
 import * as Yup from "yup";
 import moment from 'moment'
 import axios from "axios";
-import Seatpopup from "./seatpopup"
+import Seatpopup from "./seatpopup";
+import AlertPopup from "./alertPopup"
 import Skeleton from '@mui/material/Skeleton';
 import { country } from "./country"
 import { completeservice } from "./rxjs";
@@ -341,14 +342,16 @@ export default function Step2(props){
     function onSubmit(fields) {
 
         // display form field values on success
-       console.log(fields);
+    //    console.log(fields);
     }
 
     const [seats , setSeats ] = React.useState([])
     const [seatloading , setSeatloading] = React.useState(true)
     const [open, setOpen] = React.useState(false);
     const [ currentrow , setSetcurrentrow ] = React.useState([])
-    const [ rowid , setRowid ] = React.useState("")
+    const [ rowid , setRowid ] = React.useState("");
+    const [popupShow, setPopupShow] = React.useState(false);
+    const [alertMsg, setAlertMsg] = React.useState('');
 
     function getflightapi(){
         
@@ -407,7 +410,7 @@ export default function Step2(props){
            
          })
      })
-     console.log(data?.tripInfos);
+     
    //  setCurrflightdetial(JSON.stringify(window.localStorage.setItem('updateCurrflightdetial',seatmap)));
      setCurrflightdetial(seatmap)
   //  alert(1)
@@ -417,15 +420,21 @@ export default function Step2(props){
 
 
     function getSets(pp){
-        setRowid(pp.id)
-        setSelectflightdetail(pp)
-        let curr_row  = seats?.tripSeat?.[pp.id]
-       // console.log(curr_row);
-        if(curr_row == undefined){
-            alert("Seat Selection not applicable")
+        let isUnavailable =  seats?.tripSeat?.[pp.id];
+        if(isUnavailable?.nt){
+            setPopupShow(true);
+            setAlertMsg(isUnavailable?.nt);
         }else{
-            setSetcurrentrow(curr_row)
-            setOpen(true) 
+            setRowid(pp.id)
+            setSelectflightdetail(pp)
+            let curr_row  = seats?.tripSeat?.[pp.id]
+            // console.log(curr_row);
+            if(curr_row == undefined){
+                alert("Seat Selection not applicable")
+            }else{
+                setSetcurrentrow(curr_row)
+                setOpen(true) 
+            }
         }
              
     }
@@ -493,7 +502,7 @@ export default function Step2(props){
                 onSubmit={onSubmit}
                
                 >
-                                {({ errors, values, touched, setValues,setFieldValue }) => (
+                    {({ errors, values, touched, setValues,setFieldValue }) => (
                                 
                 <Form>
 
@@ -505,101 +514,103 @@ export default function Step2(props){
                                         const ticketErrors = errors.adult?.length && errors.adult[i] || {};
                                         const ticketTouched = touched.adult?.length && touched.adult[i] || {};
                                         return (
-                                            <>
-                                            <Box key={i} className="list-group list-group-flush adultdetail" sx={{ marginBottom : 3 }}>
-                                                <Box className="list-group-item">
-                                                    <Box className="formtitle" sx={{ marginBottom : 1 }}> 
-                                                        <Box className="icon"></Box> <Typography>ADULT {i + 1}</Typography>
+                                            <Box key={i} className='borderbox'>
+                                                <Box className="list-group list-group-flush adultdetail" sx={{ marginBottom : 3 }}>
+                                                    <Box className="list-group-item">
+                                                        <Box className="formtitle" sx={{ marginBottom : 1 }}> 
+                                                            <Box className="icon"></Box> <Typography>ADULT {i + 1}</Typography>
+                                                        </Box>
+                                                        <Box className="form-row" style={{display:'flex'}}>
+                                                            <Grid container spacing={2}>
+                                                                <Grid item md={2} className="form-group col-6">
+                                                                    <label>Title1</label>
+
+                                                                    <Field as="select" name={`adult.${i}.title`} className='form-control'>
+                                                                        <option value="0">Select</option>
+                                                                        <option value="mr">Mr</option>
+                                                                        <option value="mrs">Mrs</option>
+                                                                        <option value="ms">Ms</option>
+                                                                    </Field>
+
+                                                                    {/* <Field name={`adult.${i}.title`} type="text" className={'form-control' + (ticketErrors.title && ticketTouched.title ? ' is-invalid' : '' )} /> */}
+                                                                    <ErrorMessage name={`adult.${i}.title`} component="div" className="invalid-feedback" />
+                                                                </Grid>
+                                                                <Grid item md={5}  className="form-group col-6">
+                                                                    <label>First Name</label>
+                                                                    <Field name={`adult.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                                    <ErrorMessage name={`adult.${i}.firstname`} component="div" className="invalid-feedback" />
+                                                                </Grid>
+                                                                <Grid item md={5}  className="form-group col-6">
+                                                                    <label>Last Name</label>
+                                                                    <Field name={`adult.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
+                                                                    <ErrorMessage name={`adult.${i}.lastname`} component="div" className="invalid-feedback" />
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Box>
                                                     </Box>
-                                                    <Box className="form-row" style={{display:'flex'}}>
-                                                        <Grid container spacing={2}>
-                                                            <Grid item md={4} className="form-group col-6">
-                                                                <label>Title1</label>
+                                                </Box>
 
-                                                                <Field as="select" name={`adult.${i}.title`} className='form-control'>
-                                                                    <option value="0">Select</option>
-                                                                    <option value="mrs">Mrs</option>
-                                                                    <option value="ms">Ms</option>
-                                                                </Field>
-
-                                                                {/* <Field name={`adult.${i}.title`} type="text" className={'form-control' + (ticketErrors.title && ticketTouched.title ? ' is-invalid' : '' )} /> */}
-                                                                <ErrorMessage name={`adult.${i}.title`} component="div" className="invalid-feedback" />
-                                                            </Grid>
-                                                            <Grid item md={4}  className="form-group col-6">
-                                                                <label>First Name</label>
-                                                                <Field name={`adult.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
-                                                                <ErrorMessage name={`adult.${i}.firstname`} component="div" className="invalid-feedback" />
-                                                            </Grid>
-                                                            <Grid item md={4}  className="form-group col-6">
-                                                                <label>Last Name</label>
-                                                                <Field name={`adult.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
-                                                                <ErrorMessage name={`adult.${i}.lastname`} component="div" className="invalid-feedback" />
-                                                            </Grid>
+                                                <Box className="passportdetail" sx={{ marginBottom : 3 }}>
+                                                    <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                                        <Box className="icon"></Box> <Typography>ADD PASSPORT INFORMATION</Typography>
+                                                    </Box>
+                                                    <Grid container spacing={2} >
+                                                        <Grid item md={2}  >
+                                                            <label>Nationality</label>
+                                                            <Field as="select" name={`adult.${i}.passportinfo.nationality`} className='form-control'>
+                                                                <option value="0">Select</option>
+                                                                <option value="mr">Mr</option>
+                                                                <option value="mrs">Mrs</option>
+                                                                <option value="ms">Ms</option>
+                                                            </Field>
                                                         </Grid>
-                                                    </Box>
+                                                        <Grid item md={4}  >
+                                                            <label>Passport No</label>
+                                                            <Field name={`adult.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+
+                                                        </Grid>
+                                                        <Grid item md={2}  >
+                                                            <label>Issue Date</label>
+                                                            {/* <DatePicker name={`adult.${i}.passportinfo.issuedate`} onChange={e=> datechange(e) }/> */}
+                                                            <DatePicker    
+                                                                className="form-control"
+                                                                name={`adult.${i}.passportinfo.issuedate`}
+                                                                selected={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
+                                                                value={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
+                                                                onChange={(e) =>
+                                                                setFieldValue(`adult.${i}.passportinfo.issuedate`, e)
+                                                                }   
+                                                                />
+
+                                                        </Grid>
+                                                        <Grid item md={2}  >
+                                                            Expiry Date
+                                                            <DatePicker    
+                                                                className="form-control"
+                                                                name={`adult.${i}.passportinfo.expiredate`}
+                                                                selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                                value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                                onChange={(e) =>
+                                                                setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
+                                                                }   
+                                                                />
+                                                        </Grid>
+                                                        <Grid item md={2}  >
+                                                            Date of Birth
+                                                            <DatePicker   
+                                                                className="form-control" 
+                                                                name={`adult.${i}.passportinfo.dob`}
+                                                                selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                onChange={(e) =>
+                                                                setFieldValue(`adult.${i}.passportinfo.dob`, e)
+                                                                }   
+                                                                />
+                                                        </Grid>
+
+                                                    </Grid>
                                                 </Box>
                                             </Box>
-
-                                            <Box className="passportdetail" sx={{ marginBottom : 3 }}>
-                                                <Box className="formtitle" sx={{ marginBottom : 2 }}> 
-                                                    <Box className="icon"></Box> <Typography>ADD PASSPORT INFORMATION</Typography>
-                                                </Box>
-                                                <Grid container spacing={2} >
-                                                    <Grid item md={2}  >
-                                                        <label>Nationality</label>
-                                                        <Field as="select" name={`adult.${i}.passportinfo.nationality`} className='form-control'>
-                                                            <option value="0">Select</option>
-                                                            <option value="mrs">Mrs</option>
-                                                            <option value="ms">Ms</option>
-                                                        </Field>
-                                                    </Grid>
-                                                    <Grid item md={4}  >
-                                                        <label>Passport No</label>
-                                                        <Field name={`adult.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
-
-                                                    </Grid>
-                                                    <Grid item md={2}  >
-                                                        <label>Issue Date</label>
-                                                        {/* <DatePicker name={`adult.${i}.passportinfo.issuedate`} onChange={e=> datechange(e) }/> */}
-                                                        <DatePicker    
-                                                            className="form-control"
-                                                            name={`adult.${i}.passportinfo.issuedate`}
-                                                            selected={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
-                                                            value={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
-                                                            onChange={(e) =>
-                                                            setFieldValue(`adult.${i}.passportinfo.issuedate`, e)
-                                                            }   
-                                                            />
-
-                                                    </Grid>
-                                                    <Grid item md={2}  >
-                                                        Expiry Date
-                                                        <DatePicker    
-                                                            className="form-control"
-                                                            name={`adult.${i}.passportinfo.expiredate`}
-                                                            selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
-                                                            value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
-                                                            onChange={(e) =>
-                                                            setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
-                                                            }   
-                                                            />
-                                                    </Grid>
-                                                    <Grid item md={2}  >
-                                                        Date of Birth
-                                                        <DatePicker   
-                                                            className="form-control" 
-                                                            name={`adult.${i}.passportinfo.dob`}
-                                                            selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                            value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                            onChange={(e) =>
-                                                            setFieldValue(`adult.${i}.passportinfo.dob`, e)
-                                                            }   
-                                                            />
-                                                    </Grid>
-
-                                                </Grid>
-                                            </Box>
-                                            </>
                                         );
                                     }))}
                                     </FieldArray>
@@ -610,94 +621,99 @@ export default function Step2(props){
                                                         const ticketErrors = errors.child?.length && errors.child[i] || {};
                                                         const ticketTouched = touched.child?.length && touched.child[i] || {};
                                                         return (
-                                                            <>
-                                                            <Box key={i} className="list-group list-group-flush child" >
-                                                                <Box className="list-group-item">
-                                                                    <Box className="formtitle" sx={{ marginBottom : 2 }}> 
-                                                                        <Box className="icon"></Box> <Typography>CHILD {i + 1}</Typography>
-                                                                    </Box>
-                                                                    <Grid container spacing={2} className="form-row" >
-                                                                        <Grid item md={2} className="form-group col-6">
-                                                                            <label>Title</label>
+                                                            <Box  key={i}  className='borderbox'>
+                                                                <Box className="list-group list-group-flush child" style={{ marginBottom : 20 }}>
+                                                                    <Box className="list-group-item">
+                                                                        <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                                                            <Box className="icon"></Box> <Typography>CHILD {i + 1}</Typography>
+                                                                        </Box>
+                                                                        <Grid container spacing={2} className="form-row" >
+                                                                            <Grid item md={2} className="form-group col-6">
+                                                                                <label>Title</label>
 
-                                                                            <Field as="select" name={`child.${i}.title`} className={'form-control'}>
+                                                                                <Field as="select" name={`child.${i}.title`} className={'form-control'}>
+                                                                                    <option value="0">Select</option>
+                                                                                    <option value="mr">Mr</option>
+                                                                                    <option value="mrs">Mrs</option>
+                                                                                    <option value="ms">Ms</option>
+                                                                                </Field>
+
+                                                                                <ErrorMessage name={`child.${i}.title`} component="div" className="invalid-feedback" />
+                                                                            </Grid>
+                                                                            <Grid item md={5} className="form-group col-6">
+                                                                                <label>First Name</label>
+                                                                                <Field name={`child.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                                                <ErrorMessage name={`child.${i}.firstname`} component="div" className="invalid-feedback" />
+                                                                            </Grid>
+                                                                            <Grid item md={5} className="form-group col-6">
+                                                                                <label>Last Name</label>
+                                                                                <Field name={`child.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
+                                                                                <ErrorMessage name={`child.${i}.lastname`} component="div" className="invalid-feedback" />
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    </Box>
+                                                                </Box>
+
+                                                                <Box className="passportdetail">
+                                                                    <Box className="formtitle" sx={{ marginBottom : 2 }}> 
+                                                                        <Box className="icon"></Box> <Typography>ADD PASSPORT INFORMATION</Typography>
+                                                                    </Box>
+                                                                    <Grid container spacing={2} >
+                                                                        <Grid item md={2}>
+                                                                            <label>Nationality</label>
+                                                                            <Field as="select" name={`child.${i}.passportinfo.nationality`} className='form-control'>
                                                                                 <option value="0">Select</option>
+                                                                                <option value="mr">Mr</option>
                                                                                 <option value="mrs">Mrs</option>
                                                                                 <option value="ms">Ms</option>
                                                                             </Field>
+                                                                        </Grid>
+                                                                        <Grid  item md={4}> 
+                                                                            <label>Passport No</label>
+                                                                            <Field name={`child.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
 
-                                                                            <ErrorMessage name={`child.${i}.title`} component="div" className="invalid-feedback" />
                                                                         </Grid>
-                                                                        <Grid item md={5} className="form-group col-6">
-                                                                            <label>First Name</label>
-                                                                            <Field name={`child.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
-                                                                            <ErrorMessage name={`child.${i}.firstname`} component="div" className="invalid-feedback" />
+                                                                        <Grid  item md={2}>
+                                                                            <label>Issue Date</label>
+                                                                            <DatePicker    
+                                                                                className="form-control"
+                                                                                name={`child.${i}.passportinfo.issuedate`}
+                                                                                selected={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
+                                                                                value={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
+                                                                                onChange={(e) =>
+                                                                                setFieldValue(`child.${i}.passportinfo.issuedate`, e)
+                                                                                }   
+                                                                            />
+
                                                                         </Grid>
-                                                                        <Grid item md={5} className="form-group col-6">
-                                                                            <label>Last Name</label>
-                                                                            <Field name={`child.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
-                                                                            <ErrorMessage name={`child.${i}.lastname`} component="div" className="invalid-feedback" />
+                                                                        <Grid  item md={2}>
+                                                                            Expiry Date
+                                                                            <DatePicker    
+                                                                                className="form-control"
+                                                                                name={`child.${i}.passportinfo.expiredate`}
+                                                                                selected={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
+                                                                                value={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
+                                                                                onChange={(e) =>
+                                                                                setFieldValue(`child.${i}.passportinfo.expiredate`, e)
+                                                                                }   
+                                                                            />
                                                                         </Grid>
+                                                                        <Grid  item md={2}>
+                                                                            Date of Birth
+                                                                            <DatePicker    
+                                                                                className="form-control"
+                                                                                name={`child.${i}.passportinfo.dob`}
+                                                                                selected={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                                value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                                onChange={(e) =>
+                                                                                setFieldValue(`child.${i}.passportinfo.dob`, e)
+                                                                                }   
+                                                                            />
+                                                                        </Grid>
+
                                                                     </Grid>
                                                                 </Box>
                                                             </Box>
-
-                                                            <Box className="passportdetail">
-                                                                <Box className="formtitle" sx={{ marginBottom : 2 }}> 
-                                                                    <Box className="icon"></Box> <Typography>ADD PASSPORT INFORMATION</Typography>
-                                                                </Box>
-                                                                <Grid container spacing={2} >
-                                                                    <Grid item md={2}>
-                                                                        <label>Nationality</label>
-                                                                        <Field as="select" name={`child.${i}.passportinfo.nationality`}>
-                                                                            <option value="0">Select</option>
-                                                                            <option value="mrs">Mrs</option>
-                                                                            <option value="ms">Ms</option>
-                                                                        </Field>
-                                                                    </Grid>
-                                                                    <Box>
-                                                                        <label>Passport No</label>
-                                                                        <Field name={`child.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
-
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <label>Issue Date</label>
-                                                                        <DatePicker    
-                                                                            name={`child.${i}.passportinfo.issuedate`}
-                                                                            selected={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
-                                                                            value={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
-                                                                            onChange={(e) =>
-                                                                            setFieldValue(`child.${i}.passportinfo.issuedate`, e)
-                                                                            }   
-                                                                            />
-
-                                                                    </Box>
-                                                                    <Box>
-                                                                        Expiry Date
-                                                                        <DatePicker    
-                                                                            name={`child.${i}.passportinfo.expiredate`}
-                                                                            selected={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
-                                                                            value={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
-                                                                            onChange={(e) =>
-                                                                            setFieldValue(`child.${i}.passportinfo.expiredate`, e)
-                                                                            }   
-                                                                            />
-                                                                    </Box>
-                                                                    <Box>
-                                                                        Date of Birth
-                                                                        <DatePicker    
-                                                                            name={`child.${i}.passportinfo.dob`}
-                                                                            selected={getIn(values, `child.${i}.passportinfo.dob`) || ''}
-                                                                            value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
-                                                                            onChange={(e) =>
-                                                                            setFieldValue(`child.${i}.passportinfo.dob`, e)
-                                                                            }   
-                                                                            />
-                                                                    </Box>
-
-                                                                </Grid>
-                                                            </Box>
-                                                            </>
                                                         );
                                                     }))}
                                                     </FieldArray> 
@@ -716,52 +732,54 @@ export default function Step2(props){
                                                             <div key={i} className="list-group list-group-flush" >
                                                                 <div className="list-group-item">
                                                                     <h5 className="card-title">infant {i + 1}</h5>
-                                                                    <div className="form-row" style={{display:'flex'}}>
-                                                                        <div className="form-group col-6">
+                                                                    <Grid container spacing={2} className="form-row">
+                                                                        <Grid item md={2} className="form-group col-6">
                                                                             <label>Title</label>
 
                                                                             <Field as="select" name={`infant.${i}.title`}>
                                                                                 <option value="0">Select</option>
+                                                                                <option value="mr">Mr</option>
                                                                                 <option value="mrs">Mrs</option>
                                                                                 <option value="ms">Ms</option>
                                                                             </Field>
 
                                                                             <ErrorMessage name={`infant.${i}.title`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                        <div className="form-group col-6">
+                                                                        </Grid>
+                                                                        <Grid item md={5}  className="form-group col-6">
                                                                             <label>First Name</label>
                                                                             <Field name={`infant.${i}.firstname`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
                                                                             <ErrorMessage name={`infant.${i}.firstname`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                        <div className="form-group col-6">
+                                                                        </Grid>
+                                                                        <Grid  item md={5} className="form-group col-6">
                                                                             <label>Last Name</label>
                                                                             <Field name={`infant.${i}.lastname`} type="text" className={'form-control' + (ticketErrors.lastname && ticketTouched.lastname ? ' is-invalid' : '' )} />
                                                                             <ErrorMessage name={`infant.${i}.lastname`} component="div" className="invalid-feedback" />
-                                                                        </div>
-                                                                    </div>
+                                                                        </Grid>
+                                                                    </Grid>
                                                                 </div>
                                                             </div>
 
                                                             <Box>
                                                                 <Typography>ADD PASSPORT INFORMATION</Typography>
-                                                                <Box style={{ display:'flex',justifyContent:'space-between' }}>
-                                                                    <Box>
-                                                                            <label>Nationality</label>
-                                                                            <Field as="select" name={`infant.${i}.passportinfo.nationality`}>
-                                                                                <option value="0">Select</option>
-                                                                                <option value="mrs">Mrs</option>
-                                                                                <option value="ms">Ms</option>
-                                                                            </Field>
-                                                                    </Box>
-                                                                    <Box>
+                                                                <Grid  container spacing={2} className="form-row">
+                                                                    <Grid item md={2}  >
+                                                                        <label>Nationality</label>
+                                                                        <Field as="select" name={`infant.${i}.passportinfo.nationality`} className={'form-control'}>
+                                                                            <option value="0">Select</option>
+                                                                            <option value="mr">Mr</option>
+                                                                            <option value="mrs">Mrs</option>
+                                                                            <option value="ms">Ms</option>
+                                                                        </Field>
+                                                                    </Grid>
+                                                                    <Grid item md={4} >
                                                                         <label>Passport No</label>
                                                                         <Field name={`infant.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
 
-                                                                    </Box>
-                                                                    <Box>
+                                                                    </Grid>
+                                                                    <Grid item md={2} >
                                                                         <label>Issue Date</label>
                                                                         <DatePicker    
-                                                                            className="formpicker"
+                                                                            className="formpicker form-control"
                                                                             name={`infant.${i}.passportinfo.issuedate`}
                                                                             selected={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
                                                                             value={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
@@ -770,11 +788,11 @@ export default function Step2(props){
                                                                             }   
                                                                             />
 
-                                                                    </Box>
-                                                                    <Box>
+                                                                    </Grid>
+                                                                    <Grid item md={2} >
                                                                         Expiry Date
                                                                         <DatePicker  
-                                                                            className="formpicker"  
+                                                                            className="formpicker form-control"  
                                                                             name={`infant.${i}.passportinfo.expiredate`}
                                                                             selected={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
                                                                             value={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
@@ -782,8 +800,8 @@ export default function Step2(props){
                                                                             setFieldValue(`infant.${i}.passportinfo.expiredate`, e)
                                                                             }   
                                                                             />
-                                                                    </Box>
-                                                                    <Box>
+                                                                    </Grid>
+                                                                    <Grid item md={2} >
                                                                         Date of Birth
                                                                         <DatePicker    
                                                                             className="formpicker"
@@ -794,9 +812,9 @@ export default function Step2(props){
                                                                             setFieldValue(`infant.${i}.passportinfo.dob`, e)
                                                                             }   
                                                                             />
-                                                                    </Box>
+                                                                    </Grid>
 
-                                                                </Box>
+                                                                </Grid>
                                                             </Box>
                                                             </>
                                                         );
@@ -805,7 +823,7 @@ export default function Step2(props){
                                             }
 
 
-                                <Box className="contact" sx={{ marginTop : 2 }}>
+                                <Box className="contact borderbox" sx={{ marginTop : 2 }}>
                                     <Box className="formtitle" sx={{ marginBottom : 1 }}> 
                                         <Box className="icon"></Box> <Typography>CONTACT DETAILS</Typography>
                                     </Box>
@@ -823,17 +841,17 @@ export default function Step2(props){
 
 
                                         <Grid item md={4} className="form-group">
-                                                <label htmlFor="email">Mobile</label>
-                                                    <Field
-                                                    type="text"
-                                                    name="mobile"
-                                                    placeholder="Enter mobile"
-                                                    autocomplete="off"
-                                                    className={`mt-2 form-control
-                                                    ${touched.mobile && errors.mobile ? "is-invalid" : ""}`}
-                                                    />
-                    
-                                                <div className="invalid-feedback">{errors.mobile}</div>
+                                            <label htmlFor="email">Mobile</label>
+                                                <Field
+                                                type="text"
+                                                name="mobile"
+                                                placeholder="Enter mobile"
+                                                autocomplete="off"
+                                                className={`mt-2 form-control
+                                                ${touched.mobile && errors.mobile ? "is-invalid" : ""}`}
+                                                />
+                
+                                            <div className="invalid-feedback">{errors.mobile}</div>
 
                                         </Grid>
                                         <Grid item md={4}  className="form-group">
@@ -850,8 +868,6 @@ export default function Step2(props){
                                         </Grid>
                                     </Grid>
                                 </Box>
-                             
-                        
                               
                         </Box>
 
@@ -960,16 +976,6 @@ export default function Step2(props){
                                 })(values) }
 
 
-                               
-
-                                
-                               
-                                
-                                
-                                
-                               
-
-
                             </TabPanelUnstyled>
 
 
@@ -985,23 +991,22 @@ export default function Step2(props){
                                            
                                         <React.Fragment>
                                             { p?.sI?.map((pp,ppi)=>( 
-                                                <Grid container style={{ width : '100%'}} justifyContent="space-between">
-                                                <Grid item style={{ width : '20%'}}>
-                                                    <TabUnstyled >
-                                                    <Typography className="place_text" style={{ fontWeight : '300' }}>{pp.da.city}
-                                                    <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
-                                                    {pp.aa.city}</Typography>
-                                                    <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">on { moment(pp?.dt).format("MMM Do YYYY ") } </Typography>
-                                                    </TabUnstyled>
-                                                </Grid>
-                                                <Grid item>
-                                                   
-                                                    <Showseatselectfn _setOpen={setOpen} _open={open} _currflightdetial={currflightdetial} _pp={pp}/>
-                                                    
-                                                </Grid>
-                                                <Grid>
-                                                    <Button variant="outlined" onClick={()=>getSets(pp )}>Show Seat Map</Button>
-                                                </Grid>
+                                                <Grid container style={{ width : '100%'}} justifyContent="space-between" key={ppi} >
+                                                    <Grid item style={{ width : '20%'}}>
+                                                        <TabUnstyled >
+                                                            <Typography className="place_text" style={{ fontWeight : '300' }}>{pp.da.city}
+                                                            <img src={require('../../assets/icons/arrow-right.png')} alt="arrow" style={{ width: 11, marginLeft : 3, marginRight : 3 }}/>
+                                                            {pp.aa.city}</Typography>
+                                                            <Typography style={{ fontSize : 11, opacity : .7 }} className="date_text small">on { moment(pp?.dt).format("MMM Do YYYY ") } </Typography>
+                                                        </TabUnstyled>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Showseatselectfn _setOpen={setOpen} _open={open} _currflightdetial={currflightdetial} _pp={pp}/>
+                                                    </Grid>
+                                                    <Grid>
+                                                        <Button variant="outlined" onClick={()=>getSets(pp )}>Show Seat Map</Button>
+                                                        <AlertPopup popupOpen={popupShow} mapMessage={alertMsg} _setPopupShow={setPopupShow} />
+                                                    </Grid>
                                                 </Grid>     
                                             ))}
                                         </React.Fragment>
@@ -1011,17 +1016,14 @@ export default function Step2(props){
                         </Box>
                             }
 
-                    { seatloading == true &&  
-                        <Box sx={{ width: '100%' }}>
-                            <Skeleton />
-                            <Skeleton animation="wave" />
-                            <Skeleton animation={false} />
-                        </Box>
-                    }
+                                { seatloading == true &&  
+                                    <Box sx={{ width: '100%' }}>
+                                        <Skeleton />
+                                        <Skeleton animation="wave" />
+                                        <Skeleton animation={false} />
+                                    </Box>
+                                }
                                 
-
-
-
 
                             </TabPanelUnstyled>
                         </TabsUnstyled>                        
@@ -1029,7 +1031,7 @@ export default function Step2(props){
                 </Box>
 
 
-                                                    {/* <button type="submit">Form Submit</button> */}
+                {/* <button type="submit">Form Submit</button> */}
 
 
 

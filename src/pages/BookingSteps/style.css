@@ -376,3 +376,44 @@ body{
     font-size: 13px;
     font-weight: 500;
 }
+
+
+/* joourney detail flights */
+.journey_wrapper_review .journey_review{
+    width: fit-content;
+    background: #e9e9e9;
+    padding: 5px 10px;
+    font-weight: 500;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    column-gap: 9px;
+}
+
+.journey_wrapper_review .journey_review svg{
+    color: #808080;
+}
+
+.journey_wrapper_review  .time1 {
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+.journey_wrapper_review  .jplace_text {
+    font-size: 13px;
+    font-weight: 300;
+    color: #727272;
+}
+
+.borderbox {
+    border: 1px dashed #ccc;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+
+

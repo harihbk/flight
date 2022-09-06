@@ -76,8 +76,8 @@ export default function MaxWidthDialog(props) {
 
   setListprice(ListPrice) // List color amount
 
-    //  console.log(_currentrow.sInfo);
-// console.log(temporary);
+  console.log('==============================');
+  console.log(_currentrow);
 
   },[_currentrow])
 
@@ -232,7 +232,7 @@ export default function MaxWidthDialog(props) {
                 <>
                 <Row> 
                     {[...Array(_currentrow?.sData?.column)].map((col, ii) =>(<> { getRowCol(i,ii)  } </>)  )}  
-                  </Row>      
+                </Row>      
                 </>
                 ))}  
             </Box> 

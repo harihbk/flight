@@ -1,10 +1,12 @@
-import React from 'react';
+import React , { useRef, useEffect, useContext, useState } from 'react';
 import Header from '../../components/header';
 import { useNavigate  } from "react-router-dom";
-import { Container,IconButton, Box, Typography,Button, Grid, Divider } from '@mui/material';
+import { Container,IconButton, Box, Typography,Button, Grid, Divider, List, ListItem, ListItemText } from '@mui/material';
 import { FormControlLabel, RadioGroup, Radio, Tab, Tabs} from '@mui/material';
 import { TabPanelUnstyled,TabsUnstyled, TabUnstyled, TabsListUnstyled } from '@mui/base';
 import { KeyboardArrowDown } from '@mui/icons-material';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import './styles.css';
 import { ArrowRightAlt } from '@mui/icons-material';
 import Footer from '../../components/Footer/Footer';
@@ -14,16 +16,33 @@ import { ReactComponent as ArrowIcon } from '../../assets/icons/arrowicon.svg';
 import moment from 'moment'
 import axios from 'axios';  
 import { useSearchParams } from 'react-router-dom';
-import { debounce } from "lodash"
 import Searchmenuskeleton from "./Searchmenuskeleton"
 import Comboview from './comboview';
 import helpers from "./calculation" 
 import { comboService } from "./store/comborxjs"
 import { ComboStopService , CombodeparturearrivalService } from "./store/comborxjs"
 import * as _ from 'lodash';
+import Calendar from '../../components/BookingCalendar/Calendar';
+import Model from "../Home/Model";
+import Paper from '@mui/material/Paper';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import InputBase from '@mui/material/InputBase';
+import debouce from "lodash.debounce";
+import { isEmpty } from 'lodash';
+import Skeleton from 'react-loading-skeleton';
 
 
+
+function Froms({value}){
+    const { city , country } = value
+    return (
+      <div className='para'>{value.city},{value.country}</div>
+    );
+}
 function Flightdetails(rest){
+
+
 
     return (
          <>
@@ -197,7 +216,6 @@ function Faredetails(...rest){
 
 
 export default function Search({ isVisible }) {
-    const [fareType, setFareType] = React.useState('regular');
     const [tripType, setTripType] = React.useState('oneway');
     const [flightGo, setFlightGo] = React.useState('flight_go1');
     const [flightReturn, setFlightReturn] = React.useState('flight_return1');
@@ -239,6 +257,201 @@ export default function Search({ isVisible }) {
 
     const [searchParams] = useSearchParams();
 
+    
+
+    const [tripOpt, setTripOpt] = React.useState("oneway");
+    const [preferedAirline, setPreferedAirline] = React.useState('none');
+    const [fareType, setFareType] = React.useState('regular');
+    const [calendarOpen, setCalendarOpen] = React.useState(false);
+    const [calendarOpento, setCalendarOpento] = React.useState(false);
+
+
+    // const Fromref = useRef();
+    const [open, setOpen] = React.useState(false);
+    const [toopen, setToopen] = React.useState(false);
+
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const [ searchFrom , setSearchFrom ] = React.useState([]);
+    const [ searchTo , setSearchTo ] = React.useState([]);
+
+    console.log(searchTo);
+
+    const [ searchFromlocalstorage , setSearchFromlocalstorage ] = React.useState([]);
+    const [ searchTolocalstorage , setSearchTolocalstorage ] = React.useState([]);
+
+    const [ suggestionfrom , setSuggestionfrom ] = React.useState(false);
+    const [ suggestionto , setSuggestionto ] = React.useState(false);
+
+    const [ searchfromselected , setSearchfromselected ] = React.useState({});
+    const [ searchtoselected , setSearchtoselected ] = React.useState({});
+
+
+    // Passangers 
+    const [ passangeropen , setPassangeropen ] = React.useState(false);
+
+    //Traveller class
+    const [ travellerclass , setTravellerclass ] = React.useState({
+        ADULT : 1,
+        CHILD : 0,
+        INFANT : 0
+    });
+
+    // Travel class
+    const [ travelclass , setTravelclass ] = React.useState("Economy");
+
+    //Calendar
+    var date = new Date();
+    var date1 = {...date}
+    date.setDate(date.getDate() + 1);
+
+    // add a day
+    const [ calendar , setCalendar ] = React.useState(date1) // from
+    const [ tocalendar , setTocalendar ] = React.useState(date) // from
+    const [ calendartostatus , setCalendartostatus] = React.useState(true)
+  
+    const calendarref = useRef();
+    const [stopchecked, setStopchecked] = React.useState(false);
+
+
+
+    const handleChangeFrom = (e) => {
+        setSearchTerm(e.target.value);
+        const Search = e.target.value;
+        if(isEmpty(Search)){
+          setSuggestionfrom(false) // show suggestion
+          return
+        }
+        axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=${Search}`).then(res=>{
+          setSearchFrom(res?.data)
+          setSuggestionfrom(true) // show suggestion
+        }).catch(err=>{
+          console.log(err);
+        })
+    };
+
+
+    React.useEffect(()=>{
+        const url = process.env.REACT_APP_FROM_SEARCH;
+        const getstorage = JSON.parse(localStorage.getItem(url));
+        setSearchFromlocalstorage(getstorage)
+
+        if(getstorage && getstorage[0]){
+        setSearchfromselected(getstorage[0]  || {})
+        } else {
+
+        axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=Shirdi`).then(res=>{
+            let hyn = res?.data[0];
+            setSearchfromselected(hyn)
+    
+        })
+
+        }
+    },[searchFrom]);
+
+    React.useEffect(() => {
+        console.log(listflightroundfilter);
+    }, [listflightroundfilter]);
+
+    React.useEffect(()=>{
+        const url = process.env.REACT_APP_TO_SEARCH;
+        const getstorage = JSON.parse(localStorage.getItem(url));
+        setSearchTolocalstorage(getstorage)
+        if(getstorage && getstorage[0]){
+        setSearchtoselected(getstorage[0] || {})
+        } else {
+
+        // http://localhost:3030/flight?$search=Shirdi
+        axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=Chennai`).then(res=>{
+        let hyn = res?.data[0];
+        console.log(hyn);
+        setSearchtoselected(hyn)
+
+        })
+        }
+    },[searchTo]);
+
+    
+    const handleChangeTo = (e) => {
+        setSearchTerm(e.target.value);
+        const Search = e.target.value;
+        if(isEmpty(Search)){
+        setSuggestionto(false) // show suggestion
+        return
+        }
+        axios.get(`${process.env.REACT_APP_BASE_URL}/flight?$search=${Search}`).then(res=>{
+        setSearchTo(res?.data)
+        setSuggestionto(true) // show suggestion
+        }).catch(err=>{
+        console.log(err);
+        })
+
+    };
+
+    const debouncedResults = React.useMemo(() => {
+        return debouce(handleChangeFrom, 300);
+    }, []);
+
+    const debouncedResultsto = React.useMemo(() => {
+        return debouce(handleChangeTo, 300);
+    }, []);
+
+    
+    React.useEffect(() => {
+        return () => {
+            debouncedResults.cancel();
+            debouncedResultsto.cancel();
+        };
+    });
+
+    // from to address popup
+
+
+    const clickfrom = (e) => {
+        const url = process.env.REACT_APP_FROM_SEARCH;
+        const getstorage = JSON.parse(localStorage.getItem(url));
+
+        setToopen(true)
+
+
+        if (getstorage !=null && getstorage.length > 4 ){
+
+        var find =  getstorage.find(obj => obj._id == e._id)
+        if(find==undefined){
+            const swallowcopy = [e , ...getstorage ]
+            let gg= swallowcopy.slice(0,5)
+            localStorage.setItem(url , JSON.stringify(gg )) 
+        } else {
+            console.log(find);
+            let _id = find._id
+            var gets = getstorage.filter(a => a._id != _id)
+            let hh = [find,...gets]
+            localStorage.setItem(url , JSON.stringify(hh )) 
+
+        }
+
+        }  else {
+
+        if(getstorage ==null ) {
+            let arr = []
+            arr.push(e)
+            localStorage.setItem(url , JSON.stringify(arr) )
+        } else {
+        var find =  getstorage.find(obj => obj._id == e._id)
+            if(find==undefined){
+                getstorage.push(e)
+                localStorage.setItem(url , JSON.stringify(getstorage)) 
+            } 
+        } 
+        }
+        setSearchfromselected(e)
+
+        setTimeout(()=>{
+        setOpen(false)
+        },
+        100)
+
+    }
+
 
     React.useEffect(()=>{
         window.localStorage.removeItem("updateCurrflightdetial")
@@ -265,15 +478,15 @@ export default function Search({ isVisible }) {
         const CreateObject = (data) => {
             let split = data.split("-");
             let Obj =  {	
-                                fromCityOrAirport: {
-                                  code: split[0]
-                                },
-                                toCityOrAirport: {
-                                  code: split[1]
-                                },
-                                travelDate: moment(split[2]).format("YYYY-MM-DD") 
+                            fromCityOrAirport: {
+                                code: split[0]
+                            },
+                            toCityOrAirport: {
+                                code: split[1]
+                            },
+                            travelDate: moment(split[2]).format("YYYY-MM-DD") 
                         }
-                return Obj        
+            return Obj        
         }
 
       
@@ -490,18 +703,18 @@ export default function Search({ isVisible }) {
                     var modifieddata = _return.map((dd , i )=>{
 
                         let dept_obj = {
-                                            timing    : moment(dd?.sI[0]?.dt).format("HH:mm"),
-                                            timewords : moment(dd?.sI[0]?.dt).format("MMMM DD"),
-                                            city      : dd?.sI[0]?.da?.city,
-                                            name : dd?.sI[0]?.fD?.aI?.name
-                                        }
+                            timing    : moment(dd?.sI[0]?.dt).format("HH:mm"),
+                            timewords : moment(dd?.sI[0]?.dt).format("MMMM DD"),
+                            city      : dd?.sI[0]?.da?.city,
+                            name : dd?.sI[0]?.fD?.aI?.name
+                        }
 
                         let arrival_obj = {
-                                            timing    : moment(dd?.sI[dd?.sI.length - 1]?.at).format("HH:mm"),
-                                            timewords : moment(dd?.sI[dd?.sI.length - 1]?.at).format("MMMM DD") ,
-                                            city      : dd?.sI[dd?.sI.length - 1]?.aa?.city,
-                                            name : ''
-                                        }
+                            timing    : moment(dd?.sI[dd?.sI.length - 1]?.at).format("HH:mm"),
+                            timewords : moment(dd?.sI[dd?.sI.length - 1]?.at).format("MMMM DD") ,
+                            city      : dd?.sI[dd?.sI.length - 1]?.aa?.city,
+                            name : ''
+                        }
 
 
 
@@ -605,13 +818,10 @@ export default function Search({ isVisible }) {
             let paxt = paxTypefn(paxType)
             let amtstring = [];
             let ddarray = [];
-             let hh =   gg.map(dd => {
-
-                   
-
-                    let going = dd.sI.filter(d => d.isRs == false)
-                    let _return = dd.sI.filter(d => d.isRs == true)
-                    let spred = [ [...going],[..._return] ]
+            let hh =   gg.map(dd => {
+            let going = dd.sI.filter(d => d.isRs == false)
+            let _return = dd.sI.filter(d => d.isRs == true)
+            let spred = [ [...going],[..._return] ]
 
 
                 let drv ;
@@ -750,19 +960,13 @@ export default function Search({ isVisible }) {
 
                 setListflightround(ddarray);
                 setListflightroundfilter(ddarray);
-
-
-
-
-               
-
             }
 
 
 
-                    }).catch(err=>{
-                        console.log(err);
-                    })
+        }).catch(err=>{
+            console.log(err);
+        })
     },[])
 
 
@@ -1070,8 +1274,82 @@ export default function Search({ isVisible }) {
     }
 
 
+    const parentcalendarfuction = (data) => {
+        setCalendar(data)
+      
+       //  console.log(data);
+    }
+
+    const changeCalendar = ()=>{
+        calendarOpen ? setCalendarOpen(false) : setCalendarOpen(true);
+    }
+
+    const changeCalendarto = ()=>{
+      calendarOpento ? setCalendarOpento(false) : setCalendarOpento(true);
+      setTripOpt("rondtrip")
+    }
 
 
+    const parenttocalendarfuction = (data) => {
+        setCalendartostatus(false)
+        setTocalendar(data)
+    
+    //  console.log(data);
+    }
+  
+
+    const getfrom = () => {
+        setOpen(true);
+    }
+
+    const getto = () => {
+        setToopen(true);
+    }
+
+
+    const clickto = (e) => {
+
+        setCalendarOpen(true) // this will open calendar
+    
+        const url = process.env.REACT_APP_TO_SEARCH;
+        const getstorage = JSON.parse(localStorage.getItem(url));
+        if (getstorage !=null && getstorage.length > 4 ){
+          var find =  getstorage.find(obj => obj._id == e._id)
+          if(find==undefined){
+              const swallowcopy = [e , ...getstorage ]
+              let gg= swallowcopy.slice(0,5)
+              localStorage.setItem(url , JSON.stringify(gg)) 
+          } else {
+            console.log(find);
+            let _id = find._id
+            var gets = getstorage.filter(a => a._id != _id)
+            let hh = [find,...gets]
+            localStorage.setItem(url , JSON.stringify(hh )) 
+    
+          }
+    
+        }  else {
+          if(getstorage ==null ) {
+            let arr = []
+            arr.push(e)
+            localStorage.setItem(url , JSON.stringify(arr) )
+          } else {
+           var find =  getstorage.find(obj => obj._id == e._id)
+            if(find==undefined){
+                getstorage.push(e)
+                localStorage.setItem(url , JSON.stringify(getstorage)) 
+            }
+          } 
+        }
+        setSearchtoselected(e)
+    
+        setTimeout(()=>{
+          setToopen(false)
+        },
+        100)
+    
+    }
+      
     
     // Observable from sidemenu comborxjs
 //    React.useEffect(()=>{ 
@@ -1139,13 +1417,85 @@ export default function Search({ isVisible }) {
 
                         </RadioGroup>
                         <div className='bookingStripe_search'>
-                            <div className='tripType booking_input'>
+                            {/* <div className='tripType booking_input'>
                                 <Typography component="span" className='label'>Trip Type</Typography>
                                 <Typography className='placefrom inputTitle'>One-Way</Typography>
-                            </div>
-                            <div className='inputFrom booking_input'>
+                            </div> */}
+                            <div className='inputFrom booking_input' onClick={ getfrom } style={{ position : 'relative'}}>
                                 <Typography component="span" className='label'>From</Typography>
                                 <Typography className='placefrom inputTitle'>Coimbatore (CJB)</Typography>
+
+                                <Model open={ open } onClickOutside={() => {setOpen(false) ; setSuggestionfrom(false) }} >
+                                    <Box
+                                        sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        '& > :not(style)': {
+                                            m: 0,
+                                            width: '100%',
+                                            height: 128,
+                                            zIndex : 10,
+                                            position  : 'absolute',
+                                            left : 0,
+                                            top : 5
+                                        },
+                                        }}>
+                                        <Paper elevation={3} >
+                                            <Paper component="form" sx={{ display: 'flex', alignItems: 'center', width: 'auto', backgroundColor : '#121e40', boxShadow : 'none', borderRadius : 0 }}>
+                                                <IconButton sx={{ p: '10px' }} aria-label="menu">
+                                                    <SearchIcon style={{ color : '#9a9a9a' }}/>
+                                                </IconButton>
+                                                <InputBase
+                                                    sx={{ ml: 1, flex: 1, color : '#fff' }}
+                                                    placeholder="From"
+                                                    inputProps={{ 'aria-label': 'To' }}
+                                                    onChange={debouncedResults}
+                                                />
+                                            </Paper>
+                                            <Paper sx={{ height : 300 , overflowY:'auto'}}>
+                                                { suggestionfrom  ? 
+                                                <>
+                                                    <Typography  textAlign="center" style={{ fontSize : 12, paddingTop: 4, paddingBottom: 4 }}>Suggestion</Typography>
+                                                    <Divider/>
+                                                    <List>
+                                                        { searchFrom && searchFrom.map((value , index)=>(
+                                                            <ListItem  key={value.iata}
+                                                                secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                                                onClick = { () => { clickfrom(value) }  }
+                                                                >
+                                                                <ListItemAvatar style={{  minWidth : 30}}>
+                                                                    <FlightTakeoffIcon style={{  minWidth : 30}} />
+                                                                </ListItemAvatar>
+                                                                <ListItemText primary={<Froms value={value}/>} secondary={value.airport} />
+                                                            </ListItem>
+
+                                                        ))}
+                                                    </List>
+                                                </>
+                                                : 
+                                                <>
+                                                    <Typography textAlign="center" style={{ fontSize : 12, paddingTop: 4, paddingBottom: 4 }}>Recent Search</Typography>
+                                                    <Divider/>
+                                                    <List>
+                                                        { searchFromlocalstorage && searchFromlocalstorage.map((value , index)=>(
+                                                            <ListItem  key={value.iata}
+                                                                secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                                                onClick = { () => { clickfrom(value) }  }
+                                                                >
+                                                                <ListItemAvatar style={{  minWidth : 30}}>
+                                                                    <FlightTakeoffIcon />
+                                                                </ListItemAvatar>
+                                                                <ListItemText style={{ margin : 0 }} primary={<Froms value={value}/>} secondary={value.airport} />
+                                                            </ListItem>
+
+                                                        ))}
+                                                    </List>
+                                                </>
+                                                }
+                                            </Paper>
+                                        </Paper>
+                                    </Box>
+                                </Model>
                             </div>
                             
                             <div className='shiftfld'>
@@ -1155,27 +1505,186 @@ export default function Search({ isVisible }) {
                                 </IconButton>
                             </div>
 
-                            <div className='inputFrom booking_input'>
+                            <div className='inputFrom booking_input'  onClick={ getto } style={{ position : 'relative'}}>
                                 <Typography component="span" className='label'>To</Typography>
                                 <Typography className='placeto inputTitle'>Bengaluru (BLR)</Typography>
+
+                                {/* To Place Modal */}
+                                <Model open={ toopen } onClickOutside={() => {setToopen(false) ; setSuggestionto(false) }} >
+                                    <Box
+                                        sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        '& > :not(style)': {
+                                            m: 0,
+                                            width: '100%',
+                                            height: 128,
+                                            zIndex : 10,
+                                            position  : 'absolute',
+                                            left : 0,
+                                            top : 5
+                                        },
+                                        }}
+                                        >
+                                        <Paper elevation={3} >
+                                            <Paper component="form" sx={{ display: 'flex', alignItems: 'center', width: 'auto', backgroundColor : '#121e40', boxShadow : 'none', borderRadius : 0 }}>
+                                                <IconButton sx={{ p: '10px' }} aria-label="menu">
+                                                    <SearchIcon style={{ color : '#9a9a9a' }} />
+                                                </IconButton>
+                                                <InputBase
+                                                    sx={{ ml: 1, flex: 1, color : '#fff'  }}
+                                                    placeholder="To"
+                                                    inputProps={{ 'aria-label': 'From' }}
+                                                    onChange={debouncedResultsto}
+                                                />
+                                            </Paper>
+                                            <Paper sx={{ height : 300 , overflowY:'auto'}}>
+                                                { suggestionto  ? 
+                                                <>
+                                                    <Typography style={{ fontSize : 12, paddingTop: 4, paddingBottom: 4 }} textAlign="center">Suggestion</Typography>
+                                                    <Divider/>
+                                                    <List>
+                                                    { searchTo && searchTo.map((value , index)=>(
+                                                        <ListItem  key={value.iata}
+                                                            secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                                            onClick = { () => { clickto(value)  }  }
+                                                            >
+                                                            <ListItemAvatar  style={{  minWidth : 30}}>
+                                                                <FlightTakeoffIcon />
+                                                            </ListItemAvatar>
+                                                            <ListItemText primary={<Froms value={value}/>} secondary={value.airport} />
+                                                        </ListItem>
+
+                                                    ))}
+                                                    </List>
+                                                </>
+                                                : 
+                                                <>
+                                                    <Typography  style={{ fontSize : 12, paddingTop: 4, paddingBottom: 4 }} textAlign="center">Recent Search</Typography>
+                                                    <Divider/>
+                                                    <List>
+                                                    { searchTolocalstorage && searchTolocalstorage.map((value , index)=>(
+                                                        <ListItem  
+                                                                key={value.iata}
+                                                                secondaryAction={ <div className="latoBold">{ value.iata }</div> }
+                                                                onClick = { () => { clickto(value) }  }
+                                                                >
+                                                                <ListItemAvatar style={{  minWidth : 30}}>
+                                                                    <FlightTakeoffIcon />
+                                                                </ListItemAvatar>
+                                                                <ListItemText style={{ fontSize : 14 }} primary={<Froms value={value}/>} secondary={value.airport} />
+                                                        </ListItem>
+
+                                                    ))}
+                                                    </List>
+                                                </>
+                                                }
+                                            </Paper>
+
+
+                                        </Paper>
+                                        
+                                    </Box>
+                                </Model>
                             </div>
 
-                            <div className='departure booking_input'>
+                            <div className='departure booking_input' onClick={changeCalendar}>
                                 <Typography component="span" className='label'>Departure</Typography>
-                                <Typography className='placeto inputTitle'>6 May 22</Typography>
+                                <Typography className='placeto inputTitle'>{ moment(calendar).format("DD MMM YY") }</Typography>
+                                <Calendar calendarOpen = {calendarOpen}  onClickOutside={ ()=> setCalendarOpen(false)  } _parentcalendarfuction={parentcalendarfuction}/>
                             </div>
 
-                            <div className='return booking_input ' disabled={tripType == 'roundtrip' ? true : false}>
+                            <div className='return booking_input ' disabled={tripType == 'roundtrip' ? false : true}  onClick={changeCalendarto}>
                                 <Typography component="span" className='label'>Return</Typography>
-                                <Typography className='placeto inputTitle'>8 May 222</Typography>
+                                <Typography className='placeto inputTitle'>{ moment(tocalendar).format("DD MMM YY") }</Typography>
+                                <Calendar calendarOpen = {calendarOpento}  onClickOutside={ ()=>  setCalendarOpento(false)   } _parentcalendarfuction={parenttocalendarfuction}/>
                             </div>
 
-                            <div className='traverler booking_input'>
+                            <div className='traverler booking_input' style={{ position : 'relative'}} onClick={ ()=> setPassangeropen(true) }>
                                 <Typography component="span" className='label'>Travellers & Class</Typography>
                                 <Box component={'div'} sx={{ display : 'flex', columnGap : 1, alignItems : 'center' }}>
-                                    <Typography className='placeto inputTitle'>1 Adult</Typography>
-                                    <Typography className='inputTagline'>Economy</Typography>
+                                    <Typography className='placeto inputTitle'>
+                                        <span>{travellerclass?.ADULT + travellerclass?.CHILD  + travellerclass?.INFANT} {'Traveller(s)'} </span>
+                                    </Typography>
+                                    <Typography className='inputTagline'>{travelclass}</Typography>
                                 </Box>
+
+                                <Model open={passangeropen} onClickOutside={()=> setPassangeropen(false)}>
+                                    <Box
+                                    className='dropdown_box'
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        '& > :not(style)': {
+                                        m: 0,
+                                        width: '35rem',
+                                        // height: 250,
+                                        padding : 3,
+                                        zIndex : 10,
+                                        position  : 'absolute',
+                                        left : -300 ,
+                                        top : 47,
+                                        'box-shadow' : '0px 6px 10px 0px #00000017'
+                                        
+                                        },
+                                    }} >
+                                        <Paper elevation={2}>
+                                        <Grid container justifyContent="space-between" sx={{ paddingLeft : 2 , paddingRight : 2 , marginBottom : 3}}>
+                                            <Grid Item  xs={4} sx={{ paddingRight : 2, paddingLeft : 2}}>
+                                                <Typography  className='adult_title' m={1}> Adult  </Typography>
+                                                <Paper className='adult_list' sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                                    <Typography variant="h5"  onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT > 1 ? state.ADULT - 1 : 1 }) )  } > - </Typography>
+                                                    <Typography> {travellerclass.ADULT} </Typography>
+                                                    <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,ADULT : state.ADULT + 1 }) ) }> + </Typography>
+                                                </Paper>
+
+                                            </Grid>
+                                            <Grid Item  xs={4} sx={{ paddingRight : 2, paddingLeft : 2}}>
+                                                <Typography className='adult_title' m={1}>Child</Typography>
+                                                <Paper className='adult_list'  sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                                    <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD > 0 ? state.CHILD - 1 : 0 }) )  }> - </Typography>
+                                                    <Typography> {travellerclass.CHILD}  </Typography>
+                                                    <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,CHILD : state.CHILD + 1 }) ) }> + </Typography>
+                                                </Paper>
+                                            </Grid>
+                                            <Grid Item sx={{ paddingRight : 2, paddingLeft : 2}}  xs={4}>
+                                                <Typography className='adult_title' m={1}>Infant</Typography>
+                                                <Paper className='adult_list'  sx={{display:'flex', justifyContent : 'space-around' , alignItems : 'center',width : '100%' , height : 40 ,borderRadius : 20 }}>
+                                                    <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT > 0 ? state.INFANT - 1 : 0 }) )  }> - </Typography>
+                                                    <Typography> {travellerclass.INFANT}  </Typography>
+                                                    <Typography variant="h5" onClick={ ()=> setTravellerclass(state=> ({...state,INFANT : state.INFANT + 1 }) ) }> + </Typography>
+                                                </Paper>
+                                            </Grid>
+
+                                        </Grid>
+
+
+                                        <Divider  />
+
+                                        <Typography className='adult_title' m={2 }>Travel Class</Typography>
+
+                                        <Grid container justifyContent="space-around" mb={2}>
+                                            <Grid Item><Button className={ (travelclass == "Economy" ? "color_secondary" : "outline_gray") } variant={ (travelclass == "Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Economy") } >Economy</Button></Grid>
+                                            <Grid Item><Button className={ (travelclass == "Premium Economy" ? "color_secondary" : "outline_gray") }  variant={ (travelclass == "Premium Economy" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Premium Economy") }>Premium Economy</Button></Grid>
+                                            <Grid Item><Button className={ (travelclass == "Business" ? "color_secondary" : "outline_gray") }  variant={ (travelclass == "Business" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("Business") }>Business</Button></Grid>
+                                            <Grid Item><Button className={ (travelclass == "First Class" ? "color_secondary" : "outline_gray") }  variant={ (travelclass == "First Class" ? "contained" : "outlined") } onClick={ ()=> setTravelclass("First Class") }>First Class</Button></Grid>
+                                        </Grid>
+
+                                        <Divider  />
+
+                                        <Grid container justifyContent="end" spacing={2} mt={3}>
+                                            <Grid Item md={3 } sx={{ paddingRight : 2 }}>
+                                            <Button className='btnt_gray empty' fullWidth={true}onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Cancel</Button>
+                                            </Grid>
+                                            <Grid Item md={3}>
+                                            <Button variant="contained" className='color_primary' fullWidth={true} onClick={ ()=> setTimeout(()=>setPassangeropen(false),50)  }>Done</Button>
+                                            </Grid>
+
+                                        </Grid>
+                                        </Paper>
+                                    </Box>
+                            
+                                </Model>
                             </div>
                             <div className='UpdateButtonGrp'>
                                 <Button variant='contained'>Update Search</Button>
@@ -1238,66 +1747,170 @@ export default function Search({ isVisible }) {
                         </Grid>
                         <Grid item  md={9} className="booking_col">
                             <Typography className='bookingCol_title'>
-                                
                                 Flights from {location[0] ?? ''} to {location[1] ?? ''}, and back
 
-                                </Typography>
+                                {/* <Skeleton   />  */}
+                            </Typography>
 
                             <Box component={'div'} className='mainBookingrow'>
+                                { listflightroundfilter && listflightroundfilter.map((flight, index) => {
+                                    if(index == 0){
+                                        return  (
+                                        <Grid container>
+                                            <Grid item md={4}>
+                                                <Typography className='depart_place'> Departure <span className='interTextDot'>.</span>  {flight?.frmt[0]?.dept_obj?.name}  </Typography>
+                                                <Box component={'div'} className="flight_timerow">
+                                                    <Box className='time'>
+                                                        <div className='icons'>
+                                                            <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
+                                                        </div>
+                                                        <Typography className='start_time timeText'>{ moment(flight?.frmt[0]?.arrival_obj?.datetime).format("hh:mm") } </Typography>
+                                                        <ArrowRightAlt className='miniArrow'/>
+                                                        <Typography className='end_time timeText'>{ moment(flight?.frmt[0]?.dept_obj?.datetime).format("hh:mm") }</Typography>
+                                                    </Box>
+                                                    <Box className='price'>
+                                                        {/* ₹  {flight?.totalPriceList[0]?.totalamount}  */}
+                                                    </Box>
+                                                </Box>
+                                                <Typography className='details_text'> Flight Details </Typography>
+                                            </Grid>
+                                            <Grid item md={4} >
+                                                <Typography className='retun_place'> Return <span className='interTextDot'>.</span> {flight?.frmt[1]?.dept_obj?.name}  </Typography>
+                                                <Box component={'div'} className="flight_timerow">
+                                                    <Box className='time'>
+                                                        <div className='icons'>
+                                                            <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
+                                                        </div>
+                                                        <Typography className='start_time timeText'>{ moment(flight?.frmt[1]?.arrival_obj?.datetime).format("hh:mm") } </Typography>
+                                                        <ArrowRightAlt className='miniArrow'/>
+                                                        <Typography className='end_time timeText'>{ moment(flight?.frmt[1]?.dept_obj?.datetime).format("hh:mm") }</Typography>
+                                                    </Box>
+                                                    <Box className='price'>
+                                                        {/* ₹ {flight?.frmt[1]?.dept_obj?.name}  */}
+                                                    </Box>
+                                                </Box>
+                                                <Typography className='details_text'> Flight Details </Typography>
+                                            </Grid>
+                                            <Grid item md={3} >
+                                                <Typography className='total_price'>{flight?.totalPriceList[0]?.totalamount.toLocaleString('en-US', {
+                                                    style: 'currency',
+                                                    currency: 'INR',
+                                                    }) } </Typography>
+                                                <Typography className='details_text'>Fare Details</Typography>
+                                                <Button variant='contained' className='color_primary booknow_btn' onClick={() => navigatePage('booking')}>Book Now</Button>
+                                            </Grid>
+                                        </Grid>
+                                        )
+                                    }
+                                })}
+
+                            { !listflightroundfilter.length   && (
                                 <Grid container>
                                     <Grid item md={4}>
-                                        <Typography className='depart_place'> Departure <span className='interTextDot'>.</span> Indigo  </Typography>
+                                        <Typography className='depart_place' style={{ marginBottom : 0 }}><Skeleton />  </Typography>
                                         <Box component={'div'} className="flight_timerow">
                                             <Box className='time'>
                                                 <div className='icons'>
-                                                    <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
+                                                    <Skeleton height={30} />
                                                 </div>
-                                                <Typography className='start_time timeText'>07:10  </Typography>
+                                                <Typography className='start_time timeText'> <Skeleton  style={{ width : 60 }} /> </Typography>
                                                 <ArrowRightAlt className='miniArrow'/>
-                                                <Typography className='end_time timeText'>08:10</Typography>
+                                                <Typography className='end_time timeText'> <Skeleton  style={{ width : 60 }} /></Typography>
                                             </Box>
                                             <Box className='price'>
-                                                ₹ 6,552
+                                                {/* ₹  {flight?.totalPriceList[0]?.totalamount}  */}
                                             </Box>
                                         </Box>
-                                        <Typography className='details_text'> Flight Details </Typography>
+                                        <Typography className='details_text'> <Skeleton width={100} /> </Typography>
                                     </Grid>
                                     <Grid item md={4} >
-                                        <Typography className='retun_place'> Return <span className='interTextDot'>.</span> Indigo  </Typography>
+                                        <Typography className='retun_place'  style={{ marginBottom : 0 }}> <Skeleton /> </Typography>
                                         <Box component={'div'} className="flight_timerow">
                                             <Box className='time'>
                                                 <div className='icons'>
-                                                    <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
+                                                    <Skeleton height={30} />
                                                 </div>
-                                                <Typography className='start_time timeText'>07:10 </Typography>
+                                                <Typography className='start_time timeText'>
+                                                    <Skeleton  style={{ width : 60 }} /> 
+                                                </Typography>
                                                 <ArrowRightAlt className='miniArrow'/>
-                                                <Typography className='end_time timeText'>08:10</Typography>
+                                                <Typography className='end_time timeText' ><Skeleton   style={{ width : 60 }}/></Typography>
                                             </Box>
                                             <Box className='price'>
-                                                ₹ 5,552
+                                                {/* ₹ {flight?.frmt[1]?.dept_obj?.name}  */}
                                             </Box>
                                         </Box>
-                                        <Typography className='details_text'> Flight Details </Typography>
+                                        <Typography className='details_text'><Skeleton width={100} /></Typography>
                                     </Grid>
                                     <Grid item md={3} >
-                                        <Typography className='total_price'>₹ 12,490</Typography>
-                                        <Typography className='details_text'>Fare Details</Typography>
-                                        <Button variant='contained' className='color_primary booknow_btn' onClick={() => navigatePage('booking')}>Book Now</Button>
+                                        <Typography className='total_price'><Skeleton /></Typography>
+                                        <Typography className='details_text'><Skeleton /></Typography>
+                                        <Skeleton style={{ height : 37 }}/>
                                     </Grid>
                                 </Grid>
+                                )}  
                             </Box>
 
 
                             {/* choose flight */}
 
 
+                    { !listflightroundfilter.length  && (
+                        <Box className='flightlist_wrap' style={{ background : '#fff', borderRadius : 10, marginTop : 20, elevation : 2 }}>
+                            
 
+                            <Box className='chooseFlightSect' style={{ padding : 10,marginTop : 0, borderBottomWidth : 1, borderColor : '#ccc', borderBottomStyle : 'solid' }}>
+                                <Typography className='journerydate journey_start'  component={'div'}>
+                                    <Skeleton width={200} />
+                                    <ArrowRightAlt className='miniArrow dark'/>
+                                    <Skeleton width={200} />
+                                </Typography>
+                                <Box component={'div'} className='tablehead'>
+                                    <Typography>Departure</Typography>
+                                    <Typography>Duration</Typography>
+                                    <Typography>Arrival</Typography>
+                                    <Typography>Price</Typography>
+                                    <Typography className='check'></Typography>
+                                </Box>
+                            </Box>
 
-                {/* combo view */}
+                            
+                            <Box className='' style={{ padding : 10 }}>
+                                {/* <Skeleton /> */}
+                                <Grid container >
+                                    <Grid Item md={3} style={{ paddingRight : 15}}>
+                                        <Skeleton style={{  height : 40 }} />
+                                        <Skeleton />
+                                        <Skeleton />
+                                    </Grid>
+                                    <Grid Item md={2} style={{ paddingRight : 15}}>
+                                        <Skeleton   />
+                                        <Skeleton />
+                                    </Grid>
+                                    <Grid Item md={2} style={{ paddingRight : 15}}>
+                                        <Skeleton />
+                                        <Skeleton />
+                                    </Grid>
+                                    <Grid Item md={2} style={{ paddingRight : 15}}>
+                                        <Skeleton />
+                                        <Skeleton />
+                                    </Grid>
+                                    <Grid Item md={3} style={{ paddingRight : 15}}>
+                                        <Skeleton />
+                                        <Skeleton />
+                                        <Skeleton />
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Box>
+                    )}
+
+                    {/* combo view */}
 
                    { listflightroundfilter.length > 0 && 
                     <Comboview _listflightroundfilter={ listflightroundfilter } _cabinClassget={cabinClassget}  _paxtypeget={paxtypeget}/>
                    }
+
 
                 {/* combo view */}
 
@@ -1414,17 +2027,10 @@ export default function Search({ isVisible }) {
                                                                         <TabUnstyled>Rules</TabUnstyled>
                                                                     </TabsListUnstyled>
                                                                     <TabPanelUnstyled value={0}>
-
                                                                         <Flightdetails _flightdetail={data?.flightdetails}/>
-
                                                                     </TabPanelUnstyled>
                                                                     <TabPanelUnstyled value={1}>
-
-                                                                    <Faredetails value={data?.totalPriceList} _paxtypeget={paxtypeget}/>
-
-
-
-
+                                                                        <Faredetails value={data?.totalPriceList} _paxtypeget={paxtypeget}/>
                                                                     </TabPanelUnstyled>
                                                                     <TabPanelUnstyled value={2}>
                                                                         Cancellation
@@ -1494,29 +2100,28 @@ export default function Search({ isVisible }) {
                                                 </Box>
                                                 
                                                 <span>
-                                                { data?.totalPriceList.map((totaldata, totindex)=>(
+                                                    { data?.totalPriceList.map((totaldata, totindex)=>(
                                                     <Box className='price' >
-                                                    <Typography className='priceText'> 
-                                                       
-                                                       <div>
-                                                           <span>
-                                                           <Radio
-                                                                checked={totaldata?.checked}
-                                                                id= {totaldata?.id}
-                                                                value={totaldata?.id}
-                                                                onChange = { (e)=> radiochangeeventreturn(i,data?.totalPriceList , e) }
-                                                                name={ "flights-" + totaldata?.id  }
-                                                                inputProps={{ 'aria-label': 'A' }}
-                                                            />
-                                                           </span>
-                                                        <span>₹</span>
-                                                       {calculatetotalamount(totaldata)} 
-                                                       </div>
+                                                        <Typography className='priceText'> 
+                                                            <div>
+                                                                <span>
+                                                                <Radio
+                                                                        checked={totaldata?.checked}
+                                                                        id= {totaldata?.id}
+                                                                        value={totaldata?.id}
+                                                                        onChange = { (e)=> radiochangeeventreturn(i,data?.totalPriceList , e) }
+                                                                        name={ "flights-" + totaldata?.id  }
+                                                                        inputProps={{ 'aria-label': 'A' }}
+                                                                    />
+                                                                </span>
+                                                                <span>₹</span>
+                                                                {calculatetotalamount(totaldata)} 
+                                                            </div>
                                                         </Typography>
                                                         <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ cabinClassget }</Typography>
-                                                </Box>
+                                                    </Box>
                                                     )) }
-                                                     </span>
+                                                </span>
 
                                                 <span>
                                                 <Typography className={`fdetails ${tabValuereturn }`} onClick={() => tabValuereturn == i ? TabChangereturn('-1') : TabChangereturn(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>

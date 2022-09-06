@@ -1,6 +1,6 @@
 import React, { useState , createRef, useEffect, useRef } from 'react';
 import Header from '../../components/header';
-import { Container,Grid, Box, Typography, Button } from '@mui/material';
+import { Container,Grid, Box, Typography, Button, FormControl, TextField } from '@mui/material';
 import { Step,StepButton, Stepper, Paper,StepContent, StepLabel } from '@mui/material';
 import BookingSidemenu from '../../components/BookingSidemenu/BookingSidemenu';
 import Step1 from './step1';
@@ -16,6 +16,10 @@ import { TripinfoProvider } from "./context"
 import { Outlet } from 'react-router-dom';
 import './style.css';
 import { useHistory ,useLocation ,matchRoutes } from 'react-router-dom';
+import Skeleton from '@mui/material/Skeleton';
+import { Add, Close, Check } from '@mui/icons-material';
+import { array } from 'yup';
+
 
 const steps = [
     {
@@ -133,17 +137,15 @@ export default function Index() {
 
       if(newActiveStep == 0){
         navigate(`/booking/flight/${id}`);
+        handleComplete()
       }
       if(newActiveStep == 1){
-      
      //   completeservice.comborevent("next")
         navigate(`/booking/passangers/${id}`);
-
+        handleComplete()
 
       }
       if(newActiveStep == 2){
-
-
         formRef.current.handleSubmit()
         formRef.current.validateForm().then(r=>{
           let len = Object.keys(r).length
@@ -152,6 +154,7 @@ export default function Index() {
             let data = formRef.current.values
             window.localStorage.setItem('passangerdetail',JSON.stringify(data))
             navigate(`/booking/step3/${id}`);
+            handleComplete()
 
           } else {
             setActiveStep(newActiveStep-1)
@@ -159,24 +162,23 @@ export default function Index() {
          
         })
 
+          //   let st = formRef.current.isValid;
+          //   let len = Object.keys(formRef.current.errors).length
+          //  console.log(len);
+          //  console.log(formRef.current);
+          //   if(len > 0){
+          //     setActiveStep(newActiveStep-1)
+          //   }else{
+          //     let data = formRef.current.values
+          //     console.log(data);
 
-      //   let st = formRef.current.isValid;
-      //   let len = Object.keys(formRef.current.errors).length
-      //  console.log(len);
-      //  console.log(formRef.current);
-      //   if(len > 0){
-      //     setActiveStep(newActiveStep-1)
-      //   }else{
-      //     let data = formRef.current.values
-      //     console.log(data);
-
-      //     window.localStorage.setItem('passangerdetail',JSON.stringify(data))
+          //     window.localStorage.setItem('passangerdetail',JSON.stringify(data))
 
 
-      //   navigate(`/booking/step3/${id}`);
-      //   }
-    
-      }
+          //   navigate(`/booking/step3/${id}`);
+          //   }
+        
+        }
 
 
       };
@@ -206,7 +208,7 @@ export default function Index() {
         const newCompleted = completed;
         newCompleted[activeStep] = true;
         setCompleted(newCompleted);
-        handleNext();
+        // handleNext();
       };
     
       const handleReset = () => {
@@ -301,7 +303,7 @@ export default function Index() {
                             <Stepper nonLinear activeStep={activeStep} className="journey_stepper">
                                 {steps.map((label, index) => (
                                 <Step key={label} completed={completed[index]}>
-                                    <StepButton className='stepper_label' color="inherit" onClick={handleStep(index)}>
+                                    <StepButton className='stepper_label' color="inherit" >
                                       <Typography className='stepscount'>{label.steps}</Typography>
                                       {label.label}
                                     </StepButton>
@@ -327,13 +329,98 @@ export default function Index() {
                                 </React.Fragment>
                                 ) : (
 
-                      Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Outlet context={{reff:formRef}}/> </TripinfoProvider> 
-                    //  getStep(activeStep)
+                                  Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <Outlet context={{reff:formRef}}/> </TripinfoProvider> 
+
+                                  || 
+                                   
+                                  
+                                <Box sx={{ width: '100%', padding : 4 }}>
+                                    <Grid container className='placerow' justifyContent="space-between">
+                                      <Grid item className='box1' style={{ width : 170 }}>
+                                          <Skeleton style={{ height : 30 }}/>
+                                          <Skeleton animation="wave" />
+                                      </Grid>
+                                      <Grid item className='box1' style={{ width : 170 }}>
+                                          <Skeleton />
+                                          <Skeleton animation="wave" />
+                                          <Skeleton animation={false} />
+                                      </Grid>
+                                    </Grid>
+                                    {/* { new array(2).map(data, i)=>} */}
+                                    <Box className='flightitem' style={{ paddingLeft : 0, paddingRight : 0 }}>
+                                      <Skeleton style={{ marginBottom : 20}} />
+                                      <Grid container className='frow' spacing={3} alignItems='center' justifyContent={'space-between'}>
+                                        <Grid item className='box1' style={{ width : 70 }}>
+                                            <Skeleton style={{ transform : 'none', height : 40, width : 40 }}/>
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box2' style={{ width : 150 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box3' style={{ width : 150 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                        </Grid>
+                                        <Grid item className='box4' style={{ width : 150 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box4' style={{ width : 110 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box4' style={{ width : 110 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                      </Grid>
+                                    </Box>
+                                    <Box className='flightitem' style={{ paddingLeft : 0, paddingRight : 0, borderWidth : 0 }}>
+                                      <Skeleton style={{ marginBottom : 20}} />
+                                      <Grid container className='frow' spacing={3} alignItems='center' justifyContent={'space-between'}>
+                                        <Grid item className='box1' style={{ width : 70 }}>
+                                            <Skeleton style={{ transform : 'none', height : 40, width : 40 }}/>
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box2' style={{ width : 150 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box3' style={{ width : 150 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                        </Grid>
+                                        <Grid item className='box4' style={{ width : 150 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box4' style={{ width : 110 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                        <Grid item className='box4' style={{ width : 110 }}>
+                                            <Skeleton />
+                                            <Skeleton animation="wave" />
+                                            <Skeleton animation={false} />
+                                        </Grid>
+                                      </Grid>
+                                    </Box>
+                                </Box>
+
 
                                 )}
                             </div>
-                            {/* { activeStep == '0' && (
-                            )} */}
+                            
                         </Box>
 
                         <Box className='buttongroups' style={{ marginTop : 20, flexDirection : 'row', justifyContent : 'space-between' }}>
@@ -368,7 +455,67 @@ export default function Index() {
                         </Box>
                     </Grid>
                     <Grid item md={3}>
-                    <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <BookingSidemenu /> </TripinfoProvider> }</>
+                    <> { Object.keys(tripInfos).length > 0 && <TripinfoProvider value={tripInfos} > <BookingSidemenu /> </TripinfoProvider>
+                    
+                      ||  
+                      <Box sx={{ width: '100%', padding : 2 }} className='sidemenu booking'>
+                          <Box className='skelton_inner'>
+                            <Typography className='stitle'>{'Fare Summary'}</Typography>
+                            <Box className='faredetails'>
+                              <Box className='listitem'>
+                                <Box className='farelabel'>
+                                  <Add className='iconplus'/>  {'Base Fare'}
+                                </Box>
+                                <Box className='fareprice'>
+                                 <Skeleton />
+                                </Box>
+                              </Box>
+                              <Box className='listitem'>
+                                <Box className='farelabel'>
+                                  <Add className='iconplus'/>  {'Fees & Subcharges'}
+                                </Box>
+                                <Box className='fareprice'>
+                                  <Skeleton />
+                                </Box>
+                              </Box>
+
+                            </Box>
+
+
+                              <Box className='listitem bsolid' style={{ borderBottomStyle : 'solid', borderColor : '#ccc', marginTop : 10, marginBottom : 10 }}>
+                                <Box className='farelabel' style={{ fontWeight : '600' }}>
+                                  {'Total Amount'}
+                                </Box>
+                                <Box className='fareprice'  style={{ fontWeight : '600' }}>
+                                  <Skeleton style={{ marginBottom : 5,  marginTop : 5 }} />
+                                </Box>
+                              </Box>
+
+
+                              <Typography className='stitle ucase' style={{ marginTop : 20 }}>{'Promo codes'}</Typography> 
+                              <FormControl className='promocodeinput' sx={{ width : '100%' }}>
+                                  <TextField size='small' className='fullwidth' id="promocode" value={''} placeholder="Enter your Mobile Number" variant="outlined" sx={{
+                                      '& .MuiOutlinedInput-root': {
+                                        'fieldset' :{
+                                          borderColor: '#a9a9a9',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                        borderColor: '#21325d',
+                                      },
+                                    },
+                                    '& label.Mui-focused': {
+                                      color: '#21325d',
+                                    },
+                                  }}/>
+                              </FormControl>
+
+                            <Skeleton style={{ height : 140, transform: 'none', marginTop: 17, marginBottom: 10 }}/>
+                            <Skeleton  style={{ height : 140, transform: 'none', marginTop: 17, marginBottom: 10 }}  animation="wave" />
+                            <Skeleton  style={{ height : 140, transform: 'none', marginTop: 17, marginBottom: 10 }}  animation={false} />
+                          </Box>
+                      </Box>
+                    }</>
+                         
                     </Grid>
                 </Grid>
             </Container>
