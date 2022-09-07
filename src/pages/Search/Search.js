@@ -1764,9 +1764,9 @@ export default function Search({ isVisible }) {
                                                         <div className='icons'>
                                                             <img src={require('../../assets/icons/flighticon.png')} alt='flight' />
                                                         </div>
-                                                        <Typography className='start_time timeText'>{ moment(flight?.frmt[0]?.arrival_obj?.datetime).format("hh:mm") } </Typography>
+                                                        <Typography className='start_time timeText'>{flight?.frmt[0]?.dept_obj?.timing } </Typography>
                                                         <ArrowRightAlt className='miniArrow'/>
-                                                        <Typography className='end_time timeText'>{ moment(flight?.frmt[0]?.dept_obj?.datetime).format("hh:mm") }</Typography>
+                                                        <Typography className='end_time timeText'>{ flight?.frmt[0]?.arrival_obj?.timing }</Typography>
                                                     </Box>
                                                     <Box className='price'>
                                                         {/* ₹  {flight?.totalPriceList[0]?.totalamount}  */}
