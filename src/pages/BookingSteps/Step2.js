@@ -79,8 +79,8 @@ export default function Step2(props){
     const [paxinfo, setPaxinfo] = React.useState({});
     const [ currflightdetial , setCurrflightdetial ] = React.useState([])
     const [ currflightdetiallocalstorage , setCurrflightdetiallocalstorage ] = React.useState([])
-
     const [ selectflightdetail , setSelectflightdetail ] = React.useState([])
+    const [ baggagelc , setBaggagelc ] = React.useState([])
 
     const things = useContext(TripinfoContext)
 
@@ -194,8 +194,18 @@ export default function Step2(props){
 
 
     var dff = JSON.parse(window.localStorage.getItem('passangerdetail'))
-    console.log(dff);
+    // if(dff?.['_baggagemeals']){
 
+    //     try {
+    //     let dfg =dff?._baggagemeals
+    //     console.log(dfg);
+    //    // setBaggagelc(dfg)
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+
+    // }
+  
     const df = date => {
         if(date){
          return new Date(date)
@@ -227,6 +237,7 @@ export default function Step2(props){
                      issuedate : df(localdata?.passportinfo?.issuedate) ,
                      expiredate : df(localdata?.passportinfo?.expiredate),
                      dob :  df(localdata?.passportinfo?.dob)
+                     
                  }
              };
              hh.push(o)
@@ -236,30 +247,84 @@ export default function Step2(props){
            _initialValues[key.toLowerCase()] = hh
        }
     }
+
+
+
+    console.log(data?.searchQuery?.paxInfo);
+    var paxmodifyfn = []
+
+    var ji = 0
+    data?.tripInfos?.map((a,pi)=>{
+         a?.sI.map((b,pii)=>{
+        console.log(b);
+
+        for (const key in data?.searchQuery?.paxInfo) {
+            let k = data?.searchQuery?.paxInfo[key]
+            for (let index = 1; index <= k ; index++) {
+                let obj = {
+                    label : key,
+                    value : index,
+                    inc   : ji,
+                    optionbaggage : b.ssrInfo.BAGGAGE,
+                    optionmeal : b.ssrInfo.MEAL,
+                    fd : `${b?.da?.city} - ${ b?.aa?.city } ${ moment(b?.dt).format("ddd, MMM Do YYYY ") }`,
+                    mealsvalue : dff?.['baggagemeals']?.[ji]?.['mealsvalue'] || '',
+                    baggagevalue :dff?.['baggagemeals']?.[ji]?.['baggagevalue'] || ''
+
+                }
+                ji++
+                paxmodifyfn.push(obj)
+            }
+        }
+             
+           // console.log(b)
+
+        })
+    })   
+
+   
+
+   // console.log(paxmodifyfn);
     
 
-    var paxmodify = []
-    for (const key in data?.searchQuery?.paxInfo) {
-        let k = data?.searchQuery?.paxInfo[key]
-         for (let index = 1; index <= k ; index++) {
-             let obj = {
-                 label : key,
-                 value : index,
+    // var paxmodify = []
+    // for (const key in data?.searchQuery?.paxInfo) {
+    //     let k = data?.searchQuery?.paxInfo[key]
+    //      for (let index = 1; index <= k ; index++) {
+    //          let obj = {
+    //              label : key,
+    //              value : index,
                 
-             }
-             paxmodify.push(obj)
+    //          }
+    //          paxmodify.push(obj)
             
 
-         }
+    //      }
 
-    }
-    _initialValues['baggagemeals'] = paxmodify
-   // setPaxinfo(paxmodify);
+    // }
+    _initialValues['baggagemeals'] = paxmodifyfn
+
+    // if(dff?.['_baggagemeals']){
+
+    //     for (const key in dff?.['_baggagemeals']) {
+    //        console.log(dff?.['_baggagemeals'][key]);
+    //        let kkey = dff?.['_baggagemeals'][key]
+
+    //        let k = Object.keys(kkey)[0];
+    //        //console.log(kkey[k][0]['baggage'])
+    //    //    console.log(_initialValues['_baggagemeals'][key][k][0]['baggage'])
+    //      //  _initialValues['_baggagemeals'][key][k][0]['baggage'] = kkey[k][0]['baggage']
+           
+    //     }
+
+    // }
+ 
 
    _initialValues['countryCode'] = dff?.countryCode || ''
    _initialValues['email'] = dff?.email || ''
    _initialValues['mobile'] = dff?.mobile || ''
 
+   console.log(_initialValues);
 
    } catch (error) {
        console.log(error);
@@ -420,7 +485,12 @@ export default function Step2(props){
 
 
     function getSets(pp){
+
+   
+
+
         let isUnavailable =  seats?.tripSeat?.[pp.id];
+       
         if(isUnavailable?.nt){
             setPopupShow(true);
             setAlertMsg(isUnavailable?.nt);
@@ -898,7 +968,70 @@ export default function Step2(props){
                             <TabPanelUnstyled value={0} >
 
 
+                                                            
+                                                                <FieldArray name="baggagemeals" key={'bagg'}>
 
+                                                                    {() =>  values?.baggagemeals?.map((_baggagemeals, i) => {
+                                                                        console.log(_baggagemeals);
+                                                                        return (
+
+
+                                                                            <>
+                                                                            <Box key={i} sx={{ marginBottom : 2 }}>
+                                                                                <Grid container spacing={2} alignItems={'center'}>
+                                                                                    <Grid item>
+                                                                                        <Typography>{_baggagemeals.label}{_baggagemeals.value}</Typography>
+                                                                                    </Grid>
+                                                                                    <Grid item md={4}>
+                                                                                            <Box className="location_badge">
+                                                                                                <Typography> { _baggagemeals.fd } </Typography>
+                                                                                            </Box> 
+                                                                                        
+                                                                                    </Grid>
+                                                                                    <Grid item md={3}>
+                                                                                        <FormGroup>
+                                                                                            <label>Baggage </label>
+                                                                                            <Field as="select" name={`baggagemeals.${i}.baggagevalue`}  className='form-control'>
+                                                                                                <option value="0">Select</option>
+                                                                                                { _baggagemeals.optionbaggage?.length > 0 && _baggagemeals.optionbaggage?.map((bagg)=>(
+                                                                                                    <option value={bagg.code}   >{bagg.desc} @ {bagg.amount}</option>
+                                                                                                ))}
+                                                                                            </Field>
+                                                                                        </FormGroup>
+                                                                                    </Grid>
+                        
+                                                                                    <Grid item md={3}>
+                                                                                        <FormGroup>
+                                                                                            <label>Meals</label>
+                                                                                            <Field as="select" name={`baggagemeals.${i}.mealsvalue`}  className='form-control'>
+                                                                                                <option value="0">Select</option>
+                                                                                                { _baggagemeals.optionmeal?.length > 0 && _baggagemeals.optionmeal?.map((mel)=>(
+                                                                                                    <option value={mel.code}   >{mel.desc} @ {mel.amount}</option>
+                                                                                                ))}
+                                                                                            </Field>
+                                                                                        </FormGroup>
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                            </Box>
+                                                                        </>
+
+
+
+                                                                        //     <Field as="select" name={`baggage.${i}.weight`} className='form-control'>
+                                                                        //         <option value="0">Select</option>
+                                                                        //         { _baggagemeals.optionbaggage?.length > 0 && _baggagemeals.optionbaggage?.map((bagg)=>(
+                                                                        //             <option value={bagg.code}   >{bagg.desc} @ {bagg.amount}</option>
+                                                                        //         ))}
+                                                                        // </Field>
+                                                                        )
+                                                                    })}
+                                                            
+
+                                                                </FieldArray>    
+
+                                                                  
+
+{/* 
                                 { (()=>{
                                     var ii=0
                                     return (
@@ -915,7 +1048,10 @@ export default function Step2(props){
                                                                            <>
                                                                                 {
                                                                                      values?.baggagemeals?.map((_baggagemeals, i) => {
-                                                                                         ii++
+                                                                                        ii++
+                                                                                         console.log(_baggagemeals);
+
+                                                                                        // selected={bagg.code == dff?.['_baggagemeals'][ii-1][_baggagemeals.label][i]['baggage'] ? true : false }                                                                                         ii++
                                                                                         return (
                                                                                             <>
                                                                                                 <Box key={i} sx={{ marginBottom : 2 }}>
@@ -932,11 +1068,11 @@ export default function Step2(props){
                                                                                                         </Grid>
                                                                                                         <Grid item md={3}>
                                                                                                             <FormGroup>
-                                                                                                                <label>Baggage {ii-1}</label>
+                                                                                                                <label>Baggage </label>
                                                                                                                 <Field as="select" name={`_baggagemeals.${ii-1}.${_baggagemeals.label}.${i}.baggage`}  className='form-control'>
                                                                                                                     <option value="0">Select</option>
                                                                                                                     { b?.ssrInfo?.BAGGAGE?.length > 0 && b?.ssrInfo?.BAGGAGE?.map((bagg)=>(
-                                                                                                                        <option value={bagg.code}>{bagg.desc} @ {bagg.amount}</option>
+                                                                                                                        <option value={bagg.code}  selected={bagg.code == dff?.['_baggagemeals'][ii-1][_baggagemeals.label][i]['baggage'] ? true : false } >{bagg.desc} @ {bagg.amount}</option>
                                                                                                                     ))}
                                                                                                                 </Field>
                                                                                                             </FormGroup>
@@ -973,7 +1109,7 @@ export default function Step2(props){
                                             })
                                         })
                                     );
-                                })(values) }
+                                })(values) } */}
 
 
                             </TabPanelUnstyled>
