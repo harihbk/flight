@@ -20,6 +20,7 @@ export default function Step3(props){
     const [addonTab, setAddonTab] = React.useState();
     const [baggageInfo, setBaggageInfo] = React.useState(10);
     const [passenger, setPassenger] = React.useState();
+    const [passengerList, setPassengerList] = React.useState();
     const [journeyDetail, setJourneyDetail] = React.useState();
     const things = React.useContext(TripinfoContext);
     const [data , setData ] = React.useState(things?.tripInfos);
@@ -49,9 +50,29 @@ export default function Step3(props){
 
 
     useEffect(()=>{
-        setPassenger(JSON.parse(window.localStorage.getItem('passangerdetail')));
 
+        var getfromlocalpassangers = JSON.parse(window.localStorage.getItem('passangerdetail'));
+        var getLocalFD = JSON.parse(window.localStorage.getItem('updateCurrflightdetial'));
+        
+        setPassenger(getfromlocalpassangers);
+        setJourneyDetail(getLocalFD);
+        console.log(journeyDetail[0][346]);
+        
+        var newvar = [...getfromlocalpassangers?.adult ,  ...getfromlocalpassangers?.child || [], ...getfromlocalpassangers?.infant || []];
 
+        console.log(newvar);
+        let filterdata = newvar.map((data, index) => {
+            let _keys = data.label.toUpperCase();
+
+            let bagageVal = getfromlocalpassangers?.baggagemeals.filter(a => a.valuelabel == _keys);
+            data.bagageVal = bagageVal;
+            
+            return data
+
+        });
+
+        setPassengerList(filterdata);
+        console.log(filterdata);
     },[]);
 
     return(
@@ -144,7 +165,7 @@ export default function Step3(props){
                                 </Box> 
                                 <Typography>Passenger Details</Typography>
                             </Box>
-                            <Grid container className="tableheader" style={{ 'border-bottom' : '1px solid #ccc', paddingBottom : 10, marginBottom : 10 }}>
+                            <Grid container className="tableheader" style={{ 'border-bottom' : '1px solid #ccc', paddingBottom : 10, marginBottom : 5 }}>
                                 <Grid item sx={{ maxWidth : 55, width : '100%' }}>
                                     <Typography>S.no</Typography>
                                 </Grid>
@@ -163,24 +184,38 @@ export default function Step3(props){
                             </Grid>
 
                             
-                            { passenger?.adult && passenger?.adult.map((data, index) => (
-                                <Grid container className="tablecontent" style={{ 'border-top' : index !== 0 ? '1px solid #ccc' : '0' , paddingBottom : 10, marginBottom : 10 }} key={index}>
+                            { passengerList && passengerList.map((data, index) => (
+
+                                <Grid container className="tablecontent" style={{ 'border-top' : index !== 0 ? '1px solid #ccc' : '0' , paddingTop : 10, marginBottom : 10 }} key={index}>
                                     <Grid item sx={{ maxWidth : 55, width : '100%'  }}>
                                         <Typography>{ index + 1 }</Typography>
                                     </Grid>
                                     <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
                                         <Typography sx={{ textTransform : 'capitalize' }}>{ data?.title } {' '} { data?.firstname + ' ' + data?.lastname }</Typography>
-                                        <Typography sx={{ color : '#9b9b9b' }}>{ data?.passportinfo?.dob }20/20/2020</Typography>
+                                        <Typography sx={{ color : '#9b9b9b' }}>{ data?.passportinfo?.dob }</Typography>
                                     </Grid>
                                     <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
-                                        <Typography>{data?.passportinfo?.nationality} India</Typography>
-                                        <Typography>{data?.passportinfo?.passportno} Euhh9099</Typography>
+                                        <Typography>{data?.passportinfo?.nationality} </Typography>
+                                        <Typography>{data?.passportinfo?.passportno} </Typography>
                                     </Grid>
                                     <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
-                                        <Typography>NA</Typography>
+                                        <Typography>From :  {  }</Typography>
+                                        <Typography>To : </Typography>
                                     </Grid>
+
+                                    {/* baggage and meals */}
                                     <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
-                                        <Typography>NA</Typography>
+                                        <Box className="bag_meal" >
+                                            <Box className="baggage"></Box>
+                                            <Typography>Meals </Typography>
+                                            { data?.bagageVal.length > 0 && data?.bagageVal.map((bag, i) =>(
+                                                
+                                                <>
+                                                    <Typography variant="span" component={'span'}>{ !bag?.isreturn ? 'From: ' : " To: " }</Typography>
+                                                    <Typography variant="span" component={'span'} style={{ fontWeight : '500' }}>{ bag?.mealsvalue }</Typography>
+                                                </>
+                                            )) }
+                                        </Box>
                                     </Grid>
                                 </Grid>
                             ))}
