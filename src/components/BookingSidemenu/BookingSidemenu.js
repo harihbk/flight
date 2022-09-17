@@ -66,7 +66,7 @@ export default function BookingSidemenu() {
 
            
 
-            <Box>
+            <Box style={{ marginTop : 10}}>
                 <Box style={{ display : 'flex',justifyContent:'space-between'}}>
                   <Typography className="tct">Airline GST</Typography>
                   <Typography className="tct">₹{ (fare?.totalFareDetail?.afC?.TAF?.AGST).toLocaleString('en', { minimumFractionDigits: 2 }) }</Typography>

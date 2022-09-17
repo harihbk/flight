@@ -12,6 +12,8 @@ import moment from 'moment';
 import helpers from '../Search/calculation';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
+import LuggageIcon from '@mui/icons-material/Luggage';
 
 
 export default function Step3(props){
@@ -56,7 +58,7 @@ export default function Step3(props){
         
         setPassenger(getfromlocalpassangers);
         setJourneyDetail(getLocalFD);
-        console.log(journeyDetail[0][346]);
+        console.log(getLocalFD);
         
         var newvar = [...getfromlocalpassangers?.adult ,  ...getfromlocalpassangers?.child || [], ...getfromlocalpassangers?.infant || []];
 
@@ -192,7 +194,7 @@ export default function Step3(props){
                                     </Grid>
                                     <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
                                         <Typography sx={{ textTransform : 'capitalize' }}>{ data?.title } {' '} { data?.firstname + ' ' + data?.lastname }</Typography>
-                                        <Typography sx={{ color : '#9b9b9b' }}>{ data?.passportinfo?.dob }</Typography>
+                                        <Typography sx={{ color : '#9b9b9b' }}><span style={{ color : '#636363' }}>{'DOB: '}</span>{ moment(data?.passportinfo?.dob).format("DD/MM/yyyy") }</Typography>
                                     </Grid>
                                     <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
                                         <Typography>{data?.passportinfo?.nationality} </Typography>
@@ -206,10 +208,17 @@ export default function Step3(props){
                                     {/* baggage and meals */}
                                     <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
                                         <Box className="bag_meal" >
-                                            <Box className="baggage"></Box>
-                                            <Typography>Meals </Typography>
+                                            <Box className="baggage">
+                                                <Typography style={{ display : 'flex', alignItems : 'center', columnGap : 3 }}><LuggageIcon style={{ width: 14 }}/> Baggage </Typography>
+                                                { data?.baggagevalue > 0 && data?.baggagevalue.map((bag, i) =>(
+                                                    <>
+                                                        <Typography variant="span" component={'span'}>{ !bag?.isreturn ? 'From: ' : " To: " }</Typography>
+                                                        <Typography variant="span" component={'span'} style={{ fontWeight : '500' }}>{ bag?.baggagevalue }</Typography>
+                                                    </>
+                                                )) }
+                                            </Box>
+                                            <Typography style={{ display : 'flex', alignItems : 'center', columnGap : 3 }}><LunchDiningIcon style={{ width: 14 }}/> Meals </Typography>
                                             { data?.bagageVal.length > 0 && data?.bagageVal.map((bag, i) =>(
-                                                
                                                 <>
                                                     <Typography variant="span" component={'span'}>{ !bag?.isreturn ? 'From: ' : " To: " }</Typography>
                                                     <Typography variant="span" component={'span'} style={{ fontWeight : '500' }}>{ bag?.mealsvalue }</Typography>

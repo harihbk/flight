@@ -70,6 +70,14 @@ body .color_secondary:hover{
   background-color: #131e40;
   color: #fff;
 }
+.show_seatbutton{
+  background-color: #131e40 !important;
+  color: #fff;
+}
+body .show_seatbutton:hover{
+  background-color: #131e40 !important; 
+  color: #fff;
+}
 body .color_secondary.Mui-disabled{
   opacity: .4;
   color: #fff;

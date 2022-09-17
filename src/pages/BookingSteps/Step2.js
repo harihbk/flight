@@ -230,6 +230,7 @@ export default function Step2(props){
                  firstname : localdata?.firstname || '',
                  lastname :  localdata?.lastname || '',
                  label : result + parseInt(index + 1),
+                //  id : ,
                  passportinfo : {
                      nationality : localdata?.passportinfo?.nationality || '',
                      passportno  : localdata?.passportinfo?.passportno || '',
@@ -268,6 +269,7 @@ export default function Step2(props){
                     inc   : ji,
                     valuelabel : `${key}${index}`,
                     optionbaggage : b.ssrInfo.BAGGAGE,
+                    id: b?.id,
                     optionmeal : b.ssrInfo.MEAL,
                     fd : `${b?.da?.city} - ${ b?.aa?.city } ${ moment(b?.dt).format("ddd, MMM Do YYYY ") }`,
                     mealsvalue : dff?.['baggagemeals']?.[ji]?.['mealsvalue'] || '',
@@ -1140,7 +1142,7 @@ export default function Step2(props){
                                                         <Showseatselectfn _setOpen={setOpen} _open={open} _currflightdetial={currflightdetial} _pp={pp}/>
                                                     </Grid>
                                                     <Grid>
-                                                        <Button variant="outlined" onClick={()=>getSets(pp )}>Show Seat Map</Button>
+                                                        <Button variant="contained" className="color_secondary show_seatbutton" onClick={()=>getSets(pp )}>Show Seat Map</Button>
                                                         <AlertPopup popupOpen={popupShow} mapMessage={alertMsg} _setPopupShow={setPopupShow} />
                                                     </Grid>
                                                 </Grid>     
