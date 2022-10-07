@@ -63,11 +63,46 @@ export default function Step3(props){
         var newvar = [...getfromlocalpassangers?.adult ,  ...getfromlocalpassangers?.child || [], ...getfromlocalpassangers?.infant || []];
 
         console.log(newvar);
+
+        var fddetails = []
+         for (const key in getLocalFD) {
+             for (const key1 in getLocalFD[key]) {
+                 for (const key2 in getLocalFD[key][key1]) {
+                    // console.log(getLocalFD[key]?.[key1]?.[key2]);
+                    fddetails.push(getLocalFD[key][key1][key2] || [])  
+                 }
+             }
+            
+         }
+         console.log(fddetails);
+
+      //  let keys = Object.keys(lc).filter(a=> (a == 'adult' ||a == 'child' || a == 'infant' ) )
+    
+
         let filterdata = newvar.map((data, index) => {
             let _keys = data.label.toUpperCase();
+             let kky = data.label
+             let fd = fddetails.filter(a=>a.label == kky)
+             let from = fd.filter(a=>!a.deparr.isRs)
+             let to = fd.filter(a=>a.deparr.isRs)
+
+             var ff = ""
+             for (const key in from) {
+                ff +=  `${from[key].deparr.da.code}-${from[key].deparr.aa.code}->${from[key].seat},`
+             }
+
+             var tt = ""
+             for (const key in to) {
+                tt +=  `${to[key].deparr.da.code}-${to[key].deparr.aa.code}->${to[key].seat},`
+             }
+
+
+            //console.log(data.label);
 
             let bagageVal = getfromlocalpassangers?.baggagemeals.filter(a => a.valuelabel == _keys);
             data.bagageVal = bagageVal;
+            data.fd_from = ff
+            data.fd_to = tt
             
             return data
 
@@ -201,8 +236,8 @@ export default function Step3(props){
                                         <Typography>{data?.passportinfo?.passportno} </Typography>
                                     </Grid>
                                     <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
-                                        <Typography>From :  {  }</Typography>
-                                        <Typography>To : </Typography>
+                                        <Typography>From :  { data?.fd_from }</Typography>
+                                        <Typography>To : { data?.fd_to }</Typography>
                                     </Grid>
 
                                     {/* baggage and meals */}
