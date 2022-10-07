@@ -245,7 +245,7 @@ export default function Step3(props){
                                         <Box className="bag_meal" >
                                             <Box className="baggage">
                                                 <Typography style={{ display : 'flex', alignItems : 'center', columnGap : 3 }}><LuggageIcon style={{ width: 14 }}/> Baggage </Typography>
-                                                { data?.baggagevalue > 0 && data?.baggagevalue.map((bag, i) =>(
+                                                { data?.bagageVal.length > 0  && data?.bagageVal.map((bag, i) =>(
                                                     <>
                                                         <Typography variant="span" component={'span'}>{ !bag?.isreturn ? 'From: ' : " To: " }</Typography>
                                                         <Typography variant="span" component={'span'} style={{ fontWeight : '500' }}>{ bag?.baggagevalue }</Typography>
