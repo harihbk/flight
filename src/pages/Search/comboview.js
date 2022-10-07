@@ -66,6 +66,13 @@ function Flightdetails(rest){
      
 }
 
+const colorsRadio = {
+    color: "#99999a",
+    '&.Mui-checked': {
+      color: "#f59625",
+    },
+}
+
 function Faredetails(...rest){
     let { value , _paxtypeget } = rest[0] || ''
     let data = value.filter( x => x.checked == true )[0]
@@ -498,33 +505,34 @@ export default function Comboview(props) {
 
                                                             <Box className="seconddiv" style={{ width : '30%', 'border-left' : '1px dashed #efefef', paddingLeft : 10 }}>
                                                                 <Box className=''>
-
-                                                                    <span>
-                                                                { data?.totalPriceList.map((totaldata, totindex)=>(
-                                                                    <Box className='price' style={{ width : '100%' }}>
-                                                                    <Typography className='priceText'> 
-                                                                        <div id={fare}>
-                                                                            <span id={fare}>
-                                                                            <Radio
-                                                                                    checked={totaldata?.checked}
-                                                                                    id= {totaldata?.id}
-                                                                                    value={totaldata?.id}
-                                                                                    onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
-                                                                                    name={ "flights-" + totaldata?.id  }
-                                                                                    inputProps={{ 'aria-label': 'A' }}
-                                                                                />
-                                                                            </span>
-                                                                            <span>₹</span>
-                                                                        {helpers.calculatetotalamount(totaldata,_paxtypeget)}
-                                                                        <Box style={{ display : 'flex' }}>
-                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}}>{totaldata.fareIdentifier}</Typography>  
-                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ _cabinClassget }</Typography>
-                                                                        </Box>
-                                                                        </div>
-                                                                    </Typography>
-                                                                </Box>
-                                                                    )) }
-                                                                    </span>
+                                                                    <Box>
+                                                                        { data?.totalPriceList.map((totaldata, totindex)=>(
+                                                                            <Box  >
+                                                                                <Typography className='priceText'> 
+                                                                                    <Box id={fare}>
+                                                                                        <span id={fare}>
+                                                                                        <Radio
+                                                                                                checked={totaldata?.checked}
+                                                                                                id= {totaldata?.id}
+                                                                                                value={totaldata?.id}
+                                                                                                onChange = { (e)=> radiochangeevent(i,data?.totalPriceList , e) }
+                                                                                                name={ "flights-" + totaldata?.id  }
+                                                                                                inputProps={{ 'aria-label': 'A' }}
+                                                                                                sx={colorsRadio}
+                                                                                            />
+                                                                                        </span>
+                                                                                        <span>₹</span>
+                                                                                        {helpers.calculatetotalamount(totaldata,_paxtypeget)}
+                                                                                        <Box style={{ display : 'flex', columnGap : '5px' }}>
+                                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}}>{totaldata.fareIdentifier}</Typography>  
+                                                                                            {' '}
+                                                                                            <Typography variant="h6"sx={{ fontSize:11,color : '#999'}} >{ _cabinClassget }</Typography>
+                                                                                        </Box>
+                                                                                    </Box>
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        )) }
+                                                                    </Box>
 
 
 
@@ -537,7 +545,7 @@ export default function Comboview(props) {
 
                                                                 </Box>
 
-                                                                <Button className='color_primary' onClick={()=>fareifreview(data)} style={{ width : '100%', maxWidth : 300 }}>Book</Button>
+                                                                <Button className='color_primary' onClick={()=>fareifreview(data)} style={{ width : '100%', maxWidth : 300, marginTop : 3 }}>Book</Button>
                                                             </Box>
 
                                                         </Box>  

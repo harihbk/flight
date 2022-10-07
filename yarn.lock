@@ -10376,6 +10376,11 @@ react-popper@2.3.0, react-popper@^2.2.5:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
 
+react-razorpay@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/react-razorpay/-/react-razorpay-1.1.5.tgz#450324a9ee7f08c3605ac1c8af32878dcb15496a"
+  integrity sha512-jYDGW7k71qyANELOoa8JMgZjdGl1UiqqH/QbmkREl1q2nk7E+W8nyMdvD6ukXm/MPZJxTFoYljBFOJb8zydwTg==
+
 react-redux@^8.0.2:
   version "8.0.2"
   resolved "https://registry.npmjs.org/react-redux/-/react-redux-8.0.2.tgz"

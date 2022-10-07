@@ -50,9 +50,10 @@ export default function Step3(props){
 
     useEffect(()=>{
         let lc =JSON.parse(window.localStorage.getItem('passangerdetail'));
+        let seatallo  =JSON.parse(window.localStorage.getItem('passangerdetail'));
 
         let keys = Object.keys(lc).filter(a=> (a == 'adult' ||a == 'child' || a == 'infant' ) )
-        console.log(keys);
+        
         setPassenger(lc);
 
 

@@ -416,4 +416,19 @@ body{
 }
 
 
+/* ###### Seat Booking Popup ####### */
+.seatpopup_wrapper .MuiDialog-paperWidthXl{
+    max-width:  1400px;
+}
 
+.seatbooking_popup .ant-row {
+    justify-content: center;
+}
+.seatbooking_popup .ant-row > button {
+    margin: 3px;
+    color: #fff;
+}
+
+td.p-5 {
+    padding: 7px;
+}

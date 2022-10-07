@@ -15,8 +15,12 @@ export default function Step1(){
 
     useEffect(() => {
         setData(things?.tripInfos);
-        console.log(data)
+        console.log(data);
     }, [things]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+      }, [])
 
 
 
@@ -63,7 +67,7 @@ export default function Step1(){
                                                     <Typography style={{ fontSize : 10, fontWeight : '500' }}> {b?.fD.aI?.code}-{b?.fD?.fN}</Typography>
                                                 </Box>
                                                 <Box className='time_place first'>
-                                                    <Typography className='time1' style={{ fontSize : 10, fontWeight : '500' }}>{ moment(b?.dt).format("MMM Do,ddd, HH:mm") }</Typography>
+                                                    <Typography className='time1' style={{ fontSize : 16, fontWeight : '500' }}>{ moment(b?.dt).format("MMM Do,ddd, HH:mm") }</Typography>
                                                     {/* <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>ND 20:40</Typography> */}
                                                     <Typography className='jplace_text'>{ b?.da?.city },{b?.da?.country}</Typography>
 
@@ -78,7 +82,7 @@ export default function Step1(){
 
 
                                                 <Box className='time_place'>
-                                                    <Typography className='time1'  style={{ fontSize : 10, fontWeight : '500' }}>{ moment(b?.at).format("MMM Do,ddd, HH:mm") }</Typography>
+                                                    <Typography className='time1'  style={{ fontSize : 16, fontWeight : '500' }}>{ moment(b?.at).format("MMM Do,ddd, HH:mm") }</Typography>
                                                     {/* <Typography className='time1' style={{fontSize : 17,  fontWeight : '500'}}>MAS 4:00</Typography> */}
                                                     <Typography className='jplace_text'>{ b?.aa?.city },{b?.aa?.country}</Typography>
                                                     <Typography className='jplace_text'>{ b?.aa?.name }</Typography>

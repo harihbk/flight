@@ -124,7 +124,7 @@ export default function MaxWidthDialog(props) {
 
     switch (curr?.isBooked) {
       case false:
-        return <Button  variant="outlined" style={{ backgroundColor:  ( seats.includes(curr.code) ? '#c8ee90' : curr.color )  }} onClick={()=>seatselection(curr)}>{curr.seatNo}</Button>
+        return <Button  variant="outlined" style={{ backgroundColor:  ( seats.includes(curr.code) ? '#127100' : curr.color )  }} onClick={()=>seatselection(curr)}>{curr.seatNo}</Button>
       case true:
         return <Button color="error" variant="contained" style={{ cursor : 'not-allowed' }}>{curr.seatNo}</Button>
     }
@@ -204,6 +204,8 @@ export default function MaxWidthDialog(props) {
         maxWidth={maxWidth}
         open={_open}
         onClose={handleClose}
+
+        className={'seatpopup_wrapper'}
       >
         <DialogTitle> </DialogTitle>
         <DialogContent>
@@ -221,15 +223,18 @@ export default function MaxWidthDialog(props) {
             // }}
           > */}
 
-    <Box style={{ display: 'flex' , justifyContent : "space-around"  }}>
-       <Box> 
+    <Grid container  className='seatbooking_popup' justifyContent={'center'} >
+       <Grid item md={2} className='leftcol_seat' style={{ paddingRight : 10 }}> 
           <Box>
-            <Typography>Select Seats</Typography>  
-            <Typography>{_selectflightdetail?.fD?.aI?.name} { _selectflightdetail?.da?.code }-{ _selectflightdetail?.aa?.code } </Typography>
-            <Typography>{_selectflightdetail?.fD?.aI?.code}-{_selectflightdetail?.fD?.fN}</Typography>
+            <Typography style={{ fontSize : 20, fontWeight : 500, marginBottom : 10 }}>Select Seats</Typography>  
+            <Box style={{ paddingBottom : 10, paddingTop: 10, 'border-top' : '1px dashed #ccc', 'border-bottom' : '1px dashed #ccc' }}>
+              <Typography>{ _selectflightdetail?.da?.code }-{ _selectflightdetail?.aa?.code }</Typography>
+              <Typography style={{ fontSize : 14 }}>{_selectflightdetail?.fD?.aI?.name}  </Typography>
+              <Typography style={{ fontSize : 14 }}>{_selectflightdetail?.fD?.aI?.code}-{_selectflightdetail?.fD?.fN}</Typography>
+            </Box>
           </Box> 
-          <Box>
-            <table>
+          <Box style={{ marginBottom : 10 }}>
+            <table style={{ width : '100%', textAlign : 'left', marginBottom : 10, marginTop : 10 }}> 
               <thead>
                 <tr>
                   <th>Passanger</th>
@@ -242,48 +247,44 @@ export default function MaxWidthDialog(props) {
                {temporary.length > 0 && temporary.map((a,i)=>(
                   <>
                     <tr onClick={()=>temporarySeta(a,i)} style = {{ background : indexset == i ? 'antiquewhite' : '' }}>
-                      <td>{a?.passanger}-{a.key}</td>
-                      <td>{a?.seat}</td>
-                      <td>{a?.fees}</td>
+                      <td className='p-5'>{a?.passanger}-{a.key}</td>
+                      <td className='p-5'>{a?.seat}</td>
+                      <td className='p-5'>{a?.fees}</td>
                     </tr>
                   </>
                ))}
               </tbody>
             </table>
-            <Button variant="outlined" onClick={()=>onProcess()}>Process</Button>
+            <Button variant="contained" fullWidth={true} className='color_primary' onClick={()=>onProcess()}>Process</Button>
           </Box>
-        </Box>
+        </Grid>
 
-
-
-       <Box> 
-            <Box sx={{ flexGrow: 1 }}  >
+       <Grid item md={8} justifyContent={'center'}  className='middlecol_seat' style={{ 'border-right' : '1px solid #e4e4e4' , 'border-left' : '1px solid #e4e4e4', paddingLeft : 10, paddingRight : 10 }}> 
+            <Box sx={{ flexGrow: 1, justifyContent : 'center' }}  >
               {[...Array(_currentrow?.sData?.row)].map((row, i) =>(
                 <>
-                <Row> 
-                    {[...Array(_currentrow?.sData?.column)].map((col, ii) =>(<> { getRowCol(i,ii)  } </>)  )}  
-                </Row>      
+                  <Row justifyContent={'center'}> 
+                      {[...Array(_currentrow?.sData?.column)].map((col, ii) =>(<> { getRowCol(i,ii)  } </>)  )}  
+                  </Row>      
                 </>
                 ))}  
             </Box> 
-       </Box>
-       <Box> 
+       </Grid>
+
+       <Grid item md={2}  className='rightcol_seat' style={{ paddingLeft : 10 }}> 
            <Box>
-              <Box>
-                Flight Orientation
-              </Box>
-              <Box>
-                  <Typography>Seat Status</Typography>
+              <Typography  style={{ fontSize : 20, fontWeight : 500, marginBottom : 10 }}>Flight Orientation</Typography>
+              <Box style={{ paddingBottom : 10, paddingTop: 10, 'border-top' : '1px dashed #ccc', 'border-bottom' : '1px dashed #ccc' }}>
+                  <Typography style={{ marginBottom : 10 }}>Seat Status</Typography>
                   <Box>
                     <Button variant="outlined" color="success">Selected</Button>
                   </Box>
                   <Box mt={1}>
                     <Button color="error" variant="outlined" style={{ width : 100}}>Booked</Button>
                   </Box>
-              </Box>
-              <Divider/>
-              <Box>
-                <Typography>Seat Fees</Typography>
+              </Box> 
+              <Box style={{ marginTop : 10 }}> 
+                <Typography style={{ marginBottom : 10 }}>Seat Fees</Typography>
                 { listprice.length > 0 && 
                   listprice.map(data => (
 
@@ -298,9 +299,9 @@ export default function MaxWidthDialog(props) {
                 }
               </Box>
            </Box>
-       </Box>
+       </Grid>
        
-    </Box>
+    </Grid>
 
 
    
