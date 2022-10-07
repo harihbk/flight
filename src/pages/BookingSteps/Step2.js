@@ -17,6 +17,7 @@ import AlertPopup from "./alertPopup"
 import Skeleton from '@mui/material/Skeleton';
 import { country } from "./country"
 import { completeservice } from "./rxjs";
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 
 import { ErrorMessage, Field, FieldArray, Form, Formik ,useFormikContext , getIn} from "formik";
 import { _, debounce } from 'lodash'
@@ -414,6 +415,7 @@ export default function Step2(props){
     const [seatloading , setSeatloading] = React.useState(true)
     const [open, setOpen] = React.useState(false);
     const [ currentrow , setSetcurrentrow ] = React.useState([])
+    const [ currentrowdata , setSetcurrentrowdata ] = React.useState({})
     const [ rowid , setRowid ] = React.useState("");
     const [popupShow, setPopupShow] = React.useState(false);
     const [alertMsg, setAlertMsg] = React.useState('');
@@ -490,7 +492,10 @@ export default function Step2(props){
 
 
         let isUnavailable =  seats?.tripSeat?.[pp.id];
-       
+        console.log(isUnavailable);
+
+        console.log(isUnavailable);
+
         if(isUnavailable?.nt){
             setPopupShow(true);
             setAlertMsg(isUnavailable?.nt);
@@ -503,6 +508,7 @@ export default function Step2(props){
                 alert("Seat Selection not applicable")
             }else{
                 setSetcurrentrow(curr_row)
+                setSetcurrentrowdata(pp)
                 setOpen(true) 
             }
         }
@@ -559,7 +565,7 @@ export default function Step2(props){
 
     return(
         <div>
-          { open   &&  <Seatpopup _open={open} _rowid={rowid} _setOpen={setOpen} _selectflightdetail={selectflightdetail} _currentrow={currentrow} _currflightdetial={currflightdetial} seatbookingreturntoparentfn={seatbookingreturntoparentfn}/>} 
+          { open   &&  <Seatpopup _open={open} _rowid={rowid} _currentrowdata={currentrowdata} _setOpen={setOpen} _selectflightdetail={selectflightdetail} _currentrow={currentrow} _currflightdetial={currflightdetial} seatbookingreturntoparentfn={seatbookingreturntoparentfn}/>} 
             <Box className="stepWrapper">
                 <Box className="stepcontHeader">
                     <Typography className="stitle">Passenger Details</Typography>

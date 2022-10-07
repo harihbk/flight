@@ -1022,6 +1022,7 @@ export default function Search({ isVisible }) {
         let plindex = unmutate[parentindex]['totalPriceList'].findIndex( x => x.id == target_id)
         unmutate[parentindex]['totalPriceList'][plindex].checked = true
       //  setListflight(unmutate)
+     // console.log(listflightfilter);
         setListflightfilter(unmutate)
     }
 
@@ -1383,12 +1384,19 @@ export default function Search({ isVisible }) {
 
     
 
+     //  navigate(`/booking/flight/qw`)
 
+     const onewaybooknow = (data) => {
+        let f =  data.findIndex(a=>a.checked)
+        let id = data[f].id;
+     navigate(`/booking/flight/${id}`)
 
+     }
 
  
   return (
     <motion.div  >
+        
       <div className='searchPage'>
         <Header headerDark={false} />
         <Box component={'div'} className='innerwrapper'>
@@ -1732,7 +1740,6 @@ export default function Search({ isVisible }) {
                         </div>
                     </Box>
 
-
                     <Grid container className='booking_row' spacing={3}> 
                         <Grid item md={3} className="filter_col"> 
 
@@ -1997,10 +2004,17 @@ export default function Search({ isVisible }) {
                                                                 </Box>
                                                                     )) }
                                                                      </span>
-
+                                                                     
                                                                 <span>
                                                                 <Typography className={`fdetails ${tabValue }`} onClick={() => tabValue == i ? TabChange('-1') : TabChange(i)}> {'Flight Details'} <KeyboardArrowDown className='down' /></Typography>
                                                                 <Typography sx={{ fontSize:11,color:'#213bd4'}}>seats left {data?.totalPriceList[0]?.fd?.ADULT?.sR}</Typography>
+                                                                
+
+                                                                <Typography sx={{ fontSize:11,color:'#213bd4'}}> 
+                                                                
+                                                                        <Button variant='contained' className='color_primary booknow_btn' onClick={() => onewaybooknow(data?.totalPriceList) }>Book Now</Button>
+                                                                </Typography>
+
                                                                 </span>
 
                                                                   

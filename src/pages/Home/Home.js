@@ -1,3 +1,4 @@
+
 import React , { useRef } from 'react'
 import Header from '../../components/header';
 import { useNavigate  } from "react-router-dom";
@@ -38,7 +39,7 @@ import Checkbox from '@mui/material/Checkbox';
 function Froms({value}){
   const { city , country } = value
   return (
-    <div>{value.city},{value.country}</div>
+    <Typography sx={{ fontSize : 13, fontWeight : '500' }}>{value.city},{value.country}</Typography>
   );
 }
 
@@ -956,3 +957,5 @@ through the refund details, and click ‘submit’. You can even claim refund fo
     </div>
   )
 }
+
+

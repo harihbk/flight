@@ -1,3 +1,4 @@
+
 body {
   margin: 0;
   font-family: -apple-system, Quicksand, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -70,11 +71,18 @@ body .color_secondary:hover{
   background-color: #131e40;
   color: #fff;
 }
+
+body .outline_primary{
+  border-color: #131e40;
+  color: #131e40;
+}
+body .outline_primary:hover{
+  border-color: #131e40;
+}
 body .color_secondary.Mui-disabled{
   opacity: .4;
   color: #fff;
 }
-
 body .btnt_gray {
   color: #868686;
 }
@@ -96,7 +104,6 @@ body .outline_gray:hover{
   border-radius: 5px;
   border: 1px solid #ccc;
 }
-
 .invalid-feedback {
   font-size: 12px;
   margin-bottom: 10px;

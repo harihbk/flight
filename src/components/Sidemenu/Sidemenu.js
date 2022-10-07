@@ -270,7 +270,7 @@ const  Sidemenu = ({...props}) => {
 
 
                     <Box sx={{ marginBottom : 1}}> 
-                        <Button className={stopmulticity.status ? 'color_secondary' : 'outline_gray' } variant={stopmulticity.status ? "contained" : "outlined"} sx={{ marginRight : 1}} onClick={()=>setStopmulticity(
+                        <Button className={stopmulticity.status ? "color_secondary" : "outline_primary"}  variant={stopmulticity.status ? "contained" : "outlined"} sx={{ marginRight : 1}} onClick={()=>setStopmulticity(
                             prev=>({
                             ...prev,
                             status : true

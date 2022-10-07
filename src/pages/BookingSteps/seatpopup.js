@@ -15,6 +15,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import "antd/dist/antd.css";
 import { Row, Col, Divider } from 'antd';
+import { parsePath } from 'history';
 
 function Emptycol(){
   return (
@@ -25,7 +26,7 @@ function Emptycol(){
 }
 
 export default function MaxWidthDialog(props) {
-  let { _open , _setOpen , _currentrow , _selectflightdetail , _currflightdetial ,_rowid , seatbookingreturntoparentfn} = props
+  let { _open , _setOpen , _currentrow , _selectflightdetail , _currflightdetial ,_rowid , seatbookingreturntoparentfn , _currentrowdata} = props
 
 
   const [fullWidth, setFullWidth] = React.useState(true);
@@ -39,6 +40,8 @@ export default function MaxWidthDialog(props) {
   React.useEffect(()=>{
     var ind
     let _currflightdetials = [..._currflightdetial]
+    console.log(_currflightdetials);
+    console.log(_rowid);
     
     for (const key in _currflightdetials) {
       if (Object.hasOwnProperty.call(_currflightdetials, key)) {
@@ -48,6 +51,7 @@ export default function MaxWidthDialog(props) {
         }
       }
     }
+    console.log(ind);
 
     let allocateseat = [..._currflightdetials[ind][_rowid]]
     setTemporary(allocateseat)
@@ -134,6 +138,8 @@ export default function MaxWidthDialog(props) {
  //   let temp = [...temporary]
     let temp = cloneDeep(temporary);
 
+    console.log(_currentrowdata);
+
     let code = row.code;
     let indx = temp.findIndex(a => a.seat == row.code)
 
@@ -142,16 +148,40 @@ export default function MaxWidthDialog(props) {
 
     let amt = _currentrow?.sInfo[_currdindx]?.amount
    let idx = listprice.findIndex(d=>d.amount == amt)
+   console.log(row);
    if(_currentrow?.sInfo[_currdindx]){
+     
     _currentrow.sInfo[_currdindx].color =  listprice[idx]?.color
    }
+
+   console.log(indx);
 
     if(indx == -1){
       row.color = "#c8ee90"
       temp[indexset]['seat'] = row.code
       temp[indexset]['fees'] = row.amount
+      temp[indexset]['deparr'] = {
+        da : _currentrowdata.da,
+        aa : _currentrowdata.aa
+      }
+      // if(temp[indexset]['seat'] == row.code){
+      //  temp[indexset]['seat'] = "";
+      //  temp[indexset]['fees'] = "";
+      // } else {
+
+      // }
+      
       setTemporary(temp)
     } 
+    if(indx == '0'){
+
+      //row.color = "#c8ee90"
+      temp[indexset]['seat'] = ''
+      temp[indexset]['fees'] = ''
+      temp[indexset]['deparr'] = ''
+      setTemporary(temp)
+
+    }
   }
 
   const temporarySeta = (a,i) => {
