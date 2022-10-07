@@ -73,7 +73,7 @@ export default function Step3(props){
 
         });
 
-        setPassengerList(filterdata);
+        setPassengerList(filterdata); 
         console.log(filterdata);
     },[]);
 
