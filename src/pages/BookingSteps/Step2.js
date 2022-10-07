@@ -456,11 +456,13 @@ export default function Step2(props){
           let cnnt = data?.searchQuery?.paxInfo[key]
           if(key != "INFANT"){
             for (let index = 0; index < cnnt; index++) {
+                let ff = index + 1
                 let obj = {
                  passanger : key,
                  key       : index + 1,
                  seat      : '',
                  fees      : '',
+                 label     : `${key.toLowerCase()}${ff}`
                 
                 }
                 frmtobj.push(obj)
@@ -980,7 +982,7 @@ export default function Step2(props){
                                 <FieldArray name="baggagemeals" key={'bagg'}>
 
                                     {() =>  values?.baggagemeals?.map((_baggagemeals, i) => {
-                                        console.log(_baggagemeals);
+                                        //console.log(_baggagemeals);
                                         return (
 
 

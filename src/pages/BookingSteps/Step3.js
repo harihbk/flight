@@ -12,6 +12,8 @@ import moment from 'moment';
 import helpers from '../Search/calculation';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
+import LuggageIcon from '@mui/icons-material/Luggage';
 
 
 export default function Step3(props){
@@ -20,6 +22,7 @@ export default function Step3(props){
     const [addonTab, setAddonTab] = React.useState();
     const [baggageInfo, setBaggageInfo] = React.useState(10);
     const [passenger, setPassenger] = React.useState();
+    const [passengerList, setPassengerList] = React.useState();
     const [journeyDetail, setJourneyDetail] = React.useState();
     const things = React.useContext(TripinfoContext);
     const [data , setData ] = React.useState(things?.tripInfos);
@@ -49,14 +52,64 @@ export default function Step3(props){
 
 
     useEffect(()=>{
-        let lc =JSON.parse(window.localStorage.getItem('passangerdetail'));
-        let seatallo  =JSON.parse(window.localStorage.getItem('passangerdetail'));
 
-        let keys = Object.keys(lc).filter(a=> (a == 'adult' ||a == 'child' || a == 'infant' ) )
+        var getfromlocalpassangers = JSON.parse(window.localStorage.getItem('passangerdetail'));
+        var getLocalFD = JSON.parse(window.localStorage.getItem('updateCurrflightdetial'));
         
-        setPassenger(lc);
+        setPassenger(getfromlocalpassangers);
+        setJourneyDetail(getLocalFD);
+        console.log(getLocalFD);
+        
+        var newvar = [...getfromlocalpassangers?.adult ,  ...getfromlocalpassangers?.child || [], ...getfromlocalpassangers?.infant || []];
+
+        console.log(newvar);
+
+        var fddetails = []
+         for (const key in getLocalFD) {
+             for (const key1 in getLocalFD[key]) {
+                 for (const key2 in getLocalFD[key][key1]) {
+                    // console.log(getLocalFD[key]?.[key1]?.[key2]);
+                    fddetails.push(getLocalFD[key][key1][key2] || [])  
+                 }
+             }
+            
+         }
+         console.log(fddetails);
+
+      //  let keys = Object.keys(lc).filter(a=> (a == 'adult' ||a == 'child' || a == 'infant' ) )
+    
+
+        let filterdata = newvar.map((data, index) => {
+            let _keys = data.label.toUpperCase();
+             let kky = data.label
+             let fd = fddetails.filter(a=>a.label == kky)
+             let from = fd.filter(a=>!a.deparr.isRs)
+             let to = fd.filter(a=>a.deparr.isRs)
+
+             var ff = ""
+             for (const key in from) {
+                ff +=  `${from[key].deparr.da.code}-${from[key].deparr.aa.code}->${from[key].seat},`
+             }
+
+             var tt = ""
+             for (const key in to) {
+                tt +=  `${to[key].deparr.da.code}-${to[key].deparr.aa.code}->${to[key].seat},`
+             }
 
 
+            //console.log(data.label);
+
+            let bagageVal = getfromlocalpassangers?.baggagemeals.filter(a => a.valuelabel == _keys);
+            data.bagageVal = bagageVal;
+            data.fd_from = ff
+            data.fd_to = tt
+            
+            return data
+
+        });
+
+        setPassengerList(filterdata); 
+        console.log(filterdata);
     },[]);
 
     return(
@@ -149,7 +202,7 @@ export default function Step3(props){
                                 </Box> 
                                 <Typography>Passenger Details</Typography>
                             </Box>
-                            <Grid container className="tableheader" style={{ 'border-bottom' : '1px solid #ccc', paddingBottom : 10, marginBottom : 10 }}>
+                            <Grid container className="tableheader" style={{ 'border-bottom' : '1px solid #ccc', paddingBottom : 10, marginBottom : 5 }}>
                                 <Grid item sx={{ maxWidth : 55, width : '100%' }}>
                                     <Typography>S.no</Typography>
                                 </Grid>
@@ -168,24 +221,45 @@ export default function Step3(props){
                             </Grid>
 
                             
-                            { passenger?.adult && passenger?.adult.map((data, index) => (
-                                <Grid container className="tablecontent" style={{ 'border-top' : index !== 0 ? '1px solid #ccc' : '0' , paddingBottom : 10, marginBottom : 10 }} key={index}>
+                            { passengerList && passengerList.map((data, index) => (
+
+                                <Grid container className="tablecontent" style={{ 'border-top' : index !== 0 ? '1px solid #ccc' : '0' , paddingTop : 10, marginBottom : 10 }} key={index}>
                                     <Grid item sx={{ maxWidth : 55, width : '100%'  }}>
                                         <Typography>{ index + 1 }</Typography>
                                     </Grid>
                                     <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
                                         <Typography sx={{ textTransform : 'capitalize' }}>{ data?.title } {' '} { data?.firstname + ' ' + data?.lastname }</Typography>
-                                        <Typography sx={{ color : '#9b9b9b' }}>{ data?.passportinfo?.dob }20/20/2020</Typography>
+                                        <Typography sx={{ color : '#9b9b9b' }}><span style={{ color : '#636363' }}>{'DOB: '}</span>{ moment(data?.passportinfo?.dob).format("DD/MM/yyyy") }</Typography>
                                     </Grid>
                                     <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
-                                        <Typography>{data?.passportinfo?.nationality} India</Typography>
-                                        <Typography>{data?.passportinfo?.passportno} Euhh9099</Typography>
+                                        <Typography>{data?.passportinfo?.nationality} </Typography>
+                                        <Typography>{data?.passportinfo?.passportno} </Typography>
                                     </Grid>
                                     <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
-                                        <Typography>NA</Typography>
+                                        <Typography>From :  { data?.fd_from }</Typography>
+                                        <Typography>To : { data?.fd_to }</Typography>
                                     </Grid>
+
+                                    {/* baggage and meals */}
                                     <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
-                                        <Typography>NA</Typography>
+                                        <Box className="bag_meal" >
+                                            <Box className="baggage">
+                                                <Typography style={{ display : 'flex', alignItems : 'center', columnGap : 3 }}><LuggageIcon style={{ width: 14 }}/> Baggage </Typography>
+                                                { data?.baggagevalue > 0 && data?.baggagevalue.map((bag, i) =>(
+                                                    <>
+                                                        <Typography variant="span" component={'span'}>{ !bag?.isreturn ? 'From: ' : " To: " }</Typography>
+                                                        <Typography variant="span" component={'span'} style={{ fontWeight : '500' }}>{ bag?.baggagevalue }</Typography>
+                                                    </>
+                                                )) }
+                                            </Box>
+                                            <Typography style={{ display : 'flex', alignItems : 'center', columnGap : 3 }}><LunchDiningIcon style={{ width: 14 }}/> Meals </Typography>
+                                            { data?.bagageVal.length > 0 && data?.bagageVal.map((bag, i) =>(
+                                                <>
+                                                    <Typography variant="span" component={'span'}>{ !bag?.isreturn ? 'From: ' : " To: " }</Typography>
+                                                    <Typography variant="span" component={'span'} style={{ fontWeight : '500' }}>{ bag?.mealsvalue }</Typography>
+                                                </>
+                                            )) }
+                                        </Box>
                                     </Grid>
                                 </Grid>
                             ))}
