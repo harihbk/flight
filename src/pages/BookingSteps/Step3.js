@@ -58,7 +58,7 @@ export default function Step3(props){
         
         setPassenger(getfromlocalpassangers);
         setJourneyDetail(getLocalFD);
-        console.log(getLocalFD);
+        console.log(getfromlocalpassangers);
         
         var newvar = [...getfromlocalpassangers?.adult ,  ...getfromlocalpassangers?.child || [], ...getfromlocalpassangers?.infant || []];
 
@@ -68,7 +68,7 @@ export default function Step3(props){
          for (const key in getLocalFD) {
              for (const key1 in getLocalFD[key]) {
                  for (const key2 in getLocalFD[key][key1]) {
-                    // console.log(getLocalFD[key]?.[key1]?.[key2]);
+                    getLocalFD[key][key1][key2].keyid = key1
                     fddetails.push(getLocalFD[key][key1][key2] || [])  
                  }
              }
@@ -78,37 +78,56 @@ export default function Step3(props){
 
       //  let keys = Object.keys(lc).filter(a=> (a == 'adult' ||a == 'child' || a == 'infant' ) )
     
-
+var fd
         let filterdata = newvar.map((data, index) => {
+         //   console.log(data);
             let _keys = data.label.toUpperCase();
              let kky = data.label
-             let fd = fddetails.filter(a=>a.label == kky)
-             let from = fd.filter(a=>!a.deparr.isRs)
-             let to = fd.filter(a=>a.deparr.isRs)
+              fd = fddetails.filter(a=>a.label == kky)
+           // console.log(fd);
+            // if(fd){
+                let from = fd.filter(a=>(!a.deparr?.isRs))
+                let to = fd.filter(a=>(a.deparr?.isRs))
+                var ff = ""
+                
+                    for (const key in from) {
+                        if(from[key]?.deparr){
+                            ff +=  `${from[key].deparr?.da?.code}-${from[key].deparr?.aa?.code}->${from[key].seat},`
 
-             var ff = ""
-             for (const key in from) {
-                ff +=  `${from[key].deparr.da.code}-${from[key].deparr.aa.code}->${from[key].seat},`
-             }
-
-             var tt = ""
-             for (const key in to) {
-                tt +=  `${to[key].deparr.da.code}-${to[key].deparr.aa.code}->${to[key].seat},`
-             }
-
+                        }
+                     }
+        
+                     var tt = ""
+                     for (const key in to) {
+                        if(to[key]?.deparr){
+                        tt +=  `${to[key].deparr?.da?.code}-${to[key].deparr?.aa?.code}->${to[key].seat},`
+                        }
+                     }
+                     data.fd_from = ff
+                     data.fd_to = tt
+                     data.fdetails = fd.map(e=>({ code : e.seat , key : e.keyid }))
+                     
+              
+           
+            
+            
 
             //console.log(data.label);
+           let bbg = getfromlocalpassangers?.baggagemeals.filter(a => a.valuelabel == _keys);
+            let bagageVal = bbg;
+            data.baggage = bbg.filter(ee=>  ee.baggagevalue ).map(e=>({code  : e.baggagevalue , key : e.id })  )
+            data.meals = bbg.filter(ee=>  ee.mealsvalue ).map(e=>({code  : e.mealsvalue , key : e.id }  ))
 
-            let bagageVal = getfromlocalpassangers?.baggagemeals.filter(a => a.valuelabel == _keys);
+          //  data.meals = bbg.map(e=>({code  : e.mealsvalue, id : e.id }))
             data.bagageVal = bagageVal;
-            data.fd_from = ff
-            data.fd_to = tt
+           
             
             return data
 
         });
 
         setPassengerList(filterdata); 
+        localStorage.setItem("allitems",JSON.stringify(filterdata))
         console.log(filterdata);
     },[]);
 

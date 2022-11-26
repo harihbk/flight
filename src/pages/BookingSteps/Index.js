@@ -125,12 +125,12 @@ export default function Index() {
     
       const handleNext = () => {
        
-
         const newActiveStep =
           isLastStep() && !allStepsCompleted()
             ? steps.findIndex((step, i) => !(i in completed))
             : activeStep + 1;
         setActiveStep(newActiveStep);
+       // alert(newActiveStep)
 
         // console.log(newActiveStep);
        // const newActiveStep = 2
@@ -180,6 +180,10 @@ export default function Index() {
         
         }
 
+        if(newActiveStep == 3){
+          navigate(`/booking/step4/${id}`);
+        }
+
 
       };
 
@@ -197,6 +201,10 @@ export default function Index() {
         if((activeStep - 1) == 2){
           navigate(`/booking/step3/${id}`);
         }
+        if((activeStep - 1) == 3){
+          navigate(`/booking/step4/${id}`);
+        }
+        
 
       };
     

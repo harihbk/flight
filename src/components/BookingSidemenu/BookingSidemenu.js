@@ -38,7 +38,7 @@ export default function BookingSidemenu() {
   const things = useContext(TripinfoContext)
   const [ fare , setFare ] = React.useState(things?.totalPriceInfo)
 
-  console.log(things?.totalPriceInfo);
+ // console.log(things?.totalPriceInfo);
 
 
   return (

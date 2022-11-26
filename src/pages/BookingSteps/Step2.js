@@ -24,8 +24,13 @@ import { _, debounce } from 'lodash'
 import { useOutletContext } from "react-router-dom";
 
 
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 
 function Showseatselectfn( obj ) {
@@ -88,6 +93,8 @@ export default function Step2(props){
     const [data ,setData] = React.useState(things)
     const formRef = useRef()
     let incv = useRef(0)
+
+    const [value, setValue] = React.useState(dayjs('2022-04-07'));
 
 
     const { stepObj } = props;
@@ -252,7 +259,7 @@ export default function Step2(props){
 
 
 
-    console.log(data?.searchQuery?.paxInfo);
+ //   console.log(data?.searchQuery?.paxInfo);
     var paxmodifyfn = []
 
     var ji = 0
@@ -568,6 +575,9 @@ export default function Step2(props){
 
    
 
+    React.useEffect(()=>{
+       console.log([moment().subtract(15, 'years').format('YYYY-MM-DD') , moment().format('YYYY-MM-DD') ]) 
+    },[])
 
     return(
         <div>
@@ -654,7 +664,7 @@ export default function Step2(props){
                                                         <Grid item md={2}  >
                                                             <label>Issue Date</label>
                                                             {/* <DatePicker name={`adult.${i}.passportinfo.issuedate`} onChange={e=> datechange(e) }/> */}
-                                                            <DatePicker    
+                                                            {/* <DatePicker    
                                                                 className="form-control"
                                                                 name={`adult.${i}.passportinfo.issuedate`}
                                                                 selected={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
@@ -662,12 +672,30 @@ export default function Step2(props){
                                                                 onChange={(e) =>
                                                                 setFieldValue(`adult.${i}.passportinfo.issuedate`, e)
                                                                 }   
-                                                                />
+                                                                showMonthDropdown={true}
+                                                                showYearDropdown={true}
+                                                                /> */}
+                                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+                                                                    <DatePicker
+                                                                        disableFuture
+                                                                        //label="Responsive"
+                                                                        openTo="year"
+                                                                        views={['year', 'month', 'day']}
+                                                                        name={`adult.${i}.passportinfo.issuedate`}
+                                                                        value={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
+                                                                        onChange={(newValue) => {
+                                                                            setFieldValue(`adult.${i}.passportinfo.issuedate`, newValue)
+
+                                                                        }}
+                                                                        renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                        />
+                                                            </LocalizationProvider>
 
                                                         </Grid>
                                                         <Grid item md={2}  >
                                                             Expiry Date
-                                                            <DatePicker    
+                                                            {/* <DatePicker    
                                                                 className="form-control"
                                                                 name={`adult.${i}.passportinfo.expiredate`}
                                                                 selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
@@ -675,19 +703,65 @@ export default function Step2(props){
                                                                 onChange={(e) =>
                                                                 setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
                                                                 }   
-                                                                />
+                                                                showMonthDropdown={true}
+                                                                showYearDropdown={true}
+                                                                /> */}
+
+                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+                                                                        <DatePicker
+                                                                      //  disableFuture
+                                                                        //label="Responsive"
+                                                                        openTo="year"
+                                                                        views={['year', 'month', 'day']}
+                                                                        name={`adult.${i}.passportinfo.expiredate`}
+                                                                        value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
+                                                                        onChange={(newValue) => {
+                                                                            setFieldValue(`adult.${i}.passportinfo.expiredate`, newValue)
+
+                                                                        }}
+                                                                        renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                        />
+                                                                    </LocalizationProvider>
+
+
                                                         </Grid>
                                                         <Grid item md={2}  >
                                                             Date of Birth
-                                                            <DatePicker   
-                                                                className="form-control" 
-                                                                name={`adult.${i}.passportinfo.dob`}
-                                                                selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                                value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                                onChange={(e) =>
-                                                                setFieldValue(`adult.${i}.passportinfo.dob`, e)
-                                                                }   
-                                                                />
+                                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+                                                                    {/* <DatePicker   
+                                                                        className="form-control" 
+                                                                        name={`adult.${i}.passportinfo.dob`}
+                                                                        selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                        value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                        onChange={(e) =>
+                                                                        setFieldValue(`adult.${i}.passportinfo.dob`, e)
+                                                                        }   
+                                                                        // showMonthDropdown={true}
+                                                                        // showYearDropdown={true}
+                                                                        // popperPlacement="bottom"
+
+                                                                        /> */}
+
+
+                                                                     <DatePicker
+                                                                        disableFuture
+                                                                        
+                                                                        openTo="year"
+                                                                        views={['year', 'month', 'day']}
+                                                                        name={`adult.${i}.passportinfo.dob`}
+                                                                        value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
+                                                                        onChange={(newValue) => {
+                                                                            setFieldValue(`adult.${i}.passportinfo.dob`, newValue)
+
+                                                                        }}
+                                                                        renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                        />
+
+
+                                                                </LocalizationProvider>
+
                                                         </Grid>
 
                                                     </Grid>
@@ -757,7 +831,7 @@ export default function Step2(props){
                                                                 </Grid>
                                                                 <Grid  item md={2}>
                                                                     <label>Issue Date</label>
-                                                                    <DatePicker    
+                                                                    {/* <DatePicker    
                                                                         className="form-control"
                                                                         name={`child.${i}.passportinfo.issuedate`}
                                                                         selected={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
@@ -765,12 +839,28 @@ export default function Step2(props){
                                                                         onChange={(e) =>
                                                                         setFieldValue(`child.${i}.passportinfo.issuedate`, e)
                                                                         }   
-                                                                    />
+                                                                    /> */}
+                                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+                                                                                        <DatePicker
+                                                                                        disableFuture
+                                                                                        //label="Responsive"
+                                                                                        openTo="year"
+                                                                                        views={['year', 'month', 'day']}
+                                                                                        name={`child.${i}.passportinfo.issuedate`}
+                                                                                        value={getIn(values, `child.${i}.passportinfo.issuedate`) || ''}
+                                                                                        onChange={(newValue) => {
+                                                                                            setFieldValue(`child.${i}.passportinfo.issuedate`, newValue)
+
+                                                                                        }}
+                                                                                        renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                                        />
+                                                                                    </LocalizationProvider>
 
                                                                 </Grid>
                                                                 <Grid  item md={2}>
                                                                     Expiry Date
-                                                                    <DatePicker    
+                                                                    {/* <DatePicker    
                                                                         className="form-control"
                                                                         name={`child.${i}.passportinfo.expiredate`}
                                                                         selected={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
@@ -778,11 +868,27 @@ export default function Step2(props){
                                                                         onChange={(e) =>
                                                                         setFieldValue(`child.${i}.passportinfo.expiredate`, e)
                                                                         }   
-                                                                    />
+                                                                    /> */}
+                                                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+                                                                                            <DatePicker
+                                                                                          //  disableFuture
+                                                                                            //label="Responsive"
+                                                                                            openTo="year"
+                                                                                            views={['year', 'month', 'day']}
+                                                                                            name={`child.${i}.passportinfo.expiredate`}
+                                                                                            value={getIn(values, `child.${i}.passportinfo.expiredate`) || ''}
+                                                                                            onChange={(newValue) => {
+                                                                                                setFieldValue(`child.${i}.passportinfo.expiredate`, newValue)
+
+                                                                                            }}
+                                                                                            renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                                            />
+                                                                                        </LocalizationProvider>
                                                                 </Grid>
                                                                 <Grid  item md={2}>
-                                                                    Date of Birth
-                                                                    <DatePicker    
+                                                                    Date of Birth 
+                                                                    {/* <DatePicker    
                                                                         className="form-control"
                                                                         name={`child.${i}.passportinfo.dob`}
                                                                         selected={getIn(values, `child.${i}.passportinfo.dob`) || ''}
@@ -790,7 +896,26 @@ export default function Step2(props){
                                                                         onChange={(e) =>
                                                                         setFieldValue(`child.${i}.passportinfo.dob`, e)
                                                                         }   
-                                                                    />
+                                                                       
+                                                                        minDate = { moment().format('DD-MM-YYYY')}
+                                                                    /> */}
+                                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+                                                                                    <DatePicker
+                                                                                    disableFuture
+                                                                                    minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                                    //label="Responsive"
+                                                                                    openTo="year"
+                                                                                    views={['year', 'month', 'day']}
+                                                                                    name={`child.${i}.passportinfo.dob`}
+                                                                                    value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                                    onChange={(newValue) => {
+                                                                                        setFieldValue(`child.${i}.passportinfo.dob`, newValue)
+
+                                                                                    }}
+                                                                                    renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                                    />
+                                                                                </LocalizationProvider>
                                                                 </Grid>
 
                                                             </Grid>
@@ -865,7 +990,7 @@ export default function Step2(props){
                                                             </Grid>
                                                             <Grid item md={2} >
                                                                 <label>Issue Date</label>
-                                                                <DatePicker    
+                                                                {/* <DatePicker    
                                                                     className="formpicker form-control"
                                                                     name={`infant.${i}.passportinfo.issuedate`}
                                                                     selected={getIn(values, `infant.${i}.passportinfo.issuedate`) || ''}
@@ -873,12 +998,28 @@ export default function Step2(props){
                                                                     onChange={(e) =>
                                                                     setFieldValue(`infant.${i}.passportinfo.issuedate`, e)
                                                                     }   
-                                                                    />
+                                                                    /> */}
+                                                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                                            <DatePicker
+                                                                                            disableFuture
+                                                                                            minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                                            //label="Responsive"
+                                                                                            openTo="year"
+                                                                                            views={['year', 'month', 'day']}
+                                                                                            name={`child.${i}.passportinfo.dob`}
+                                                                                            value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                                            onChange={(newValue) => {
+                                                                                                setFieldValue(`child.${i}.passportinfo.dob`, newValue)
+
+                                                                                            }}
+                                                                                            renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                                            />
+                                                                                        </LocalizationProvider>
 
                                                             </Grid>
                                                             <Grid item md={2} >
                                                                 Expiry Date
-                                                                <DatePicker  
+                                                                {/* <DatePicker  
                                                                     className="formpicker form-control"  
                                                                     name={`infant.${i}.passportinfo.expiredate`}
                                                                     selected={getIn(values, `infant.${i}.passportinfo.expiredate`) || ''}
@@ -886,11 +1027,49 @@ export default function Step2(props){
                                                                     onChange={(e) =>
                                                                     setFieldValue(`infant.${i}.passportinfo.expiredate`, e)
                                                                     }   
-                                                                    />
+                                                                    /> */}
+
+                                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                            <DatePicker
+                                                                            disableFuture
+                                                                            minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                            //label="Responsive"
+                                                                            openTo="year"
+                                                                            views={['year', 'month', 'day']}
+                                                                            name={`child.${i}.passportinfo.dob`}
+                                                                            value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                            onChange={(newValue) => {
+                                                                                setFieldValue(`child.${i}.passportinfo.dob`, newValue)
+
+                                                                            }}
+                                                                            renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                            />
+                                                                        </LocalizationProvider>
+
+
                                                             </Grid>
                                                             <Grid item md={2} >
                                                                 Date of Birth
-                                                                <DatePicker    
+
+                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                    <DatePicker
+                                                                    disableFuture
+                                                                    minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                    //label="Responsive"
+                                                                    openTo="year"
+                                                                    views={['year', 'month', 'day']}
+                                                                    name={`child.${i}.passportinfo.dob`}
+                                                                    value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                    onChange={(newValue) => {
+                                                                        setFieldValue(`child.${i}.passportinfo.dob`, newValue)
+
+                                                                    }}
+                                                                    renderInput={(params) => <TextField variant="outlined" {...params} />}
+                                                                    />
+                                                                </LocalizationProvider>
+
+
+                                                                {/* <DatePicker    
                                                                     className="formpicker form-control"
                                                                     name={`infant.${i}.passportinfo.dob`}
                                                                     selected={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
@@ -898,7 +1077,7 @@ export default function Step2(props){
                                                                     onChange={(e) =>
                                                                     setFieldValue(`infant.${i}.passportinfo.dob`, e)
                                                                     }   
-                                                                    />
+                                                                    /> */}
                                                             </Grid>
 
                                                         </Grid>
