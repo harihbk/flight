@@ -36,6 +36,7 @@ body{
     text-align: center;
     padding-top: 10px;
     position: relative;
+    height: 68px;
 }
 .flightlist_item  .journeydetail .jplace_text{
     font-size: 10px;
