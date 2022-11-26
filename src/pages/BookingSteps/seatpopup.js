@@ -139,7 +139,7 @@ export default function MaxWidthDialog(props) {
     let temp = cloneDeep(temporary);
 
     console.log(_currentrowdata);
-// console.log(row);
+ console.log(temp);
     let code = row.code;
     let indx = temp.findIndex(a => a.seat == row.code)
 
@@ -159,6 +159,7 @@ export default function MaxWidthDialog(props) {
     if(indx == -1){
       row.color = "#c8ee90"
       temp[indexset]['seat'] = row.code
+     // temp[indexset]['key'] = row.code
       temp[indexset]['fees'] = row.amount
       temp[indexset]['deparr'] = _currentrowdata
      // temp[indexset]['label'] = 
