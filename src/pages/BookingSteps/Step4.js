@@ -1,11 +1,46 @@
-import React from "react";
+import React , { useCallback } from "react";
 import { Container,Grid, Box, Typography, Button } from '@mui/material';
 import TripinfoContext from "./context";
 import moment from 'moment'
 import axios from "axios";
 
 
+
 export default function Step4(){
+
+
+    const handlePayment = () => {
+      //  const order = await createOrder(params);
+    
+        const options = {
+          key: "rzp_test_J6XVbB3HHLs2GN",
+          key_secret : 'RVcGMbJhsC8tFB7KmSms7Ogr',
+          amount: "3000",
+          currency: "INR",
+          name: "Acme Corp",
+          description: "Test Transaction",
+          image: "https://example.com/your_logo",
+        //  order_id: "12344",
+          handler: (res) => {
+            console.log(res);
+          },
+          prefill: {
+            name: "Piyush Garg",
+            email: "youremail@example.com",
+            contact: "9999999999",
+          },
+          notes: {
+            address: "Razorpay Corporate Office",
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+    
+        const rzpay =  new window.Razorpay(options)
+      //  const rzpay = new Razorpay(options);
+        rzpay.open();
+      };
 
     const things = React.useContext(TripinfoContext);
     var allitems = JSON.parse(window.localStorage.getItem('allitems'));
@@ -78,15 +113,18 @@ export default function Step4(){
      //   https://apitest.tripjack.com/oms/v1/air/book
      console.log(obj);
 
-            const headers = {
-                'Content-Type': 'application/json',
-                'apikey': process.env.REACT_APP_FLIGHT_API_KEY
-                }
-            axios.post(`${process.env.REACT_APP_FLIGHT_URL}/oms/v1/air/book`,obj , { headers : headers}  ).then(res=>{
-               console.log(res);
-                }).catch(e=>{
+     handlePayment(obj)
+
+            // const headers = {
+            //     'Content-Type': 'application/json',
+            //     'apikey': process.env.REACT_APP_FLIGHT_API_KEY
+            //     }
+            // axios.post(`${process.env.REACT_APP_FLIGHT_URL}/oms/v1/air/book`,obj , { headers : headers}  ).then(res=>{
+            //    console.log(res);
+            //    handlePayment(res.data)
+            //     }).catch(e=>{
         
-                })
+            //     })
         
 
 
@@ -96,6 +134,7 @@ export default function Step4(){
     return(
         <div>
             Fourth Step
+            <button onClick={handlePayment}>Click</button>
         </div>
     )
 }
