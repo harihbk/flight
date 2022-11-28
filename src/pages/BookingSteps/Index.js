@@ -20,7 +20,6 @@ import Skeleton from '@mui/material/Skeleton';
 import { Add, Close, Check } from '@mui/icons-material';
 import { array } from 'yup';
 
-
 const steps = [
     {
       steps: 'First Step',
@@ -77,7 +76,6 @@ export default function Index() {
     React.useMemo(()=>{
 
 
-     console.log("sd");
       const headers = {
         'Content-Type': 'application/json',
         'apikey': process.env.REACT_APP_FLIGHT_API_KEY

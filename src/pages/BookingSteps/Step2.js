@@ -88,6 +88,13 @@ export default function Step2(props){
     const [ selectflightdetail , setSelectflightdetail ] = React.useState([])
     const [ baggagelc , setBaggagelc ] = React.useState([])
 
+
+    const [adultdob, setAdultdob] = React.useState({});
+    const [childdob, setChilddob] = React.useState({});
+    const [infantdob, setInfantdob] = React.useState({});
+
+
+
     const things = useContext(TripinfoContext)
 
     const [data ,setData] = React.useState(things)
@@ -129,6 +136,7 @@ export default function Step2(props){
 
     useEffect(() =>{
 
+       
 
         // var paxmodify = []
         // for (const key in data?.searchQuery?.paxInfo) {
@@ -227,12 +235,9 @@ export default function Step2(props){
        if(data.searchQuery.paxInfo[key] > 0){
            let cnt = data.searchQuery.paxInfo[key];
            let hh = []
-
            for (let index = 0; index < cnt; index++) {
             let result = key.toLowerCase();
             let localdata = dff?.[result][index];
-
-
                let o = {
                  title : localdata?.title || '',
                  firstname : localdata?.firstname || '',
@@ -247,12 +252,8 @@ export default function Step2(props){
                      dob :  df(localdata?.passportinfo?.dob)
                  },
              };
-
-
              hh.push(o)
            }
-
-           
            _initialValues[key.toLowerCase()] = hh
        }
     }
@@ -406,13 +407,22 @@ export default function Step2(props){
             Yup.object().shape({
                 title : Yup.string().required("Title is Required"),
                 firstname : Yup.string().required("Firstname is required"),
-                lastname : Yup.string().required("Lastname is required")
+                lastname : Yup.string().required("Lastname is required"),
+                passportinfo : Yup.object().shape({
+                    passportno : Yup.string().required("Passport is Required"),
+                    nationality : Yup.string().required("Nationality is Required"),
+                    issuedate : Yup.string().required("Issue Date is Required"),
+                    expiredate : Yup.string().required("Expire Date is Required"),
+                    dob : Yup.string().required("Date of Birth is Required")
+                    })
             })
         ),
         ...schemaobj,
         ...validationSchemabaggagemeals,
         ...validationcontactdetail
     })
+
+
 
    console.log(validationSchema);
 
@@ -457,6 +467,8 @@ export default function Step2(props){
     // this method is used for seat flight details
 
     React.useEffect(()=>{
+
+        console.log(data);
        var frmtobj = []
       
        for (const key in  data?.searchQuery?.paxInfo) {
@@ -576,7 +588,28 @@ export default function Step2(props){
    
 
     React.useEffect(()=>{
-       console.log([moment().subtract(15, 'years').format('YYYY-MM-DD') , moment().format('YYYY-MM-DD') ]) 
+        setAdultdob({
+            start : moment().subtract(100, 'years').format('YYYY-MM-DD'),
+            end : moment().subtract(12, 'years').format('YYYY-MM-DD')
+        })
+
+        setChilddob({
+            start : moment().subtract(12, 'years').format('YYYY-MM-DD'),
+            end : moment().subtract(2, 'years').format('YYYY-MM-DD')
+        })
+
+        setInfantdob({
+            start :  moment().subtract(2, 'years').format('YYYY-MM-DD'),
+            end   : moment().format('YYYY-MM-DD')
+        })
+
+       
+
+    //    console.log([moment().subtract(2, 'years').format('YYYY-MM-DD') , moment().format('YYYY-MM-DD') ]) 
+    //    console.log([moment().subtract(12, 'years').format('YYYY-MM-DD') , moment().subtract(2, 'years').format('YYYY-MM-DD') ]) 
+    //    console.log([moment().subtract(100, 'years').format('YYYY-MM-DD') , moment().subtract(12, 'years').format('YYYY-MM-DD') ]) 
+
+
     },[])
 
     return(
@@ -655,31 +688,23 @@ export default function Step2(props){
                                                                 <option value="mrs">Mrs</option>
                                                                 <option value="ms">Ms</option>
                                                             </Field>
+                                                            <ErrorMessage name={`adult.${i}.passportinfo.nationality`} component="div" className="invalid-feedback" />
+
                                                         </Grid>
                                                         <Grid item md={4}  >
                                                             <label>Passport No</label>
-                                                            <Field name={`adult.${i}.passportinfo.passportno`} type="text" className={'form-control' + (ticketErrors.firstname && ticketTouched.firstname ? ' is-invalid' : '' )} />
+                                                            <Field name={`adult.${i}.passportinfo.passportno`} type="text"  />
+                                                            <ErrorMessage name={`adult.${i}.passportinfo.passportno`} component="div" className="invalid-feedback" />
+
 
                                                         </Grid>
                                                         <Grid item md={2}  >
                                                             <label>Issue Date</label>
-                                                            {/* <DatePicker name={`adult.${i}.passportinfo.issuedate`} onChange={e=> datechange(e) }/> */}
-                                                            {/* <DatePicker    
-                                                                className="form-control"
-                                                                name={`adult.${i}.passportinfo.issuedate`}
-                                                                selected={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
-                                                                value={getIn(values, `adult.${i}.passportinfo.issuedate`) || ''}
-                                                                onChange={(e) =>
-                                                                setFieldValue(`adult.${i}.passportinfo.issuedate`, e)
-                                                                }   
-                                                                showMonthDropdown={true}
-                                                                showYearDropdown={true}
-                                                                /> */}
+                                                           
                                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
 
                                                                     <DatePicker
                                                                         disableFuture
-                                                                        //label="Responsive"
                                                                         openTo="year"
                                                                         views={['year', 'month', 'day']}
                                                                         name={`adult.${i}.passportinfo.issuedate`}
@@ -691,22 +716,12 @@ export default function Step2(props){
                                                                         renderInput={(params) => <TextField variant="outlined" {...params} />}
                                                                         />
                                                             </LocalizationProvider>
+                                                            <ErrorMessage name={`adult.${i}.passportinfo.issuedate`} component="div" className="invalid-feedback" />
 
                                                         </Grid>
                                                         <Grid item md={2}  >
                                                             Expiry Date
-                                                            {/* <DatePicker    
-                                                                className="form-control"
-                                                                name={`adult.${i}.passportinfo.expiredate`}
-                                                                selected={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
-                                                                value={getIn(values, `adult.${i}.passportinfo.expiredate`) || ''}
-                                                                onChange={(e) =>
-                                                                setFieldValue(`adult.${i}.passportinfo.expiredate`, e)
-                                                                }   
-                                                                showMonthDropdown={true}
-                                                                showYearDropdown={true}
-                                                                /> */}
-
+                                                            
                                                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
 
                                                                         <DatePicker
@@ -723,6 +738,7 @@ export default function Step2(props){
                                                                         renderInput={(params) => <TextField variant="outlined" {...params} />}
                                                                         />
                                                                     </LocalizationProvider>
+                                                                    <ErrorMessage name={`adult.${i}.passportinfo.expiredate`} component="div" className="invalid-feedback" />
 
 
                                                         </Grid>
@@ -730,27 +746,15 @@ export default function Step2(props){
                                                             Date of Birth
                                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
 
-                                                                    {/* <DatePicker   
-                                                                        className="form-control" 
-                                                                        name={`adult.${i}.passportinfo.dob`}
-                                                                        selected={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                                        value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
-                                                                        onChange={(e) =>
-                                                                        setFieldValue(`adult.${i}.passportinfo.dob`, e)
-                                                                        }   
-                                                                        // showMonthDropdown={true}
-                                                                        // showYearDropdown={true}
-                                                                        // popperPlacement="bottom"
-
-                                                                        /> */}
-
-
+                                            
                                                                      <DatePicker
                                                                         disableFuture
-                                                                        
+                                                                        minDate={adultdob.start}
+                                                                        maxDate={adultdob.end}
                                                                         openTo="year"
                                                                         views={['year', 'month', 'day']}
                                                                         name={`adult.${i}.passportinfo.dob`}
+
                                                                         value={getIn(values, `adult.${i}.passportinfo.dob`) || ''}
                                                                         onChange={(newValue) => {
                                                                             setFieldValue(`adult.${i}.passportinfo.dob`, newValue)
@@ -761,6 +765,7 @@ export default function Step2(props){
 
 
                                                                 </LocalizationProvider>
+                                                                <ErrorMessage name={`adult.${i}.passportinfo.dob`} component="div" className="invalid-feedback" />
 
                                                         </Grid>
 
@@ -845,6 +850,7 @@ export default function Step2(props){
                                                                                         <DatePicker
                                                                                         disableFuture
                                                                                         //label="Responsive"
+                                                                                       
                                                                                         openTo="year"
                                                                                         views={['year', 'month', 'day']}
                                                                                         name={`child.${i}.passportinfo.issuedate`}
@@ -903,7 +909,9 @@ export default function Step2(props){
 
                                                                                     <DatePicker
                                                                                     disableFuture
-                                                                                    minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                                    minDate={childdob.start}
+                                                                                    maxDate={childdob.end}
+                                                                                   // minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
                                                                                     //label="Responsive"
                                                                                     openTo="year"
                                                                                     views={['year', 'month', 'day']}
@@ -1002,11 +1010,12 @@ export default function Step2(props){
                                                                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                                                             <DatePicker
                                                                                             disableFuture
-                                                                                            minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                                            
+                                                                                           // minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
                                                                                             //label="Responsive"
                                                                                             openTo="year"
                                                                                             views={['year', 'month', 'day']}
-                                                                                            name={`child.${i}.passportinfo.dob`}
+                                                                                            name={`infant.${i}.passportinfo.dob`}
                                                                                             value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
                                                                                             onChange={(newValue) => {
                                                                                                 setFieldValue(`child.${i}.passportinfo.dob`, newValue)
@@ -1036,10 +1045,10 @@ export default function Step2(props){
                                                                             //label="Responsive"
                                                                             openTo="year"
                                                                             views={['year', 'month', 'day']}
-                                                                            name={`child.${i}.passportinfo.dob`}
-                                                                            value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                            name={`infant.${i}.passportinfo.dob`}
+                                                                            value={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
                                                                             onChange={(newValue) => {
-                                                                                setFieldValue(`child.${i}.passportinfo.dob`, newValue)
+                                                                                setFieldValue(`infant.${i}.passportinfo.dob`, newValue)
 
                                                                             }}
                                                                             renderInput={(params) => <TextField variant="outlined" {...params} />}
@@ -1054,14 +1063,16 @@ export default function Step2(props){
                                                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                                     <DatePicker
                                                                     disableFuture
-                                                                    minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
+                                                                    minDate={infantdob.start}
+                                                                    maxDate={infantdob.end}
+                                                                   // minDate = {moment().subtract(15, 'years').format('YYYY-MM-DD')}
                                                                     //label="Responsive"
                                                                     openTo="year"
                                                                     views={['year', 'month', 'day']}
-                                                                    name={`child.${i}.passportinfo.dob`}
-                                                                    value={getIn(values, `child.${i}.passportinfo.dob`) || ''}
+                                                                    name={`infant.${i}.passportinfo.dob`}
+                                                                    value={getIn(values, `infant.${i}.passportinfo.dob`) || ''}
                                                                     onChange={(newValue) => {
-                                                                        setFieldValue(`child.${i}.passportinfo.dob`, newValue)
+                                                                        setFieldValue(`infant.${i}.passportinfo.dob`, newValue)
 
                                                                     }}
                                                                     renderInput={(params) => <TextField variant="outlined" {...params} />}
