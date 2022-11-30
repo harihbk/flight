@@ -5,6 +5,10 @@ import 'react-day-picker/dist/style.css';
 import './calendar.css';
 import { Typography } from '@mui/material';
 
+const CustomInput = React.forwardRef((props, ref) => {
+    return <Typography {...props} ref={ref} />;
+  });
+
  const  Calendar = (props ) => {
 
     var date = new Date();
@@ -20,10 +24,12 @@ date.setDate(date.getDate() + 1);
     const [singleLabels, setSingleLabels] = React.useState([3200, 4000, 44, 565, 5656, 565 ,5656, 656]);
     const [singleInvalid, setSingleInvalid] = React.useState([]);
 
-    const { calendarOpen , onClickOutside  , _parentcalendarfuction} = props;
+    const { calendarOpen , onClickOutside  , _parentcalendarfuction } = props;
 
      const refd = React.createRef();
-     
+     const refddd = React.createRef();
+
+  
 
     const onPageLoadingSingle = React.useCallback((event) => {
         getPrices(event.firstDay, (bookings) => {
@@ -33,9 +39,12 @@ date.setDate(date.getDate() + 1);
         });
     }, []);
 
+   
+
     React.useEffect(() => {
         const handleClickOutside = (event) => {
-            // console.log(event.target);
+            //  console.log(event.target.className);
+            
           if (refd.current && !refd.current.contains(event.target)) {
             onClickOutside && onClickOutside();
           }
@@ -58,9 +67,10 @@ date.setDate(date.getDate() + 1);
     //   },[])
 
       const handleDayChange = date => {
+         
            setSelected(date)
         _parentcalendarfuction(date)
-
+        onClickOutside()
       }
 
 
@@ -103,15 +113,14 @@ date.setDate(date.getDate() + 1);
         { calendarOpen && (
             <div ref={refd}>
             <DayPicker className='bookingCalendar_Cs' 
-                mode="single"
+        customInput={<CustomInput inputRef={refddd} />}
+        mode="single"
                 selected={selected}
                 onSelect={setSelected} 
                 labels={singleLabels}
              invalid={singleInvalid}
              onPageLoading={onPageLoadingSingle}
              onDayClick={handleDayChange}
-
-
             />
             </div>
         ) }
