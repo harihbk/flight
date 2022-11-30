@@ -60,6 +60,7 @@ export default function Home(props) {
 
   const [ searchfromselected , setSearchfromselected ] = React.useState({});
   const [ searchtoselected , setSearchtoselected ] = React.useState({});
+  const calcref = React.createRef();
 
 
   // Passangers 
@@ -351,13 +352,21 @@ export default function Home(props) {
     setFareType(event.target.value);
   };
 
-  const changeCalendar = ()=>{
-    calendarOpen ? setCalendarOpen(false) : setCalendarOpen(true);
+  const changeCalendar = () => {
+    if(!calendarOpen){
+      setCalendarOpen(true)
+    }
+     // calendarOpen ? setCalendarOpen(true) : setCalendarOpen(true);
+
   }
 
   const changeCalendarto = ()=>{
-    calendarOpento ? setCalendarOpento(false) : setCalendarOpento(true);
-    setTripOpt("rondtrip")
+    if(!calendarOpento){
+      setCalendarOpento(true)
+      setTripOpt("rondtrip")
+
+    }
+   // calendarOpento ? setCalendarOpento(false) : setCalendarOpento(true);
   }
 
   const getfrom = () => {
@@ -604,7 +613,7 @@ export default function Home(props) {
                           <Typography className='inputTagline'>{ moment(calendar).format("dddd") }</Typography>
                         </Box>
                         
-                        <Calendar calendarOpen = {calendarOpen}  onClickOutside={ ()=> setCalendarOpen(false)  } _parentcalendarfuction={parentcalendarfuction}/>
+                        <Calendar calendarOpen = {calendarOpen}   onClickOutside={ ()=> setCalendarOpen(false)  } _parentcalendarfuction={parentcalendarfuction}/>
                     </div>
 
 
@@ -614,9 +623,8 @@ export default function Home(props) {
                           <Typography component="span" className='label'>Return </Typography>
                           <Typography className='placeto inputTitle'>Tap to add a return</Typography>
                           <Calendar calendarOpen = {calendarOpento}  onClickOutside={ ()=>  setCalendarOpento(false)   } _parentcalendarfuction={parenttocalendarfuction}/>
-
-                        </Box>
-                        }
+                         </Box>
+                       }
 
                         { !calendartostatus  &&   
                         <Box  >
