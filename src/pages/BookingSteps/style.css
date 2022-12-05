@@ -142,7 +142,7 @@ body{
     padding: 10px;
     border-bottom: 1px solid #ebecec;
 }
-.flight_addon_tab .tablistnav button{
+.flight_addon_tab .tablistnav button:not(.MuiButton-contained){
     border: 0;
     padding: 10px 20px;
     font-size: 17px;
@@ -187,7 +187,7 @@ body{
     padding: 6px 15px;
     margin-bottom: 10px;
 }
-.flight_addon_tab .mealstab .tablistnav button:not(.Mui-selected){
+.flight_addon_tab .mealstab .tablistnav button:not(.Mui-selected):not(.MuiButton-contained){
     background-color: #efefef;
 }
 
@@ -425,9 +425,14 @@ body{
 .seatbooking_popup .ant-row {
     justify-content: center;
 }
-.seatbooking_popup .ant-row > button {
+.seatbooking_popup .ant-row  button {
     margin: 3px;
     color: #fff;
+    min-width: 25px;
+    max-width: 35px;
+    font-size: 12px;
+    box-shadow: none;
+    border-radius: 6px;
 }
 
 td.p-5 {
