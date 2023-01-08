@@ -415,7 +415,7 @@
     max-width: 95px;
 } */
 .flightitem .timeandDetails .price {
-    max-width: 130px;
+    max-width: 180px;
 }
 .flightitem .timeandDetails .price  svg.down{
     width: 15px;

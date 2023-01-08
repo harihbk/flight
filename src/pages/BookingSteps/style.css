@@ -433,8 +433,29 @@ body{
     font-size: 12px;
     box-shadow: none;
     border-radius: 6px;
+    border: 1px solid;
 }
 
 td.p-5 {
     padding: 7px;
+}
+
+
+
+/* flight map */
+.flight_seatmap{
+    margin: auto;
+    /* background-image: url(../../assets/flight.png); */
+    position: relative;
+    z-index: 1;
+    border-top-left-radius: 115px;
+    border-top-right-radius: 115px;
+}
+.fligh_image_wrap{    
+    position: absolute;
+    top: 0;
+    z-index: 0;
+    width: 91%;
+    left: 50%;
+    transform: translateX(-50%);
 }

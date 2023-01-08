@@ -16,11 +16,14 @@ import cloneDeep from 'lodash/cloneDeep';
 import "antd/dist/antd.css";
 import { Row, Col, Divider } from 'antd';
 import { parsePath } from 'history';
+import { BorderColor } from '@mui/icons-material';
 
 function Emptycol() {
   return (
     <>
-      <Col><Button variant="outlined" style={{ visibility: 'hidden' }}> NO  </Button> </Col>
+      <Col>
+        <Button variant="outlined" style={{ visibility: 'hidden' }}> NO  </Button> 
+      </Col>
     </>
   )
 }
@@ -124,9 +127,10 @@ export default function MaxWidthDialog(props) {
 
       switch (curr?.isBooked) {
         case false:
-          return <Button variant="outlined" style={{ backgroundColor: (seats.includes(curr.code) ? '#127100' : curr.color) }} onClick={() => seatselection(curr)}>{curr.seatNo}</Button>
+          return <Button variant="outlined" style={{ backgroundColor: (seats.includes(curr.code) ? curr.color : '#ffffff' ), BorderColor : curr.color,  color: (seats.includes(curr.code) ? '#ffffff' : curr.color) }} onClick={() => seatselection(curr)}>{curr.seatNo}</Button>
+
         case true:
-          return <Button  variant="contained" style={{ cursor: 'not-allowed', backgroundColor : '#acacac' }} title={ curr.seatNo }> X</Button>
+          return <Button variant="contained" style={{ cursor: 'not-allowed', backgroundColor: '#acacac', BorderColor : '#acacac' }} title={curr.seatNo}> X</Button>
       }
       return <Emptycol />
     }
@@ -157,7 +161,7 @@ export default function MaxWidthDialog(props) {
     console.log(indx);
 
     if (indx == -1) {
-      row.color = "#c8ee90"
+      // row.color = "#c8ee90"
       temp[indexset]['seat'] = row.code
       // temp[indexset]['key'] = row.code
       temp[indexset]['fees'] = row.amount
@@ -206,7 +210,7 @@ export default function MaxWidthDialog(props) {
 
         className={'seatpopup_wrapper'}
       >
-        <DialogContent>
+        <DialogContent style={{ overflowY : 'hidden' }}>
           {/* <Box
             noValidate
             component="form"
@@ -254,8 +258,8 @@ export default function MaxWidthDialog(props) {
               </Box>
             </Grid>
 
-            <Grid item md={8} justifyContent={'center'} className='middlecol_seat' style={{ 'border-right': '1px solid #e4e4e4', 'border-left': '1px solid #e4e4e4', paddingLeft: 10, paddingRight: 10 }}>
-              <Box sx={{ flexGrow: 1, justifyContent: 'center' }}  >
+            <Grid item md={8} justifyContent={'center'} className='middlecol_seat' style={{ 'border-right': '1px solid #e4e4e4', 'border-left': '1px solid #e4e4e4', paddingLeft: 10, paddingRight: 10, paddingTop : '2em', paddingBottom : '2em' ,  height : '80vh', overflowY : 'auto', backgroundColor : '#efefef'  }}>
+              <Box className='flight_seatmap' sx={{ flexGrow: 1, justifyContent: 'center', maxWidth : 'max-content', paddingY : '3em', paddingX : '2em', backgroundColor : '#ffffff'}}  >
                 {[...Array(_currentrow?.sData?.row)].map((row, i) => (
                   <>
                     <Row justifyContent={'center'}>
@@ -264,31 +268,28 @@ export default function MaxWidthDialog(props) {
                   </>
                 ))}
               </Box>
+              {/* <img src={require('../../assets/flight.png')} className="fligh_image_wrap" />  */}
             </Grid>
 
             <Grid item md={2} className='rightcol_seat' style={{ paddingLeft: 10 }}>
               <Box>
                 <Typography style={{ fontSize: 20, fontWeight: 500, marginBottom: 10 }}>Flight Orientation</Typography>
-                <Box style={{ paddingBottom: 10, paddingTop: 10, 'border-top': '1px dashed #ccc', 'border-bottom': '1px dashed #ccc' }}>
-                  <Typography style={{ marginBottom: 10 }}>Seat Status</Typography>
-                  <Box>
-                    <Button variant="outlined" color="success">Selected</Button>
-                  </Box>
-                  <Box mt={1}>
-                    <Button color="error" variant="outlined" style={{ width: 100 }}>Booked</Button>
+                <Box style={{ paddingBottom: 5, paddingTop: 10 }}>
+                  <Typography style={{ marginBottom: 10 }}>Seat Fees</Typography>
+                  <Box style={{ display: 'flex' }}>
+                    <Paper className='seat_info_box' component="div" style={{ width: 20, height: 20, marginRight: 8, backgroundColor: '#ccc' }} />
+                    <Typography>Blocked</Typography>
                   </Box>
                 </Box>
-                <Box style={{ marginTop: 10 }}>
-                  <Typography style={{ marginBottom: 10 }}>Seat Fees</Typography>
+                <Box  >
                   {listprice.length > 0 &&
                     listprice.map(data => (
 
-                      <Box style={{ width: 100, marginBottom: 10, alignItem: 'center' }}>
+                      <Box style={{ width: 100, marginBottom: 5, alignItem: 'center' }}>
                         <Box style={{ display: 'flex' }}>
-                          <Paper component="div" style={{ width: 20, height: 20, marginRight: 8, backgroundColor: data.color }} />
+                          <Paper className='seat_info_box'  component="div" style={{ width: 20, height: 20, marginRight: 8, backgroundColor: data.color }} />
                           <Typography>{data.amount}</Typography>
                         </Box>
-
                       </Box>
                     ))
                   }
