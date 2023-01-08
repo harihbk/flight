@@ -228,10 +228,10 @@ var fd
                                 <Grid item  sx={{ maxWidth : 200, width : '100%'  }}>
                                     <Typography>Name </Typography>
                                 </Grid>
-                                <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
+                                <Grid item sx={{ maxWidth : 165, width : '100%'  }}>
                                     <Typography>Nationality & Passport</Typography>
                                 </Grid>
-                                <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
+                                <Grid item sx={{ maxWidth : 165, width : '100%'  }}>
                                     <Typography>Seat Booking</Typography>
                                 </Grid>
                                 <Grid item sx={{ maxWidth : 160, width : '100%'  }}>
@@ -250,11 +250,11 @@ var fd
                                         <Typography sx={{ textTransform : 'capitalize' }}>{ data?.title } {' '} { data?.firstname + ' ' + data?.lastname }</Typography>
                                         <Typography sx={{ color : '#9b9b9b' }}><span style={{ color : '#636363' }}>{'DOB: '}</span>{ moment(data?.passportinfo?.dob).format("DD/MM/yyyy") }</Typography>
                                     </Grid>
-                                    <Grid item sx={{ maxWidth : 180, width : '100%'  }}>
+                                    <Grid item sx={{ maxWidth : 165, width : '100%'  }}>
                                         <Typography>{data?.passportinfo?.nationality} </Typography>
                                         <Typography>{data?.passportinfo?.passportno} </Typography>
                                     </Grid>
-                                    <Grid item sx={{ maxWidth : 130, width : '100%'  }}>
+                                    <Grid item sx={{ maxWidth : 165, width : '100%'  }}>
                                         <Typography>From :  { data?.fd_from }</Typography>
                                         <Typography>To : { data?.fd_to }</Typography>
                                     </Grid>

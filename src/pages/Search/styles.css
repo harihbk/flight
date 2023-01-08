@@ -245,7 +245,49 @@
     font-weight: 600;
 }
 
+/* combo view  */
+.booking_row .comboview_item .timeText{
+    font-size: 14px;
+    font-weight: 500;
+}
+.booking_row .comboview_item .from h6,.booking_row .comboview_item .to h6{
+    font-size: 9px;
+    font-weight: 400;
+}
+.booking_row .comboview_item .place{
+    font-size: 11px;
+    font-weight: 400;
+}
+.flightitem.comboview_item .timeandDetails .hours{
+    max-width: 70px;
+    opacity: .8;
+}
+.flightitem.comboview_item .timeandDetails .hourstext{
+    border-width: 1px;
+}
+.flightitem.comboview_item .priceText {
+    font-size: 15px;
+}
+.flightitem.comboview_item .comboview_price .MuiRadio-root, .flightitem.single_item .comboview_price .MuiRadio-root{
+    padding: 0;
+    padding-right: 5px;
+}
+.flightitem.comboview_item{
+    padding: 12px 12px;
+}
+.seatDetails_row{
+    display: flex;
+    justify-content: space-between;
+    padding-top: 5px;
+    align-items: center;
+}
+.flightitem.single_item .comboview_price .priceText{
+    font-size: 19px;
+}
 
+.single_line {
+    display: flex;
+}
 .mainBookingrow  .booknow_btn{
     width: 100%;
     margin-top: 10px;
@@ -369,8 +411,11 @@
 .flightitem .timeandDetails .to {
     max-width: 75px;
 }
-.flightitem .timeandDetails .price {
+/* .flightitem .timeandDetails .price {
     max-width: 95px;
+} */
+.flightitem .timeandDetails .price {
+    max-width: 180px;
 }
 .flightitem .timeandDetails .price  svg.down{
     width: 15px;

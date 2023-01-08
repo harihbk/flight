@@ -68,10 +68,14 @@ export default function Index() {
     const navigate = useNavigate();
 
     const { id }  = useParams();
+    const splitId = id.split(',');
+
     var value
     var pricd = {
-      priceIds : [id]
+      priceIds : splitId
   }
+  console.log(typeof(pricd));
+  console.log(pricd);
 
     React.useMemo(()=>{
 

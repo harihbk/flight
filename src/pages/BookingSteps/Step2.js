@@ -693,7 +693,7 @@ export default function Step2(props){
                                                         </Grid>
                                                         <Grid item md={4}  >
                                                             <label>Passport No</label>
-                                                            <Field name={`adult.${i}.passportinfo.passportno`} type="text"  />
+                                                            <Field name={`adult.${i}.passportinfo.passportno`} type="text"  className='form-control' />
                                                             <ErrorMessage name={`adult.${i}.passportinfo.passportno`} component="div" className="invalid-feedback" />
 
 
